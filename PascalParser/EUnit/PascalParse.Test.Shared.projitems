@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>{F3FF91A4-94A4-4098-8B6D-3352C05D142C}</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Elements.PascalParser</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\LexerTypes.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestLexer.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestLexerPasLex.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestAstClasses.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestGlobals.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestNodeStack.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestEnumsClass.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestBinaryReadeWriter.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\Test.Units.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestTreeBuilder.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestSearchPaths.pas" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tests\" />
+  </ItemGroup>
+</Project>

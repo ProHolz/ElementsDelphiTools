@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>{597FB294-A480-4BC1-9C5B-768828A1D2E5}</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>AstShared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Exceptions.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.SyntaxNode.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.SyntaxNode.Childs.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.ExpressionList.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Operators.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Consts.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Ast.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Interfaces.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Lexer.Types.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Lexer.Base.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Lexer.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Helper.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.EnumHelper.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectIndexer.Types.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectIndexer.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Writer.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Writer.Binary.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.Lexer.DelphiDefines.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectIndexer.ParserProblems.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectIndexer.ParsedUnits.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectIndexer.SearchPaths.pas" />
+  </ItemGroup>
+</Project>
