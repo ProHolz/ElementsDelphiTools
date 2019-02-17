@@ -1,3 +1,9 @@
+Forked from
+[DelphiAST](https://github.com/RomanYankovsky/DelphiAST)
+
+## Ported to Elements Oxygene
+these port was made 01/2019 from Friedrich Westermann. These is a one to one port from Delphi to Oxygene-Syntax
+
 ### Abstract Syntax Tree Builder for Delphi 
 With DelphiAST you can take real Delphi code and get an abstract syntax tree. One unit at time and without a symbol table though. 
 
