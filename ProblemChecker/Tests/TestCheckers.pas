@@ -1,0 +1,177 @@
+﻿namespace ProblemChecker;
+
+interface
+
+uses
+  RemObjects.Elements.EUnit,
+  PascalParser;
+
+type
+  TestCheckers = public class(Test, IProblem_Log)
+  private
+    method prepareUnitWithType: TSyntaxNode;
+    method prepareUnitWithInitFinal: TSyntaxNode;
+    method Problem_At(Check : eEleCheck; Line : Integer; Pos : Integer; const Name : String = '');
+    FSolver : ISyntaxNodeSolver;
+    FGlobProbs : Integer;
+  protected
+  // method
+  public
+    method Setup; override;
+    method SetupTest; override;
+    method TestMoreThanOneClass;
+    method TestInitialization;
+    method TestFinalization;
+    method TestEnums;
+    method TestPublicGlobVars;
+    method TestPublicGlobMethods;
+    method TestMultiConstructors;
+    method TestMultiDestructors;
+    method TestClassInImplementation;
+    method TestClassInterfacandImplementation;
+    method TestConstRecord;
+    method TestVariantRecord;
+    method TestWithUse;
+    method TestDFM;
+
+  end;
+
+implementation
+
+uses
+  PascalParser;
+
+  method TestCheckers.SetupTest;
+  begin
+    FSolver := new TSyntaxNodeResolver();
+  end;
+
+method TestCheckers.Setup;
+begin
+ // Check.IsTrue(false);
+ FGlobProbs := 0;
+end;
+
+method TestCheckers.prepareUnitWithType: TSyntaxNode;
+begin
+  result := TPasSyntaxTreeBuilder.RunWithString(cTest1, false);
+end;
+
+
+method TestCheckers.prepareUnitWithInitFinal: TSyntaxNode;
+begin
+  result := TPasSyntaxTreeBuilder.RunWithString(cUnitInitFinal, false);
+end;
+
+
+method TestCheckers.TestMoreThanOneClass;
+begin
+  var lchecker := new TProblem_MoreThanOneClass() as ISingleProbSolver;
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+  Check.AreEqual(FGlobProbs, 2);
+end;
+
+method TestCheckers.TestInitialization;
+begin
+  var lchecker := new TProblem_Initialization() as ISingleProbSolver;
+  Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+
+end;
+
+method TestCheckers.TestFinalization;
+begin
+  var lchecker := new TProblem_Finalization() as ISingleProbSolver;
+  Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+end;
+
+method TestCheckers.TestEnums;
+begin
+  var lchecker := new TProblem_Enums() as ISingleProbSolver;
+  Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+ Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+end;
+
+method TestCheckers.TestPublicGlobVars;
+begin
+  var lchecker := new TProblem_GlobVars() as ISingleProbSolver;
+  Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+end;
+
+method TestCheckers.TestPublicGlobMethods;
+begin
+  var lchecker := new TProblem_GlobMethods() as ISingleProbSolver;
+  Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+ Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+end;
+
+method TestCheckers.TestMultiConstructors;
+begin
+  var lchecker := new TProblem_MultiContructors() as ISingleProbSolver;
+
+  var  lClassCount := FSolver.getPublicClass(prepareUnitWithType).Count;
+  Check.AreEqual(lClassCount, 2);
+
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+ Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+end;
+
+method TestCheckers.TestMultiDestructors;
+begin
+  var lchecker := new TProblem_Destructors() as ISingleProbSolver;
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+ Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+  Check.AreEqual(FGlobProbs, 1);
+end;
+
+method TestCheckers.TestClassInImplementation;
+begin
+  var lchecker := new TProblem_ClassInImplementation() as ISingleProbSolver;
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+end;
+
+method TestCheckers.TestClassInterfacandImplementation;
+begin
+  var lchecker := new TProblem_InterFaceAndImplement() as ISingleProbSolver;
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+end;
+
+method TestCheckers.TestConstRecord;
+begin
+  var lchecker := new TProblem_HasConstRecords() as ISingleProbSolver;
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+end;
+
+method TestCheckers.TestVariantRecord;
+begin
+  var lchecker := new TProblem_VariantRecord() as ISingleProbSolver;
+  Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+  Check.IsTrue( lchecker.CheckForProblem(TPasSyntaxTreeBuilder.RunWithString(cConstVarRec, false), FSolver, self));
+end;
+
+method TestCheckers.TestWithUse;
+begin
+  var lchecker := new TProblem_With() as ISingleProbSolver;
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
+end;
+
+method TestCheckers.Problem_At(Check: eEleCheck; Line: Integer; Pos: Integer; const Name : String = '');
+begin
+  inc(FGlobProbs);
+end;
+
+method TestCheckers.TestDFM;
+begin
+  var toCheck := TPasSyntaxTreeBuilder.RunWithString(cUnitWithResDFM, false);
+
+  //File.WriteText('D:\Test\res.xml',  TSyntaxTreeWriter.ToXML(toCheck, true));
+
+  var lchecker := new TProblem_DFM() as ISingleProbSolver;
+  Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self), 'Not finished yet');
+end;
+
+
+
+end.

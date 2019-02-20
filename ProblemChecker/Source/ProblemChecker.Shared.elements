@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{890D978F-D98E-406A-9829-218266347D0D}</ProjectGuid>
+    <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
+    <RootNamespace>ProblemChecker</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>ProblemChecker.Shared</RootNamespace>
+  </PropertyGroup>
+  <Import Project="ProblemChecker.Shared.projitems" Label="Shared" />
+  <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.SharedProject.targets" />
+  <PropertyGroup>
+    <PreBuildEvent />
+  </PropertyGroup>
+</Project>

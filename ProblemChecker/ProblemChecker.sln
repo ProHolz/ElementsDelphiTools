@@ -1,0 +1,28 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# RemObjects Water
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Problemchecker.Net", "Source\Problemchecker.Net.elements", "{7D40B9FE-B3E1-4AF9-B480-A71AEEE5F130}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "ProblemChecker.Shared", "Source\ProblemChecker.Shared.elements", "{890D978F-D98E-406A-9829-218266347D0D}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "ProblemChecker.Tests", "Tests\ProblemChecker.Tests.elements", "{5EE76ED2-852A-45DC-A600-2191560ACA8A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AnyCPU = Debug|AnyCPU
+		Release|AnyCPU = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7D40B9FE-B3E1-4AF9-B480-A71AEEE5F130}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{7D40B9FE-B3E1-4AF9-B480-A71AEEE5F130}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{7D40B9FE-B3E1-4AF9-B480-A71AEEE5F130}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{7D40B9FE-B3E1-4AF9-B480-A71AEEE5F130}.Release|AnyCPU.Build.0 = Release|AnyCPU
+		{5EE76ED2-852A-45DC-A600-2191560ACA8A}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{5EE76ED2-852A-45DC-A600-2191560ACA8A}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{5EE76ED2-852A-45DC-A600-2191560ACA8A}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{5EE76ED2-852A-45DC-A600-2191560ACA8A}.Release|AnyCPU.Build.0 = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
