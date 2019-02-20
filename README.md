@@ -12,5 +12,5 @@ you will find it in the PascalParser subfolder.
 
 1. Delphi AST aka PascalParser (done)
 1. Problem Checker,
-   Tool to find Problems in Delphi-Sources before porting to Elements(almost done coming soon)
+   Tool to find Problems in Delphi-Sources before porting to Elements (done)
 1. Test-Creator, a Tool to create Test-Classes for all public classes and public methods in Delphi-Sources. (WIP)
