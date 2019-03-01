@@ -318,7 +318,7 @@ implementation
 type
   TAttributeValue = (atAsm, atTrue, atFunction, atProcedure, atClassOf, atClass,
     atConst, atConstructor, atDestructor, atEnum, atInterface, atNil, atNumeric,
-    atOut, atPointer, atName, atString, atSubRange, atVar, atDispInterface);
+    atOut, atPointer, atName, atString, atSubRange, atVar, atDispInterface, atOperator);
 
     var
       AttributeValues: array[TAttributeValue] of String := [
@@ -341,7 +341,8 @@ type
       'String',
       'SubRange',
       'Var',
-      'DispInterface'
+      'DispInterface',
+      'Operator'
 
       ]; readonly;
 
@@ -829,8 +830,8 @@ type
 
       method TPasSyntaxTreeBuilder.ClassFunctionHeading;
       begin
-        //if SameText(FLexer.Token,'operator') then FStack.Peek.SetAttribute(anKind, AttributeValues[TAttributeValue.atOperator])
-      //else
+        if FLexer.Token.EqualsIgnoringCase('operator') then FStack.Peek.SetAttribute(TAttributeName.anKind, AttributeValues[TAttributeValue.atOperator])
+      else
         FStack.Peek.SetAttribute(TAttributeName.anKind, AttributeValues[TAttributeValue.atFunction]);
         inherited;
       end;
