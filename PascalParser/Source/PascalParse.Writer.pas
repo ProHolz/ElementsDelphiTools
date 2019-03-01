@@ -21,7 +21,7 @@ res : Array of Char;
 
 method Encode(const s: not nullable String);
 begin
-  for i : Integer := 0 to s.Length do
+  for i : Integer := 0 to s.Length-1 do
   res[n+i] := s[i];
   inc(n, s.Length);
 end;
@@ -79,6 +79,9 @@ end;
 
     if Node is TValuedSyntaxNode then
       Builder.Append(' value="' + XMLEncode(TValuedSyntaxNode(Node).Value) + '"');
+
+    if Node is TCommentNode then
+      Builder.Append(' text="' + XMLEncode(TCommentNode(Node).Text) + '"');
 
     for Attr in Node.Attributes do
       Builder.Append(' ' + Attr.Key.ToString + '="' + XMLEncode(Attr.Value) + '"');

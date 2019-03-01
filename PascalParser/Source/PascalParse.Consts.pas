@@ -179,7 +179,8 @@ type
 
     ntAnsiComment,
     ntBorComment,
-    ntSlashesComment
+    ntSlashesComment,
+    ntComments
   );
 
   TAttributeName = public enum (

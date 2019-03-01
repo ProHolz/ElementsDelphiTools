@@ -12,6 +12,7 @@
     <CreateFXFile>True</CreateFXFile>
     <XmlDoc>True</XmlDoc>
     <XmlDocAllMembers>False</XmlDocAllMembers>
+    <TestProject>PascalParse.Test.Echoes</TestProject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>

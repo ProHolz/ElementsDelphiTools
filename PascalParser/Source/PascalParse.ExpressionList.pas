@@ -50,13 +50,13 @@ interface
 type
   TExpressionTools = class
   private
-      class method CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
-    public
-      class method ExprToReverseNotation(Expr: List<TSyntaxNode>): List<TSyntaxNode>; static;
-      class method NodeListToTree(Expr: List<TSyntaxNode>; Root: TSyntaxNode); static;
-      class method PrepareExpr(ExprNodes: List<TSyntaxNode>): List<TSyntaxNode>; static;
-      class method RawNodeListToTree(RawParentNode: TSyntaxNode; RawNodeList: List<TSyntaxNode>; NewRoot: TSyntaxNode); static;
-    end;
+    class method CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
+  public
+    class method ExprToReverseNotation(Expr: List<TSyntaxNode>): List<TSyntaxNode>; static;
+    class method NodeListToTree(Expr: List<TSyntaxNode>; Root: TSyntaxNode); static;
+    class method PrepareExpr(ExprNodes: List<TSyntaxNode>): List<TSyntaxNode>; static;
+    class method RawNodeListToTree(RawParentNode: TSyntaxNode; RawNodeList: List<TSyntaxNode>; NewRoot: TSyntaxNode); static;
+  end;
 
 implementation
 
@@ -121,113 +121,113 @@ begin
     Result := nil;
       raise;
   end;
-    end;
+end;
 
-    class method TExpressionTools.NodeListToTree(Expr: List<TSyntaxNode>; Root: TSyntaxNode);
-    var
-    Stack: Stack<TSyntaxNode>;
-    SecondNode: TSyntaxNode;
-    begin
-      Stack := new Stack<TSyntaxNode>();
-      try
-        for Node in Expr do
+class method TExpressionTools.NodeListToTree(Expr: List<TSyntaxNode>; Root: TSyntaxNode);
+var
+Stack: Stack<TSyntaxNode>;
+SecondNode: TSyntaxNode;
+begin
+  Stack := new Stack<TSyntaxNode>();
+  try
+    for Node in Expr do
+      begin
+      if TOperators.IsOpName(Node.Typ) then
+        case TOperators.Items[Node.Typ].Kind of
+          TOperatorKind.okUnary: Node.AddChild(Stack.Pop);
+          TOperatorKind.okBinary:
           begin
-          if TOperators.IsOpName(Node.Typ) then
-            case TOperators.Items[Node.Typ].Kind of
-              TOperatorKind.okUnary: Node.AddChild(Stack.Pop);
-              TOperatorKind.okBinary:
-              begin
-                  SecondNode := Stack.Pop;
-                  Node.AddChild(Stack.Pop);
-                  Node.AddChild(SecondNode);
-                end;
-              end;
-          Stack.Push(Node);
+            SecondNode := Stack.Pop;
+            Node.AddChild(Stack.Pop);
+            Node.AddChild(SecondNode);
+          end;
         end;
-
-        Root.AddChild(Stack.Pop);
-
-        assert(Stack.Count = 0);
-      finally
-        Stack := nil;
-      end;
+      Stack.Push(Node);
     end;
 
-    class method TExpressionTools.PrepareExpr(ExprNodes: List<TSyntaxNode>): List<TSyntaxNode>;
-    var
-    PrevNode: TSyntaxNode;
-    begin
-      Result := new List<TSyntaxNode>;
-      try
+    Root.AddChild(Stack.Pop);
+
+    assert(Stack.Count = 0);
+  finally
+    Stack := nil;
+  end;
+end;
+
+class method TExpressionTools.PrepareExpr(ExprNodes: List<TSyntaxNode>): List<TSyntaxNode>;
+var
+PrevNode: TSyntaxNode;
+begin
+  Result := new List<TSyntaxNode>;
+  try
     //Result.Capacity := ExprNodes.Count * 2;
 
-          PrevNode := nil;
-          for Node in ExprNodes do
-            begin
-            if Node.Typ = TSyntaxNodeType.ntCall then
-              Continue;
+        PrevNode := nil;
+        for Node in ExprNodes do
+          begin
+          if Node.Typ = TSyntaxNodeType.ntCall then
+            Continue;
 
-            if assigned(PrevNode) and IsRoundOpen(Node.Typ) then
-            begin
-              if not TOperators.IsOpName(PrevNode.Typ) and not IsRoundOpen(PrevNode.Typ) then
-                Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntCall, Node.ParentNode));
+          if assigned(PrevNode) and IsRoundOpen(Node.Typ) then
+          begin
+            if not TOperators.IsOpName(PrevNode.Typ) and not IsRoundOpen(PrevNode.Typ) then
+              Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntCall, Node.ParentNode));
 
-              if TOperators.IsOpName(PrevNode.Typ)
-              and (TOperators.Items[PrevNode.Typ].Kind = TOperatorKind.okUnary)
-              and (TOperators.Items[PrevNode.Typ].AssocType = TOperatorAssocType.atLeft)
-                then
-                Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntCall, Node.ParentNode));
-            end;
-
-            if assigned(PrevNode) and (Node.Typ = TSyntaxNodeType.ntTypeArgs) then
-            begin
-              if not TOperators.IsOpName(PrevNode.Typ) and (PrevNode.Typ <> TSyntaxNodeType.ntTypeArgs) then
-                Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntGeneric, Node.ParentNode));
-
-              if TOperators.IsOpName(PrevNode.Typ)
-              and (TOperators.Items[PrevNode.Typ].Kind = TOperatorKind.okUnary)
-              and (TOperators.Items[PrevNode.Typ].AssocType = TOperatorAssocType.atLeft)
-                then
-                Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntGeneric, Node.ParentNode));
-            end;
-
-            if Node.Typ <> TSyntaxNodeType.ntAlignmentParam then
-              Result.Add(Node.Clone);
-            PrevNode := Node;
+            if TOperators.IsOpName(PrevNode.Typ)
+            and (TOperators.Items[PrevNode.Typ].Kind = TOperatorKind.okUnary)
+            and (TOperators.Items[PrevNode.Typ].AssocType = TOperatorAssocType.atLeft)
+              then
+              Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntCall, Node.ParentNode));
           end;
-        except
-          Result := nil;
-            raise;
-        end;
-    end;
 
-    class method TExpressionTools.CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
-    begin
-      Result := new TSyntaxNode(NodeType);
-      Result.AssignPositionFrom(ParentNode);
-    end;
+          if assigned(PrevNode) and (Node.Typ = TSyntaxNodeType.ntTypeArgs) then
+          begin
+            if not TOperators.IsOpName(PrevNode.Typ) and (PrevNode.Typ <> TSyntaxNodeType.ntTypeArgs) then
+              Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntGeneric, Node.ParentNode));
 
-    class method TExpressionTools.RawNodeListToTree(RawParentNode: TSyntaxNode; RawNodeList: List<TSyntaxNode>;
-    NewRoot: TSyntaxNode);
-    var
-    PreparedNodeList, ReverseNodeList: List<TSyntaxNode>;
-    begin
-      try
-        PreparedNodeList := PrepareExpr(RawNodeList);
-        try
-          ReverseNodeList := ExprToReverseNotation(PreparedNodeList);
-          try
-            NodeListToTree(ReverseNodeList, NewRoot);
-          finally
-            ReverseNodeList := nil;
+            if TOperators.IsOpName(PrevNode.Typ)
+            and (TOperators.Items[PrevNode.Typ].Kind = TOperatorKind.okUnary)
+            and (TOperators.Items[PrevNode.Typ].AssocType = TOperatorAssocType.atLeft)
+              then
+              Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntGeneric, Node.ParentNode));
           end;
-        finally
-          PreparedNodeList := nil;
+
+          if Node.Typ <> TSyntaxNodeType.ntAlignmentParam then
+            Result.Add(Node.Clone);
+          PrevNode := Node;
         end;
       except
-        on E: Exception do
-          raise new EParserException(NewRoot.Line, NewRoot.Col, NewRoot.FileName, E.Message);
+        Result := nil;
+          raise;
       end;
+end;
+
+class method TExpressionTools.CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
+begin
+  Result := new TSyntaxNode(NodeType);
+  Result.AssignPositionFrom(ParentNode);
+end;
+
+class method TExpressionTools.RawNodeListToTree(RawParentNode: TSyntaxNode; RawNodeList: List<TSyntaxNode>;
+NewRoot: TSyntaxNode);
+var
+PreparedNodeList, ReverseNodeList: List<TSyntaxNode>;
+begin
+  try
+    PreparedNodeList := PrepareExpr(RawNodeList);
+    try
+      ReverseNodeList := ExprToReverseNotation(PreparedNodeList);
+      try
+        NodeListToTree(ReverseNodeList, NewRoot);
+      finally
+        ReverseNodeList := nil;
+      end;
+    finally
+      PreparedNodeList := nil;
     end;
+  except
+    on E: Exception do
+      raise new EParserException(NewRoot.Line, NewRoot.Col, NewRoot.FileName, E.Message);
+  end;
+end;
 
 end.

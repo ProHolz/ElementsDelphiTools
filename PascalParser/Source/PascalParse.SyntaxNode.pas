@@ -55,7 +55,7 @@ type
   protected
     FAttributes: Dictionary<TAttributeName, String>;
     FChildNodes: List<TSyntaxNode>;
-     method NewNode: TSyntaxNode; virtual;
+    method NewNode: TSyntaxNode; virtual;
     method InitFields;
 
   public
@@ -66,18 +66,28 @@ type
 
     method Clone: TSyntaxNode; virtual;
     method AssignPositionFrom(const Node: TSyntaxNode);
-
+ // Attributes
     method GetAttribute(const Key: TAttributeName): not nullable String;
     method HasAttribute(const Key: TAttributeName): Boolean;
     method SetAttribute(const Key: TAttributeName; const  Value: not nullable String);
     method ClearAttributes;
 
+// ShortCuts for Attributes
+    method AttribName : not nullable String; inline;
+    method AttribKind : not nullable String; inline;
+    method AttribType : not nullable String; inline;
+
+
+// Childs
     method AddChild(Node: TSyntaxNode): TSyntaxNode;
     method AddChild(aTyp: TSyntaxNodeType): TSyntaxNode;
     method DeleteChild(Node: TSyntaxNode);
     method ExtractChild(Node: TSyntaxNode);
 
     method FindNode(aTyp: TSyntaxNodeType): TSyntaxNode;
+    method FindNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
+    method FindInterfaceNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
+    method FindImplemenationNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
 
     property Typ: TSyntaxNodeType read  protected write;
 
@@ -137,7 +147,6 @@ end;
 method TSyntaxNode.AddChild(Node: TSyntaxNode): TSyntaxNode;
 require
   Node <> nil;
-
   begin
     FChildNodes.Add(Node);
     Node.ParentNode := Self;
@@ -158,14 +167,11 @@ require
   method TSyntaxNode.Clone: TSyntaxNode;
 
   begin
-   Result := NewNode;
+    result := NewNode;
     for item in FChildNodes  do
-      begin
-      Result.AddChild(item.Clone);
-    end;
-
-    Result.FAttributes.Add(FAttributes);
-    Result.AssignPositionFrom(Self);
+      result.AddChild(item.Clone);
+    result.FAttributes.Add(FAttributes);
+    result.AssignPositionFrom(Self);
 
   end;
 
@@ -186,6 +192,41 @@ require
   begin
     exit  FChildNodes.FirstOrDefault((Item)->(Item.Typ = aTyp));
   end;
+
+  method TSyntaxNode.FindNodes(aTyp: TSyntaxNodeType): Array of TSyntaxnode;
+  begin
+    var ltemp := new List<TSyntaxNode>();
+    for lNode in ChildNodes do
+      begin
+      if lNode.Typ = aTyp then
+        ltemp.Add(lNode);
+      ltemp.Add(lNode.FindNodes(aTyp));
+    end;
+    result := ltemp.ToArray;
+  end;
+
+  method TSyntaxNode.FindInterfaceNodes(aTyp: TSyntaxNodeType): Array of TSyntaxnode;
+  begin
+    var ltemp := new List<TSyntaxNode>();
+    var lInterface := FindNode(TSyntaxNodeType.ntInterface);
+    if assigned(lInterface) then
+      for lNode in lInterface.ChildNodes.FindAll(Item->Item.Typ = aTyp) do
+        ltemp.Add(lNode);
+    result := ltemp.ToArray;
+  end;
+
+
+  method TSyntaxNode.FindImplemenationNodes(aTyp: TSyntaxNodeType): array of TSyntaxNode;
+  begin
+    var ltemp := new List<TSyntaxNode>();
+    var lImplementation := FindNode(TSyntaxNodeType.ntImplementation);
+    if assigned(lImplementation) then
+      for lNode in lImplementation.ChildNodes.FindAll(Item->Item.Typ = aTyp) do
+        ltemp.Add(lNode);
+    result := ltemp.ToArray;
+  end;
+
+
 
   method TSyntaxNode.GetAttribute(const Key: TAttributeName): not nullable string;
   begin
@@ -221,5 +262,21 @@ require
     Line := Node.Line;
     FileName := Node.FileName;
   end;
+
+  method TSyntaxNode.AttribName: not nullable String;
+  begin
+    result := GetAttribute(TAttributeName.anName);
+  end;
+
+  method TSyntaxNode.AttribKind: not nullable String;
+  begin
+    result := GetAttribute(TAttributeName.anKind);
+  end;
+
+  method TSyntaxNode.AttribType: not nullable String;
+  begin
+    result := GetAttribute(TAttributeName.anType);
+  end;
+
 
 end.
