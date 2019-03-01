@@ -82,7 +82,8 @@ type
     method AddChild(Node: TSyntaxNode): TSyntaxNode;
     method AddChild(aTyp: TSyntaxNodeType): TSyntaxNode;
     method DeleteChild(Node: TSyntaxNode);
-    method ExtractChild(Node: TSyntaxNode);
+    method ExtractChild(Node: TSyntaxNode) : TSyntaxNode;
+    method ChildCount : Integer;
 
     method FindNode(aTyp: TSyntaxNodeType): TSyntaxNode;
     method FindNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
@@ -176,10 +177,11 @@ require
   end;
 
 
-  method TSyntaxNode.ExtractChild(Node: TSyntaxNode);
+  method TSyntaxNode.ExtractChild(Node: TSyntaxNode) : TSyntaxNode;
   begin
     if FChildNodes.Contains(Node) then
       FChildNodes.Remove(Node);
+      result := Node;
   end;
 
   method TSyntaxNode.DeleteChild(Node: TSyntaxNode);
@@ -193,7 +195,7 @@ require
     exit  FChildNodes.FirstOrDefault((Item)->(Item.Typ = aTyp));
   end;
 
-  method TSyntaxNode.FindNodes(aTyp: TSyntaxNodeType): Array of TSyntaxnode;
+  method TSyntaxNode.FindNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
   begin
     var ltemp := new List<TSyntaxNode>();
     for lNode in ChildNodes do
@@ -205,7 +207,7 @@ require
     result := ltemp.ToArray;
   end;
 
-  method TSyntaxNode.FindInterfaceNodes(aTyp: TSyntaxNodeType): Array of TSyntaxnode;
+  method TSyntaxNode.FindInterfaceNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
   begin
     var ltemp := new List<TSyntaxNode>();
     var lInterface := FindNode(TSyntaxNodeType.ntInterface);
@@ -277,6 +279,11 @@ require
   begin
     result := GetAttribute(TAttributeName.anType);
   end;
+
+method TSyntaxNode.ChildCount: Integer;
+begin
+ result := ChildNodes.Count;
+end;
 
 
 end.

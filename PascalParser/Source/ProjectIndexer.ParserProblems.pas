@@ -5,6 +5,11 @@ type
 
   TParseProblemInfo = public record
   public
+    constructor();
+    begin
+
+    end;
+
     class  method Create(aProblemType: TParseProblemType; aFilename : String; aDescription : String) : TParseProblemInfo;
     begin
       result := new TParseProblemInfo();

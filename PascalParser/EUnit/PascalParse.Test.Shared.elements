@@ -3,8 +3,6 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F3FF91A4-94A4-4098-8B6D-3352C05D142C}</ProjectGuid>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
-  </PropertyGroup>
-  <PropertyGroup>
     <RootNamespace>PascalParser</RootNamespace>
   </PropertyGroup>
   <Import Project="PascalParse.Test.Shared.projitems" Label="Shared" />

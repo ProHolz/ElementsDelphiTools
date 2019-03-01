@@ -280,6 +280,7 @@ type
 
     method GetFileName: not nullable String;
     method UpdateScopedEnums;
+    method GetIsJunkAssembly: Boolean;
     method DoOnComment(const CommentText: not nullable String);
   protected
     method SetOrigin(const NewValue: not nullable String); virtual;
@@ -290,6 +291,7 @@ type
     method CharAhead: Char;
     method Next;
     method NextNoJunk;
+    method NextNoJunkAssembly;
     method NextNoSpace;
     method InitLexer;
     method InitFrom(ALexer: TmwBasePasLex);
@@ -305,6 +307,7 @@ type
     property CompilerDirective: not nullable String read GetCompilerDirective;
     property DirectiveParam: not nullable String read GetDirectiveParam;
     property IsJunk: Boolean read GetIsJunk;
+    property IsJunkAssembly: Boolean read GetIsJunkAssembly;
     property IsSpace: Boolean read GetIsSpace;
     property Origin: not nullable String read GetOrigin write SetOrigin;
     property PosXY: TTokenPoint read GetPosXY;
@@ -997,13 +1000,17 @@ implementation
     method TmwBasePasLex.Func95: TptTokenKind;
     begin
       Result := TptTokenKind.ptIdentifier;
-      if KeyComp('Contains') then FExID := TptTokenKind.ptContains else
-        if KeyComp('Absolute') then FExID := TptTokenKind.ptAbsolute;
+      if KeyComp('Contains') then FExID := TptTokenKind.ptContains
+      else if KeyComp('Absolute') then FExID := TptTokenKind.ptAbsolute
+      else if KeyComp('Dependency') then FExID := TptTokenKind.ptDependency; //#240
+
     end;
+
 
     method TmwBasePasLex.Func96: TptTokenKind;
     begin
       Result := TptTokenKind.ptIdentifier;
+
       if KeyComp('ByteBool') then FExID := TptTokenKind.ptByteBool else
         if KeyComp('Override') then FExID := TptTokenKind.ptOverride else
           if KeyComp('Published') then FExID := TptTokenKind.ptPublished;
@@ -1038,9 +1045,9 @@ implementation
     method TmwBasePasLex.Func101: TptTokenKind;
     begin
       Result := TptTokenKind.ptIdentifier;
-      if KeyComp('Register') then FExID := TptTokenKind.ptRegister else
-        if KeyComp('Platform') then FExID := TptTokenKind.ptPlatform else
-          if KeyComp('Continue') then FExID := TptTokenKind.ptContinue;
+  if KeyComp('Register') then FExID:= TptTokenKind.ptRegister
+  else if KeyComp('Platform') then FExID:= TptTokenKind.ptPlatform
+  else if KeyComp('Continue') then FExID:= TptTokenKind.ptContinue;
     end;
 
     method TmwBasePasLex.Func102: TptTokenKind;
@@ -1095,8 +1102,8 @@ implementation
     method TmwBasePasLex.Func117: TptTokenKind;
     begin
       Result :=TptTokenKind.ptIdentifier;
-      if KeyComp('Exports') then Result := TptTokenKind.ptExports else
-        if KeyComp('OleVariant') then FExID := TptTokenKind.ptOleVariant;
+  if KeyComp('Exports') then Result:= TptTokenKind.ptExports
+  else if KeyComp('OleVariant') then FExID:= TptTokenKind.ptOleVariant;
     end;
 
     method TmwBasePasLex.Func123: TptTokenKind;
@@ -1132,18 +1139,23 @@ implementation
     method TmwBasePasLex.Func130: TptTokenKind;
     begin
       Result :=TptTokenKind.ptIdentifier;
-      if KeyComp('AnsiString') then FExID := TptTokenKind.ptAnsiString;
+      if KeyComp('AnsiString') then
+      begin
+        Result:= TptTokenKind.ptString;
+      FExID := TptTokenKind.ptAnsiString;
+      end;
     end;
 
-    method TmwBasePasLex.Func132: TptTokenKind;
-    begin
-      Result :=TptTokenKind.ptIdentifier;
-      if KeyComp('Reintroduce') then FExID := TptTokenKind.ptReintroduce;
-    end;
+      method TmwBasePasLex.Func132: TptTokenKind;
+      begin
+        result := TptTokenKind.ptIdentifier;
+        if KeyComp('Reintroduce') then FExID := TptTokenKind.ptReintroduce;
+      end;
 
     method TmwBasePasLex.Func133: TptTokenKind;
     begin
       Result :=TptTokenKind.ptIdentifier;
+
       if KeyComp('Property') then Result := TptTokenKind.ptProperty;
     end;
 
@@ -2300,6 +2312,12 @@ begin
       Result := TptTokenKind.IsTokenIDJunk(FTokenID) or (FUseDefines and (FDefineStack > 0) and (TokenID <> TptTokenKind.ptNull));
     end;
 
+method TmwBasePasLex.GetIsJunkAssembly: Boolean;
+begin
+  Result := not(FTokenID in [ TptTokenKind.ptCRLF]) and (
+    IsTokenIDJunk(FTokenID) or (FUseDefines and (FDefineStack > 0) and (TokenID <> TptTokenKind.ptNull))
+    );
+end;
     method TmwBasePasLex.GetIsSpace: Boolean;
     begin
       Result := FTokenID in [TptTokenKind.ptCRLF, TptTokenKind.ptSpace];
@@ -2322,6 +2340,12 @@ begin
         until not IsJunk;
     end;
 
+method TmwBasePasLex.NextNoJunkAssembly;
+begin
+  repeat
+    Next
+  until not IsJunkAssembly;
+end;
     method TmwBasePasLex.NextNoSpace;
     begin
       repeat

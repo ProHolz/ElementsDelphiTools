@@ -37,6 +37,7 @@ type
     ptAddressOp,
     ptAmpersand,
     ptAnd,
+    ptAnsiChar,
     ptAnsiComment,
     ptAnsiString,
     ptArray,
@@ -77,6 +78,7 @@ type
     ptDefault,
     ptDefineDirect,
     ptDeprecated,
+    ptDependency,  //for external declarations
     ptDestructor,
     ptDispid,
     ptDispinterface,
@@ -229,7 +231,9 @@ type
     ptTo,
     ptTry,
     ptType,
+    ptUInt64,
     ptUndefDirect,
+    ptUnicodeString,
     ptUnit,
     ptUnknown,
     ptUnsafe,
@@ -249,6 +253,8 @@ type
     ptWriteonly,
     ptXor);
 
+   TptTokenKinds = Array of TptTokenKind;
+
   TmwPasLexStatus = record
   {$HIDE H6}
     CommentState: TCommentState;
@@ -264,4 +270,25 @@ type
 
 
 
+method IsTokenIDJunk(const aTokenID: TptTokenKind): Boolean;
+begin
+  Result := aTokenID in [
+    TptTokenKind.ptAnsiComment,
+    TptTokenKind.ptBorComment,
+    TptTokenKind.ptCRLF,
+    TptTokenKind.ptCRLFCo,
+    TptTokenKind.ptSlashesComment,
+    TptTokenKind.ptSpace,
+    TptTokenKind.ptIfDirect,
+    TptTokenKind.ptElseDirect,
+    TptTokenKind.ptIfEndDirect,
+    TptTokenKind.ptElseIfDirect,
+    TptTokenKind.ptIfDefDirect,
+    TptTokenKind.ptIfNDefDirect,
+    TptTokenKind.ptEndIfDirect,
+    TptTokenKind.ptIfOptDirect,
+    TptTokenKind.ptDefineDirect,
+    TptTokenKind.ptScopedEnumsDirect,
+    TptTokenKind.ptUndefDirect];
+end;
 end.
