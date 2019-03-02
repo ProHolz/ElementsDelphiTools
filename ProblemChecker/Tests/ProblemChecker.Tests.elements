@@ -9,6 +9,7 @@
     <ApplicationIcon>Properties\App.ico</ApplicationIcon>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
+    <TargetFramework>.NETFramework4.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
