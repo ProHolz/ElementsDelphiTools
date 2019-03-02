@@ -14,6 +14,8 @@ implementation
 
 method TestSearchPath.Test1;
 begin
+  if Environment.OS = OperatingSystem.Windows then
+  begin
   var lPath := new Searchpaths('X:\Source_fritz\RoofCad');
   lPath.Add('cad'); //0
   lPath.Add('\cairo'); //1
@@ -39,6 +41,7 @@ begin
           3 : Check.AreEqual(ls, 'D:\Source_fritz\cairo');
         end;
       end;
+  end;
 end;
 
 end.

@@ -8,10 +8,12 @@ uses
 type
   TestTreeBuilder = public class(Test)
   private
-  protected
-  public
+
+
     method FirstTest;
     method TestCompilerVersions;
+  public
+    method TestCompilerDirectives;
   end;
 
 implementation
@@ -20,7 +22,6 @@ method TestTreeBuilder.FirstTest;
 begin
  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
  try
-  //Assert.ra
   Builder.RunWithString(cBinaryXml);
  except
    on E : Exception do
@@ -40,6 +41,23 @@ begin
  Check.Throws(->Builder.RunWithString(cCompilerVersions28));
  Check.Throws(->Builder.RunWithString(cCompilerVersionsGreater28));
 
+end;
+
+method TestTreeBuilder.TestCompilerDirectives;
+begin
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+ //try
+  //var node :=  Builder.RunWithString(cTestEmptyUnit);
+ //except
+   //on E : Exception do
+   //Assert.Fail(E.Message);
+ //end;
+ try
+  Builder.RunWithString(cTestCompilerDirectives);
+ except
+   on E : Exception do
+     Assert.Fail(E.Message);
+ end;
 end;
 
 end.

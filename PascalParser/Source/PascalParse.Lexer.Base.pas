@@ -599,8 +599,8 @@ implementation
     method TmwBasePasLex.Func19: TptTokenKind;
     begin
       Result := TptTokenKind.ptIdentifier;
-      if KeyComp('Do') then Result := TptTokenKind.ptDo else
-        if KeyComp('And') then Result := TptTokenKind.ptAnd;
+  if KeyComp('Do') then Result := TptTokenKind.ptDo
+  else if KeyComp('And') then Result := TptTokenKind.ptAnd;
     end;
 
     method TmwBasePasLex.Func20: TptTokenKind;
@@ -666,9 +666,9 @@ implementation
     method TmwBasePasLex.Func33: TptTokenKind;
     begin
       Result := TptTokenKind.ptIdentifier;
-      if KeyComp('Or') then Result := TptTokenKind.ptOr else
-        if KeyComp('Name') then FExID := TptTokenKind.ptName else
-          if KeyComp('Asm') then Result := TptTokenKind.ptAsm;
+  if KeyComp('Or') then Result := TptTokenKind.ptOr
+  else if KeyComp('Name') then FExID := TptTokenKind.ptName
+  else if KeyComp('Asm') then Result := TptTokenKind.ptAsm;
     end;
 
     method TmwBasePasLex.Func35: TptTokenKind;
@@ -702,8 +702,8 @@ implementation
     method TmwBasePasLex.Func39: TptTokenKind;
     begin
       Result := TptTokenKind.ptIdentifier;
-      if KeyComp('For') then Result := TptTokenKind.ptFor else
-        if KeyComp('Shl') then Result := TptTokenKind.ptShl;
+  if KeyComp('For') then Result := TptTokenKind.ptFor
+  else if KeyComp('Shl') then Result := TptTokenKind.ptShl;
     end;
 
     method TmwBasePasLex.Func40: TptTokenKind;
@@ -799,9 +799,9 @@ implementation
     method TmwBasePasLex.Func57: TptTokenKind;
     begin
       Result := TptTokenKind.ptIdentifier;
-      if KeyComp('While') then Result := TptTokenKind.ptWhile else
-        if KeyComp('Xor') then Result := TptTokenKind.ptXor else
-          if KeyComp('Goto') then Result := TptTokenKind.ptGoto;
+  if KeyComp('While') then Result := TptTokenKind.ptWhile
+  else if KeyComp('Xor') then Result := TptTokenKind.ptXor
+  else if KeyComp('Goto') then Result := TptTokenKind.ptGoto;
     end;
 
     method TmwBasePasLex.Func58: TptTokenKind;
@@ -903,7 +903,8 @@ implementation
     method TmwBasePasLex.Func73: TptTokenKind;
     begin
       Result := TptTokenKind.ptIdentifier;
-      if KeyComp('Except') then Result := TptTokenKind.ptExcept;
+  if KeyComp('Except') then Result := TptTokenKind.ptExcept else
+  if KeyComp('AnsiChar') then FExID := TptTokenKind.ptAnsiChar;
     end;
 
     method TmwBasePasLex.Func75: TptTokenKind;
@@ -1139,8 +1140,7 @@ implementation
     method TmwBasePasLex.Func130: TptTokenKind;
     begin
       Result :=TptTokenKind.ptIdentifier;
-      if KeyComp('AnsiString') then
-      begin
+  if KeyComp('AnsiString') then begin
         Result:= TptTokenKind.ptString;
       FExID := TptTokenKind.ptAnsiString;
       end;
@@ -1186,8 +1186,8 @@ implementation
     method TmwBasePasLex.Func166: TptTokenKind;
     begin
       Result :=TptTokenKind.ptIdentifier;
-      if KeyComp('Constructor') then Result := TptTokenKind.ptConstructor else
-        if KeyComp('Implementation') then Result := TptTokenKind.ptImplementation;
+  if KeyComp('Constructor') then Result:= TptTokenKind.ptConstructor
+  else if KeyComp('Implementation') then Result:= TptTokenKind.ptImplementation;
     end;
 
     method TmwBasePasLex.Func167: TptTokenKind;
@@ -1205,8 +1205,8 @@ implementation
     method TmwBasePasLex.Func191: TptTokenKind;
     begin
       Result :=TptTokenKind.ptIdentifier;
-      if KeyComp('Resourcestring') then Result := TptTokenKind.ptResourcestring else
-        if KeyComp('Stringresource') then FExID := TptTokenKind.ptStringresource;
+  if KeyComp('Resourcestring') then Result:= TptTokenKind.ptResourcestring
+  else if KeyComp('Stringresource') then FExID:= TptTokenKind.ptStringresource;
     end;
 
     method TmwBasePasLex.AltFunc: TptTokenKind;
@@ -2409,6 +2409,7 @@ end;
       FDirectiveParamOrigin := FTokenPos;
       TempPos := FTokenPos;
       FTokenPos := FBuffer.Run;
+  FExID:= TptTokenKind.ptCompDirect; //Always register the fact that we are in a directive.
       case KeyHash of
         9:
         if KeyComp('I') and (not (FBuffer.Buf[FBuffer.Run] in ['+', '-'])) then
@@ -2599,12 +2600,8 @@ end;
 method TmwBasePasLex.GetIsOrdIdent: Boolean;
 begin
   if FTokenID =TptTokenKind.ptIdentifier then
-    Result := FExID in
-    [TptTokenKind.ptBoolean, TptTokenKind.ptByte, TptTokenKind.ptChar,
-     TptTokenKind.ptDWORD, TptTokenKind.ptInt64, TptTokenKind.ptInteger,
-      TptTokenKind.ptLongint, TptTokenKind.ptLongword,
-      TptTokenKind.ptPChar, TptTokenKind.ptShortint,
-      TptTokenKind.ptSmallint, TptTokenKind.ptWideChar, TptTokenKind.ptWord]
+    Result := FExID in [TptTokenKind.ptBoolean, TptTokenKind.ptByte, TptTokenKind.ptChar, TptTokenKind.ptDWORD, TptTokenKind.ptInt64, TptTokenKind.ptInteger,
+      TptTokenKind.ptLongint, TptTokenKind.ptLongword, TptTokenKind.ptPChar, TptTokenKind.ptShortint, TptTokenKind.ptSmallint, TptTokenKind.ptWideChar, TptTokenKind.ptWord]
   else
     Result := False;
 end;

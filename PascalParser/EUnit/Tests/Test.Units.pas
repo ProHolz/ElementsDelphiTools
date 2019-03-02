@@ -109,7 +109,33 @@ implementation
 end.
 ";
 
+// ( *$DESCRIPTION 'TEST Description '*)
 
+(*
+
+ {$DESCRIPTION 'TEST Description '}
+ const c = 1;
+*)
+cTestCompilerDirectives = "
+unit Test;
+interface
+ {$DESCRIPTION 'TEST Description '}
+
+(*$DESCRIPTION 'TEST Description '*)
+
+implementation
+end.
+
+";
+
+cTestEmptyUnit = "
+unit Test;
+interface
+
+implementation
+end.
+
+";
 
 
 end.
