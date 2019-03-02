@@ -169,7 +169,7 @@ begin
   //File.WriteText('D:\Test\res.xml',  TSyntaxTreeWriter.ToXML(toCheck, true));
 
   var lchecker := new TProblem_DFM() as ISingleProbSolver;
-  Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self), 'Not finished yet');
+  Check.IsFalse( lchecker.CheckForProblem(toCheck, FSolver, self), 'Not finished yet');
 end;
 
 
