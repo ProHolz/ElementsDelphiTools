@@ -78,9 +78,9 @@ begin
   var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
   var Source : String;
   if Environment.OS = OperatingSystem.macOS then
-    Source := File.ReadText("/Volumes/HD2/Projekte/SynEdit/Source/SynEditMiscClasses.pas")
+    Source := File.ReadText("/Volumes/HD2/Projekte/SynEdit/Source/SynUsp10.pas")
     else
-    Source := File.ReadText("X:\Projekte\SynEdit\Source\SynEditMiscClasses.pas");
+    Source := File.ReadText("X:\Projekte\SynEdit\Source\SynUsp10.pas");
 
   try
     Builder.RunWithString(Source );

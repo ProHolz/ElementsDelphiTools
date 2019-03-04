@@ -9,17 +9,17 @@
     <Import_RootNamespace>Elements.PascalParser</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Tests\LexerTypes.pas" />
-    <None Include="$(MSBuildThisFileDirectory)Tests\TestLexer.pas" />
-    <None Include="$(MSBuildThisFileDirectory)Tests\TestLexerPasLex.pas" />
-    <None Include="$(MSBuildThisFileDirectory)Tests\TestAstClasses.pas" />
-    <None Include="$(MSBuildThisFileDirectory)Tests\TestGlobals.pas" />
-    <None Include="$(MSBuildThisFileDirectory)Tests\TestNodeStack.pas" />
-    <None Include="$(MSBuildThisFileDirectory)Tests\TestEnumsClass.pas" />
-    <None Include="$(MSBuildThisFileDirectory)Tests\TestBinaryReadeWriter.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\LexerTypes.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestLexer.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestLexerPasLex.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestAstClasses.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestGlobals.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestNodeStack.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestEnumsClass.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestBinaryReadeWriter.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)Tests\Test.Units.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)Tests\TestTreeBuilder.pas" />
-    <None Include="$(MSBuildThisFileDirectory)Tests\TestSearchPaths.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tests\TestSearchPaths.pas" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Tests\" />

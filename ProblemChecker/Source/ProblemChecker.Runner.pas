@@ -105,7 +105,7 @@ end;
 
 method ProjectRunner.UnitParsedEvent(Sender: Object; const unitName: String; const fileName: String; var syntaxTree: TSyntaxNode; syntaxTreeFromParser: Boolean; var doAbort: Boolean);
 begin
-// write(unitName+' ');
+ write(unitName+' ');
  fProblems.check(syntaxTree);
 end;
 

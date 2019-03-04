@@ -10,7 +10,6 @@ type
     procedure Test1;
     procedure Test2;
     procedure Test3;
-    procedure Test4;
     procedure Test5;
 
   end;
@@ -39,10 +38,7 @@ begin
   Check.AreEqual(TAttributeName.anReintroduce.ToString, 'anReintroduce');
 end;
 
-procedure TMyTestObject.Test4;
-begin
-//  Check.AreEqual(TmwPasCodeInfo.ciClassHeritage.ToString, 'ciClassHeritage');
-end;
+
 
 procedure TMyTestObject.Test5;
 begin
