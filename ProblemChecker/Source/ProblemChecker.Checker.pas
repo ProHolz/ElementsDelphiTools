@@ -87,7 +87,10 @@ type
    property CheckTyp : eEleCheck read eEleCheck.eDfm;
  end;
 
-
+  TProblem_RES = class( ISingleProbSolver)
+    method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
+    property CheckTyp : eEleCheck read eEleCheck.eDfm;
+  end;
 
 implementation
 
@@ -228,6 +231,7 @@ begin
      SNT.ntConstants,
      SNT.ntConstant,
      SNT.ntValue
+     ,SNT.ntRecordConstant
      ,SNT.ntField
      ,SNT.ntExpression
      ]; //
@@ -240,6 +244,7 @@ begin
      SNT.ntConstants,
      SNT.ntConstant,
      SNT.ntValue,
+     SNT.ntRecordConstant,
      SNT.ntField,
      SNT.ntExpression]; //
   lConstants := NodeSolver.getNodeArrayAll(cMethodTypes, syntaxTree);
@@ -250,9 +255,9 @@ end;
 method TProblem_VariantRecord.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
 begin
   result := false;
-  var lClasses := NodeSolver.getPublicRecord(syntaxTree);
-  for lClass in lClasses do
-    if NodeSolver.getNodeArray(SNT.ntExpression, lClass).Count > 0 then exit(true);
+  var lRecords := NodeSolver.getPublicRecord(syntaxTree);
+  for lRecord in lRecords do
+    if NodeSolver.getNodeArray(SNT.ntVariantSection, lRecord).Count > 0 then exit(true);
 end;
 
 method TProblem_ClassInImplementation.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -263,6 +268,32 @@ end;
 method TProblem_DFM.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
 begin
   result := false;
+  var Nodes := NodeSolver.getNodeGlobArray(SNT.ntCompilerDirective, syntaxTree);
+  if Nodes.Count > 0 then
+  begin
+    for each node in Nodes do
+     begin
+      if node.AttribType = 'R' then
+       if node.AttribKind.Trim.ToUpper.EndsWith('.DFM') then exit (true);
+     end;
+  end;
+
+end;
+
+method TProblem_RES.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
+begin
+  result := false;
+
+  var Nodes := NodeSolver.getNodeGlobArray(SNT.ntCompilerDirective, syntaxTree);
+  if Nodes.Count > 0 then
+  begin
+    for each node in Nodes do
+      begin
+      if node.AttribType = 'R' then
+      if node.AttribKind.Trim.ToUpper.EndsWith('.RES') then exit (true);
+    end;
+  end;
+
 end;
 
 

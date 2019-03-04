@@ -41,7 +41,7 @@ end;
 
 procedure TMyTestObject.Test4;
 begin
-  Check.AreEqual(TmwPasCodeInfo.ciClassHeritage.ToString, 'ciClassHeritage');
+//  Check.AreEqual(TmwPasCodeInfo.ciClassHeritage.ToString, 'ciClassHeritage');
 end;
 
 procedure TMyTestObject.Test5;

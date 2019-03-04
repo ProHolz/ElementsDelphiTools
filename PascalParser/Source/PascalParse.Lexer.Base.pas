@@ -2309,15 +2309,16 @@ begin
 
     method TmwBasePasLex.GetIsJunk: Boolean;
     begin
-      Result := TptTokenKind.IsTokenIDJunk(FTokenID) or (FUseDefines and (FDefineStack > 0) and (TokenID <> TptTokenKind.ptNull));
+      Result := FTokenID.isJunk or (FUseDefines and (FDefineStack > 0) and (TokenID <> TptTokenKind.ptNull));
     end;
 
 method TmwBasePasLex.GetIsJunkAssembly: Boolean;
 begin
   Result := not(FTokenID in [ TptTokenKind.ptCRLF]) and (
-    IsTokenIDJunk(FTokenID) or (FUseDefines and (FDefineStack > 0) and (TokenID <> TptTokenKind.ptNull))
+    FTokenID.isJunk or (FUseDefines and (FDefineStack > 0) and (TokenID <> TptTokenKind.ptNull))
     );
 end;
+
     method TmwBasePasLex.GetIsSpace: Boolean;
     begin
       Result := FTokenID in [TptTokenKind.ptCRLF, TptTokenKind.ptSpace];
@@ -2774,6 +2775,4 @@ begin
 end;
 
 
-//initialization
- // MakeIdentTable;
 end.

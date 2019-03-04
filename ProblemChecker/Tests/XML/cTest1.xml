@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<UNIT line="1" col="2" anName="TestPublic">
+  <INTERFACE begin_line="3" begin_col="1" end_line="36" end_col="1">
+    <USES begin_line="4" begin_col="2" end_line="9" end_col="3">
+      <UNIT line="5" col="4" anName="Windows"/>
+      <UNIT line="6" col="4" anName="Sysutils"/>
+      <UNIT line="7" col="4" anName="Classes"/>
+    </USES>
+    <TYPESECTION line="9" col="3">
+      <TYPEDECL begin_line="10" begin_col="5" end_line="12" end_col="8" anName="testRecord">
+        <TYPE line="10" col="18" anType="record">
+          <FIELD line="11" col="8">
+            <NAME line="11" col="8" anName="x"/>
+            <TYPE line="11" col="14" anName="integer"/>
+          </FIELD>
+          <FIELD line="11" col="10">
+            <NAME line="11" col="10" anName="y"/>
+            <TYPE line="11" col="14" anName="integer"/>
+          </FIELD>
+        </TYPE>
+      </TYPEDECL>
+      <TYPEDECL begin_line="14" begin_col="4" end_line="16" end_col="8" anName="testRecord2">
+        <TYPE line="14" col="18" anType="record">
+          <FIELD line="15" col="8">
+            <NAME line="15" col="8" anName="x"/>
+            <TYPE line="15" col="14" anName="integer"/>
+          </FIELD>
+          <FIELD line="15" col="10">
+            <NAME line="15" col="10" anName="y"/>
+            <TYPE line="15" col="14" anName="integer"/>
+          </FIELD>
+        </TYPE>
+      </TYPEDECL>
+    </TYPESECTION>
+    <CONSTANTS line="18" col="4" anKind="const">
+      <CONSTANT line="18" col="10">
+        <NAME line="18" col="10" anName="T"/>
+        <TYPE line="18" col="14" anName="testrecord"/>
+        <VALUE line="18" col="27">
+          <RECORDCONSTANT line="18" col="27">
+            <FIELD line="18" col="28">
+              <NAME line="0" col="0" anName="X"/>
+              <EXPRESSION line="18" col="30">
+                <LITERAL line="18" col="30" value="1" anType="Numeric"/>
+              </EXPRESSION>
+            </FIELD>
+            <FIELD line="18" col="33">
+              <NAME line="0" col="0" anName="y"/>
+              <EXPRESSION line="18" col="35">
+                <LITERAL line="18" col="35" value="2" anType="Numeric"/>
+              </EXPRESSION>
+            </FIELD>
+          </RECORDCONSTANT>
+        </VALUE>
+      </CONSTANT>
+    </CONSTANTS>
+    <TYPESECTION line="20" col="3">
+      <TYPEDECL begin_line="21" begin_col="4" end_line="24" end_col="7" anName="testclass">
+        <TYPE line="21" col="16" anType="Class">
+          <PUBLIC line="22" col="4" anVisibility="True">
+            <METHOD begin_line="23" begin_col="6" end_line="24" end_col="4" anKind="Destructor" anName="Done"/>
+          </PUBLIC>
+        </TYPE>
+      </TYPEDECL>
+      <TYPEDECL begin_line="26" begin_col="4" end_line="27" end_col="7" anName="Itest">
+        <TYPE line="26" col="12" anType="Interface"/>
+      </TYPEDECL>
+      <TYPEDECL begin_line="29" begin_col="5" end_line="34" end_col="7" anName="testclass2">
+        <TYPE line="29" col="18" anType="Class">
+          <TYPE line="29" col="24" anName="ITest"/>
+          <PUBLIC line="30" col="5" anVisibility="True">
+            <METHOD begin_line="31" begin_col="5" end_line="32" end_col="5" anKind="Constructor" anName="one"/>
+            <METHOD begin_line="32" begin_col="5" end_line="34" end_col="4" anKind="Constructor" anName="two"/>
+          </PUBLIC>
+        </TYPE>
+      </TYPEDECL>
+    </TYPESECTION>
+  </INTERFACE>
+  <IMPLEMENTATION begin_line="36" begin_col="1" end_line="51" end_col="1">
+    <USES begin_line="37" begin_col="2" end_line="39" end_col="1">
+      <UNIT line="38" col="3" anName="System.Math"/>
+    </USES>
+    <TYPESECTION line="39" col="1">
+      <TYPEDECL begin_line="40" begin_col="3" end_line="41" end_col="6" anName="implclass">
+        <TYPE line="40" col="15" anType="Class"/>
+      </TYPEDECL>
+    </TYPESECTION>
+    <METHOD begin_line="44" begin_col="1" end_line="51" end_col="1" anKind="procedure">
+      <NAME line="44" col="11" anName="TestWidth">
+        <NAME line="44" col="11" anName="TestWidth"/>
+      </NAME>
+      <STATEMENTS begin_line="45" begin_col="1" end_line="49" end_col="4" anKind="Begin">
+        <WITH line="46" col="2">
+          <EXPRESSIONS line="46" col="7">
+            <EXPRESSION line="46" col="7">
+              <IDENTIFIER line="46" col="7" anName="a"/>
+            </EXPRESSION>
+          </EXPRESSIONS>
+          <STATEMENTS begin_line="47" begin_col="4" end_line="48" end_col="8" anKind="Begin"/>
+        </WITH>
+      </STATEMENTS>
+    </METHOD>
+  </IMPLEMENTATION>
+</UNIT>

@@ -3203,8 +3203,8 @@ type
             self.OnMessage := @ParserMessage;
             inherited RunWithString(Context);
           finally
-            Result := FStack.Peek;
-            FStack.Pop;
+            if FStack.Count > 0 then
+            Result := FStack.Pop;
           end;
         except
           on E: EParserException do

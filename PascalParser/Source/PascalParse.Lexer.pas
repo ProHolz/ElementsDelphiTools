@@ -4596,9 +4596,13 @@ begin
       begin
         ExternalDirective;
       end;
-      TptTokenKind.ptDynamic, TptTokenKind.ptMessage, TptTokenKind.ptOverload, TptTokenKind.ptOverride, TptTokenKind.ptReintroduce, TptTokenKind.ptVirtual, TptTokenKind.ptStatic:
+      TptTokenKind.ptDynamic, TptTokenKind.ptOverload, TptTokenKind.ptOverride, TptTokenKind.ptReintroduce, TptTokenKind.ptVirtual, TptTokenKind.ptStatic:
       begin
         DirectiveBinding;
+      end;
+      TptTokenKind.ptMessage :
+      begin
+        DirectiveBindingMessage;
       end;
       TptTokenKind.ptInline, TptTokenKind.ptAssembler:
       begin

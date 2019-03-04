@@ -268,7 +268,7 @@ type
   );
 
 
-
+(*
   TmwPasCodeInfo = public enum(
     ciNone,
     ciAccessSpecifier,
@@ -518,7 +518,7 @@ type
     ciWriteAccessIdentifier
   );
 
-
+*)
 
 
 end.

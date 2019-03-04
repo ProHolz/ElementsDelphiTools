@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<UNIT line="2" col="1" anName="TestPublic">
+  <INTERFACE begin_line="3" begin_col="1" end_line="16" end_col="1">
+    <TYPESECTION line="4" col="1">
+      <TYPEDECL begin_line="5" begin_col="3" end_line="10" end_col="8" anName="varRecord">
+        <TYPE line="5" col="15" anType="record">
+          <VARIANTSECTION line="6" col="7">
+            <VARIANTTAG line="6" col="12" anType="boolean"/>
+            <RECORDVARIANT line="7" col="8">
+              <CASELABELS line="7" col="8">
+                <CASELABEL line="7" col="8">
+                  <EXPRESSION line="7" col="8">
+                    <IDENTIFIER line="7" col="8" anName="false"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="7" col="17">
+                <NAME line="7" col="17" anName="b"/>
+                <TYPE line="7" col="21" anName="Boolean"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="8" col="8">
+              <CASELABELS line="8" col="8">
+                <CASELABEL line="8" col="8">
+                  <EXPRESSION line="8" col="8">
+                    <IDENTIFIER line="8" col="8" anName="true"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="8" col="16">
+                <NAME line="8" col="16" anName="c"/>
+                <TYPE line="8" col="20" anName="Integer"/>
+              </FIELD>
+            </RECORDVARIANT>
+          </VARIANTSECTION>
+        </TYPE>
+      </TYPEDECL>
+    </TYPESECTION>
+    <CONSTANTS line="13" col="1" anKind="const">
+      <CONSTANT line="14" col="3">
+        <NAME line="14" col="3" anName="cint"/>
+        <VALUE line="14" col="10">
+          <EXPRESSION line="14" col="10">
+            <LITERAL line="14" col="10" value="5" anType="Numeric"/>
+          </EXPRESSION>
+        </VALUE>
+      </CONSTANT>
+      <CONSTANT line="15" col="3">
+        <NAME line="15" col="3" anName="TInit"/>
+        <TYPE line="15" col="11" anName="testrecord"/>
+        <VALUE line="15" col="24">
+          <RECORDCONSTANT line="15" col="24">
+            <FIELD line="15" col="25">
+              <NAME line="0" col="0" anName="X"/>
+              <EXPRESSION line="15" col="27">
+                <LITERAL line="15" col="27" value="1" anType="Numeric"/>
+              </EXPRESSION>
+            </FIELD>
+            <FIELD line="15" col="30">
+              <NAME line="0" col="0" anName="y"/>
+              <EXPRESSION line="15" col="32">
+                <LITERAL line="15" col="32" value="2" anType="Numeric"/>
+              </EXPRESSION>
+            </FIELD>
+          </RECORDCONSTANT>
+        </VALUE>
+      </CONSTANT>
+    </CONSTANTS>
+  </INTERFACE>
+  <IMPLEMENTATION begin_line="16" begin_col="1" end_line="17" end_col="1"/>
+</UNIT>

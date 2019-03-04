@@ -1,5 +1,5 @@
 ﻿namespace ProblemChecker;
-
+uses PascalParser;
 const
   cUnitWithResDFM =
 "unit TestPublic;
@@ -120,5 +120,24 @@ const
 implementation
 end.
 ";
+
+method WriteoutConstxml;
+begin
+  var temp := TPasSyntaxTreeBuilder.RunWithString(cUnitWithResDFM, false);
+  File.WriteText('X:\Elements\ElementsDelphiTools\ProblemChecker\Tests\XML\cUnitWithResDFM.xml' , TSyntaxTreeWriter.ToXML(temp, true));
+
+  temp := TPasSyntaxTreeBuilder.RunWithString(cUnitInitFinal, false);
+  File.WriteText('X:\Elements\ElementsDelphiTools\ProblemChecker\Tests\XML\cUnitInitFinal.xml' , TSyntaxTreeWriter.ToXML(temp, true));
+
+
+  temp := TPasSyntaxTreeBuilder.RunWithString(cTest1, false);
+  File.WriteText('X:\Elements\ElementsDelphiTools\ProblemChecker\Tests\XML\cTest1.xml' , TSyntaxTreeWriter.ToXML(temp, true));
+
+  temp := TPasSyntaxTreeBuilder.RunWithString(cConstVarRec, false);
+  File.WriteText('X:\Elements\ElementsDelphiTools\ProblemChecker\Tests\XML\cConstVarRec.xml' , TSyntaxTreeWriter.ToXML(temp, true));
+
+end;
+
+
 
 end.

@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<UNIT line="2" col="1" anName="TestPublic">
+  <INTERFACE begin_line="4" begin_col="1" end_line="14" end_col="1">
+    <VARIABLES line="6" col="1">
+      <VARIABLE line="6" col="5">
+        <NAME line="6" col="5" anName="Test"/>
+        <TYPE line="6" col="12" anName="Integer"/>
+      </VARIABLE>
+    </VARIABLES>
+    <TYPESECTION line="8" col="1">
+      <TYPEDECL begin_line="9" begin_col="3" end_line="9" end_col="26" anName="TEnum">
+        <TYPE line="9" col="11" anType="Enum">
+          <IDENTIFIER line="9" col="12" anName="first"/>
+          <IDENTIFIER line="9" col="19" anName="second"/>
+        </TYPE>
+      </TYPEDECL>
+    </TYPESECTION>
+    <METHOD begin_line="12" begin_col="1" end_line="14" end_col="1" anKind="Procedure">
+      <NAME line="12" col="11" anName="Globall">
+        <NAME line="12" col="11" anName="Globall"/>
+      </NAME>
+    </METHOD>
+  </INTERFACE>
+  <IMPLEMENTATION begin_line="14" begin_col="1" end_line="20" end_col="1">
+    <METHOD begin_line="16" begin_col="1" end_line="20" end_col="1" anKind="procedure">
+      <NAME line="16" col="11" anName="Globall">
+        <NAME line="16" col="11" anName="Globall"/>
+      </NAME>
+      <STATEMENTS begin_line="17" begin_col="1" end_line="18" end_col="4" anKind="Begin"/>
+    </METHOD>
+  </IMPLEMENTATION>
+  <INITIALIZATION begin_line="20" begin_col="1" end_line="23" end_col="1">
+    <STATEMENTS begin_line="23" begin_col="1" end_line="23" end_col="1"/>
+  </INITIALIZATION>
+  <FINALIZATION begin_line="23" begin_col="1" end_line="24" end_col="1">
+    <STATEMENTS begin_line="24" begin_col="1" end_line="24" end_col="1"/>
+  </FINALIZATION>
+</UNIT>

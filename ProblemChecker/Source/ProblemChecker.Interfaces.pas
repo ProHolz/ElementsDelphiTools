@@ -11,10 +11,11 @@ type
   end;
 
   ISyntaxNodeSolver = interface
-  // Deafults
+  // Defaults
    method getNode(aNodetype: TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNode;
    method getNodeArray(aNodetype: TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNodeList;
    method getNodeArrayAll(aNodetypes: array of TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNodeList;
+   method getNodeGlobArray(aNodetype: TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNodeList;
 
   // Helper
     method getPublicTypes(const aNode: TSyntaxNode; const aTypename : String; const amatchname : Boolean = false):TSyntaxNodeList;

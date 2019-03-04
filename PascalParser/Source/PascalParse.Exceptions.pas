@@ -121,7 +121,7 @@ end;
 constructor ESyntaxError.Create(const Msg: string; aPosXY: TTokenPoint);
 begin
   FPosXY := aPosXY;
-  inherited Constructor(Msg);
+  inherited Constructor(String.Format('{0} {1} {2}',  [Msg, FPosXY.X, FPosXY.Y ]));
 
 end;
 

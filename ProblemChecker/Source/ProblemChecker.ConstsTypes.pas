@@ -28,8 +28,8 @@ type
     eVariantRecord,       // Record with Variant parts
     ePublicEnums,        // Enum Types shuld be check ScopedEnums, not done yet
     eClassDeclImpl,      // Class defined in implementation
-    eConstRecord     // Const Records with initialisation, Should be extendet with checke of not Single consts aka const array of integer
-
+    eConstRecord,     // Const Records with initialisation, Should be extendet with checke of not Single consts aka const array of integer
+    eHasResources    // Res in File
     );
 
   const
@@ -48,6 +48,7 @@ type
     'has Variant record Type',
     'has Enums in Interface (Check for Scoped Enums)',
     'has Class Declaration in Implementation',
-    'has Const Records ');
+    'has Const Records ',
+    'has Resoure inside');
 
 end.

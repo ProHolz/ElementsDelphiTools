@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<UNIT line="1" col="1" anName="TestPublic">
+  <INTERFACE begin_line="2" begin_col="1" end_line="5" end_col="1">
+    <COMPILERDIRECTIVE line="3" col="1" value="{$R *.DFM}" anType="R" anKind="*.DFM"/>
+  </INTERFACE>
+  <IMPLEMENTATION begin_line="5" begin_col="1" end_line="10" end_col="1">
+    <COMPILERDIRECTIVE line="7" col="1" value="{$R TEST.RES}" anType="R" anKind="TEST.RES"/>
+  </IMPLEMENTATION>
+</UNIT>

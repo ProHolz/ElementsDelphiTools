@@ -11,6 +11,7 @@ type
       // add your own code here
       writeLn('The magic happens here.');
       var project := new ProjectRunner("X:\Projekte\SynEdit\Packages\XE7\SynEdit_R.dpk");
+     // var project := new ProjectRunner("X:\Projekte\SynEdit\Source\SynEditMiscClasses.pas");
 
       project.Run;
       if project.Problems.Count > 0 then

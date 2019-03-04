@@ -267,28 +267,4 @@ type
     TokenID: TptTokenKind;
   end;
 
-
-
-
-method IsTokenIDJunk(const aTokenID: TptTokenKind): Boolean;
-begin
-  Result := aTokenID in [
-    TptTokenKind.ptAnsiComment,
-    TptTokenKind.ptBorComment,
-    TptTokenKind.ptCRLF,
-    TptTokenKind.ptCRLFCo,
-    TptTokenKind.ptSlashesComment,
-    TptTokenKind.ptSpace,
-    TptTokenKind.ptIfDirect,
-    TptTokenKind.ptElseDirect,
-    TptTokenKind.ptIfEndDirect,
-    TptTokenKind.ptElseIfDirect,
-    TptTokenKind.ptIfDefDirect,
-    TptTokenKind.ptIfNDefDirect,
-    TptTokenKind.ptEndIfDirect,
-    TptTokenKind.ptIfOptDirect,
-    TptTokenKind.ptDefineDirect,
-    TptTokenKind.ptScopedEnumsDirect,
-    TptTokenKind.ptUndefDirect];
-end;
 end.

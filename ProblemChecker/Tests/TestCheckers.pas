@@ -33,6 +33,7 @@ type
     method TestVariantRecord;
     method TestWithUse;
     method TestDFM;
+    method TestResource;
 
   end;
 
@@ -165,11 +166,15 @@ end;
 method TestCheckers.TestDFM;
 begin
   var toCheck := TPasSyntaxTreeBuilder.RunWithString(cUnitWithResDFM, false);
-
-  //File.WriteText('D:\Test\res.xml',  TSyntaxTreeWriter.ToXML(toCheck, true));
-
   var lchecker := new TProblem_DFM() as ISingleProbSolver;
-  Check.IsFalse( lchecker.CheckForProblem(toCheck, FSolver, self), 'Not finished yet');
+  Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
+end;
+
+method TestCheckers.TestResource;
+begin
+  var toCheck := TPasSyntaxTreeBuilder.RunWithString(cUnitWithResDFM, false);
+  var lchecker := new TProblem_RES() as ISingleProbSolver;
+   Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
 end;
 
 

@@ -311,9 +311,10 @@ begin
   unitNode: TSyntaxNode;
   usesPath: String;
   begin
-    unitNode := FindType(syntaxTree, TSyntaxNodeType.ntUnit);
-    if not assigned(unitNode) then
-      Exit;
+    //unitNode := FindType(syntaxTree, TSyntaxNodeType.ntUnit);
+    //if not assigned(unitNode) then
+      //Exit;
+    unitNode := syntaxTree;
 
     unitList := new List<String>;
     BuildUsesList(unitNode, fileName, isProject, unitList);

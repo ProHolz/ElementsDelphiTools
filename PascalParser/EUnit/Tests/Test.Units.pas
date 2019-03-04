@@ -116,6 +116,7 @@ end.
  {$DESCRIPTION 'TEST Description '}
  const c = 1;
 *)
+const
 cTestCompilerDirectives = "
 unit Test;
 interface
@@ -128,14 +129,31 @@ end.
 
 ";
 
-cTestEmptyUnit = "
+const
+cTestEmptyUnit =
+"unit Test;
+interface
+implementation
+end.";
+
+
+const
+ctestSyn = "
+
 unit Test;
 interface
+type
+  TSynSelectedColor = class(TPersistent)
+  public
+   procedure WMGetDlgCode(var Message: TMessage); message WM_GETDLGCODE;
+  end;
 
-implementation
+ implementation
 end.
 
-";
+"
+;
+
 
 
 end.
