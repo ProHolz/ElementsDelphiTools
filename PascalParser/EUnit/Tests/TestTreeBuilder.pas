@@ -8,15 +8,17 @@ uses
 type
   TestTreeBuilder = public class(Test)
   private
+    // Only used internal for FW
+    method TestSynEditUnitFromFile;
 
     method FirstTest;
     method TestCompilerVersions;
-
     method TestCompilerDirectives;
-  public
-
     method TestSynEditUnit;
-    method TestSynEditUnitFromFile;
+    method TestVariantRecord;
+   public
+
+    method TestConstArrays;
   end;
 
 implementation
@@ -88,6 +90,32 @@ begin
     on E : Exception do
       Assert.Fail(E.Message);
   end;
+end;
+
+method TestTreeBuilder.TestVariantRecord;
+begin
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+
+  try
+    Builder.RunWithString(ctestVariantRecord );
+  except
+    on E : Exception do
+      Assert.Fail(E.Message);
+  end;
+end;
+
+method TestTreeBuilder.TestConstArrays;
+begin
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+  Var Root := Builder.RunWithString(cTestArray );
+
+  Var lConsts := Root.FindInterfaceNodes(TSyntaxNodeType.ntConstants);
+  Assert.AreEqual(length(lConsts), 1);
+  Assert.AreEqual(lConsts[0].ChildCount, 2);
+  Var const1 := lConsts[0].ChildNodes[0];
+  Var const2 := lConsts[0].ChildNodes[1];
+  Check.IsNotNil(const1.FindNode(TSyntaxNodeType.ntValue).FindNode(TSyntaxNodeType.ntExpression));
+  Check.IsNotNil(const2.FindNode(TSyntaxNodeType.ntValue).FindNode(TSyntaxNodeType.ntExpression));
 end;
 
 end.

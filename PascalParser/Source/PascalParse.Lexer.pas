@@ -76,6 +76,7 @@ type
 
   TmwSimplePasPar = public class(Object)
   private
+
     FLexer: TmwPasLex;
     FInterfaceOnly: Boolean;
     FLastNoJunkPos: Integer;
@@ -417,6 +418,7 @@ type
     method VariantIdentifier; virtual;
     method RecordVariantSection; virtual;
     method RecordVariantTag; virtual;
+    method RecordVariantSectionIdentifier; virtual;
     method VarParameter; virtual;
     method VarName; virtual;
     method VarNameList; virtual;
@@ -2176,8 +2178,16 @@ end;
       begin
         Identifier;
         if (TokenID = TptTokenKind.ptColon) then
-          Identifier;
+          RecordVariantSectionIdentifier;
       end;
+
+      method TmwSimplePasPar.RecordVariantSectionIdentifier;
+      begin
+        NextToken;
+        Identifier;
+
+      end;
+
       method TmwSimplePasPar.RecordVariantSection;
       begin
         Expected(TptTokenKind.ptCase);

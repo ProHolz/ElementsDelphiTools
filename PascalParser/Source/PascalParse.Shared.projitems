@@ -30,5 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ProjectIndexer.ParserProblems.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)ProjectIndexer.ParsedUnits.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)ProjectIndexer.SearchPaths.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)PascalParse.EnumTokenHelper.pas" />
   </ItemGroup>
 </Project>

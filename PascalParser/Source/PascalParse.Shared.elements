@@ -4,8 +4,6 @@
     <ProjectGuid>{597FB294-A480-4BC1-9C5B-768828A1D2E5}</ProjectGuid>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
     <RootNamespace>PascalParser</RootNamespace>
-  </PropertyGroup>
-  <PropertyGroup>
     <RootNamespace>PascalParser</RootNamespace>
   </PropertyGroup>
   <Import Project="PascalParse.Shared.projitems" Label="Shared" />

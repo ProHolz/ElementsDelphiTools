@@ -47,162 +47,163 @@ Known Issues:
 namespace PascalParser;
 type
   TSyntaxNodeType = public enum (
-    ntAddr,
+    ntAddr, //unary
     ntDoubleAddr,
-    ntDeref,
+    ntDeref, // Expression
     ntGeneric,
-    ntIndexed,
-    ntDot,
-    ntCall,
-    ntUnaryMinus,
-    ntNot,
-    ntMul,
-    ntFDiv,
-    ntDiv,
-    ntMod,
-    ntAnd,
-    ntShl,
-    ntShr,
-    ntAs,
-    ntAdd,
-    ntSub,
-    ntOr,
-    ntXor,
-    ntEqual,
-    ntNotEqual,
-    ntLower,
-    ntGreater,
-    ntLowerEqual,
-    ntGreaterEqual,
-    ntIn,
-    ntIs,
+    ntIndexed, //Expression
+    ntDot, // Expression
+    ntCall, // Expression Statement
+    ntUnaryMinus, //unary
+    ntNot, //unary
+    ntMul, //Operator
+    ntFDiv, //Operator
+    ntDiv, //Operator
+    ntMod, //Operator
+    ntAnd, //Operator
+    ntShl, //Operator
+    ntShr, //Operator
+    ntAs, // Expression
+
+    ntAdd, //Operator
+    ntSub, //Operator
+    ntOr, //Operator
+    ntXor, //Operator
+    ntEqual, //Operator
+    ntNotEqual, //Operator
+    ntLower, //Operator
+    ntGreater, //Operator
+    ntLowerEqual, //Operator
+    ntGreaterEqual, //Operator
+    ntIn, //Operator
+    ntIs, //Operator
 
   //Allow the use of [ntStrictPrivate..ntAutomated].
-    ntStrictPrivate,
-    ntPrivate,
-    ntStrictProtected,
-    ntProtected,
-    ntPublic,
-    ntPublished,
-    ntAutomated,
+    ntStrictPrivate, // Visibility
+    ntPrivate, // Visibility
+    ntStrictProtected, // Visibility
+    ntProtected, // Visibility
+    ntPublic, // Visibility
+    ntPublished, // Visibility
+    ntAutomated, // Visibility
 
-    ntUnknown,
-    ntAlignmentParam,
-    ntAnonymousMethod,
-    ntAnonymousMethodType,
-    ntArguments,
-    ntAsmFragment,
-    ntAsmStatement,
-    ntAssign,
-    ntAt,
-    ntAttribute,
-    ntAttributes,
-    ntBounds,
-    ntCase,
-    ntCaseElse,
-    ntCaseLabel,
-    ntCaseLabels,
-    ntCaseSelector,
+    ntUnknown, // unknown Operator
+    ntAlignmentParam, // Dont now check.....
+    ntAnonymousMethod, // Anonymous
+    ntAnonymousMethodType, // Anonymous
+    ntArguments, // Attribute
+    ntAsmFragment, // Asm
+    ntAsmStatement, // Asm
+    ntAssign, // Statement
+    ntAt, // Expression
+    ntAttribute, // Attribute
+    ntAttributes, // Attribute
+    ntBounds, // Expression
+    ntCase,  // Statement
+    ntCaseElse, // Statement
+    ntCaseLabel, // Statement
+    ntCaseLabels, // Statement
+    ntCaseSelector, // Statement
     ntClassConstraint,
-    ntCompilerDirective,
-    ntConstant,
-    ntConstants,
+    ntCompilerDirective, // Fileflow
+    ntConstant,  // Typedecl
+    ntConstants, // Typedecl
     ntConstraints,
     ntConstructorConstraint,
-    ntContains,
-    ntDefault,
-    ntDependency,
+    ntContains, // Fileflow
+    ntDefault, // Type Specifier
+    ntDependency, // File Flow
     ntDeprecated,
-    ntDimension,
-    ntDownTo,
-    ntElement,
-    ntElse,
-    ntEmptyStatement,
-    ntEnum,
-    ntExcept,
-    ntExceptElse,
+    ntDimension, // Expression
+    ntDownTo,  // Statement
+    ntElement, // Expression
+    ntElse,  // Statement
+    ntEmptyStatement, // Statement
+    ntEnum, // Not used
+    ntExcept, // Statement
+    ntExceptElse, // Statement
     ntExceptionHandler,
     ntExperimental,
     ntExports,
-    ntExpression,
-    ntExpressions,
+    ntExpression, // Expression
+    ntExpressions, // Expressions
     ntExternal,
     ntExternalName,
-    ntField,
-    ntFields,
-    ntFinalization,
+    ntField, // Typedecl
+    ntFields, // Typedecl
+    ntFinalization, // FileFlow
     ntFinally,
-    ntFor,
-    ntFrom,
-    ntGoto,
-    ntGuid,
+    ntFor, // Statement
+    ntFrom, // Statement
+    ntGoto, // Expression
+    ntGuid, // Typedecl
     ntHelper,
-    ntIdentifier,
-    ntIf,
-    ntImplementation,
+    ntIdentifier, // Expression
+    ntIf, // Statement
+    ntImplementation, //FileFlow
     ntImplements,
     ntIndex,
-    ntInherited,
-    ntInitialization,
-    ntInterface,
+    ntInherited, // Statement
+    ntInitialization, // FileFlow
+    ntInterface, // FileFlow
     ntLabel,
     ntLabeledStatement,
-    ntLHS,
-    ntLibrary,
-    ntLiteral,
+    ntLHS, //Expression
+    ntLibrary, //Filflow
+    ntLiteral, //Expression
     ntMessage,
-    ntMethod,
-    ntName,
+    ntMethod, // Type decl
+    ntName, // Expression
     ntNamedArgument,
-    ntPackage,
-    ntParameter,
-    ntParameters,
+    ntPackage, // Fileflow
+    ntParameter, // Expression
+    ntParameters, // Expression
   {ntPath,}
-    ntPlatform,
+    ntPlatform, //Type specifier
     ntPositionalArgument,
-    ntProgram,
-    ntProperty,
+    ntProgram, // FileFlow
+    ntProperty, // Type decl
     ntRaise,
-    ntRead,
-    ntRecordConstant,
+    ntRead, // Expression
+    ntRecordConstant, // Expression
     ntRecordConstraint,
     ntRecordVariant,
-    ntRepeat,
+    ntRepeat, // Statement
     ntRequires,
     ntResident,
     ntResolutionClause,
-    ntResourceString,
-    ntReturnType,
-    ntRHS,
-    ntRoundClose,
-    ntRoundOpen,
-    ntSet,
-    ntStatement,
-    ntStatements,
-    ntSubrange,
-    ntThen,
-    ntTo,
-    ntTry,
-    ntType,
+    ntResourceString, // Type decl
+    ntReturnType, // Expression
+    ntRHS, // Expression
+    ntRoundClose, // Expression
+    ntRoundOpen, // Expression
+    ntSet, // Expression
+    ntStatement, // not used
+    ntStatements, // Statement
+    ntSubrange, // not used
+    ntThen, // Statement
+    ntTo, // Statement
+    ntTry, // Statement
+    ntType, // Expression
     ntTypeArgs,
-    ntTypeDecl,
+    ntTypeDecl, // Type decl
     ntTypeParam,
     ntTypeParams,
-    ntTypeSection,
-    ntValue,
-    ntVariable,
-    ntVariables,
+    ntTypeSection,// Type decl
+    ntValue, // Expression
+    ntVariable, // Type decl
+    ntVariables, // Type decl
     ntVariantSection,
     ntVariantTag,
-    ntUnit,
-    ntUses,
-    ntWhile,
-    ntWith,
-    ntWrite,
+    ntUnit, // FileFlow
+    ntUses, // FileFlow
+    ntWhile, // Statement
+    ntWith,  // Statement
+    ntWrite, // Expression
 
-    ntAnsiComment,
-    ntBorComment,
-    ntSlashesComment
+    ntAnsiComment, // Comment
+    ntBorComment, // Comment
+    ntSlashesComment // Comment
 
   );
 
@@ -267,258 +268,6 @@ type
     vchInvalidIncludeFile
   );
 
-
-(*
-  TmwPasCodeInfo = public enum(
-    ciNone,
-    ciAccessSpecifier,
-    ciAdditiveOperator,
-    ciArrayConstant,
-    ciArrayType,
-    ciAsmStatement,
-    ciBlock,
-    ciCaseLabel,
-    ciCaseSelector,
-    ciCaseStatement,
-    ciCharString,
-    ciClassClass,
-    ciClassField,
-    ciClassForward,
-    ciClassFunctionHeading,
-    ciClassHeritage,
-    ciClassMemberList,
-    ciClassMethodDirective,
-    ciClassMethodHeading,
-    ciClassMethodOrProperty,
-    ciClassMethodResolution,
-    ciClassProcedureHeading,
-    ciClassProperty,
-    ciClassReferenceType,
-    ciClassType,
-    ciClassTypeEnd,
-    ciClassVisibility,
-    ciCompoundStatement,
-    ciConstantColon,
-    ciConstantDeclaration,
-    ciConstantEqual,
-    ciConstantExpression,
-    ciConstantName,
-    ciConstantValue,
-    ciConstantValueTyped,
-    ciConstParameter,
-    ciConstructorHeading,
-    ciConstructorName,
-    ciConstSection,
-    ciContainsClause,
-    ciContainsExpression,
-    ciContainsIdentifier,
-    ciContainsStatement,
-    ciDeclarationSection,
-    ciDesignator,
-    ciDestructorHeading,
-    ciDestructorName,
-    ciDirective16Bit,
-    ciDirectiveBinding,
-    ciDirectiveCalling,
-    ciDirectiveDeprecated,
-    ciDirectiveLibrary,
-    ciDirectiveLocal,
-    ciDirectivePlatform,
-    ciDirectiveVarargs,
-    ciDispIDSpecifier,
-    ciDispInterfaceForward,
-    ciEmptyStatement,
-    ciEnumeratedType,
-    ciEnumeratedTypeItem,
-    ciExceptBlock,
-    ciExceptionBlockElseBranch,
-    ciExceptionClassTypeIdentifier,
-    ciExceptionHandler,
-    ciExceptionHandlerList,
-    ciExceptionIdentifier,
-    ciExceptionVariable,
-    ciExpliciteType,
-    ciExportedHeading,
-    ciExportsClause,
-    ciExportsElement,
-    ciExpression,
-    ciExpressionList,
-    ciExternalDirective,
-    ciExternalDirectiveThree,
-    ciExternalDirectiveTwo,
-    ciFactor,
-    ciFieldDeclaration,
-    ciFieldList,
-    ciFileType,
-    ciFormalParameterList,
-    ciFormalParameterSection,
-    ciForStatement,
-    ciForwardDeclaration,
-    ciFunctionHeading,
-    ciFunctionMethodDeclaration,
-    ciFunctionMethodName,
-    ciFunctionProcedureBlock,
-    ciFunctionProcedureName,
-    ciHandlePtCompDirect,
-    ciHandlePtDefineDirect,
-    ciHandlePtElseDirect,
-    ciHandlePtIfDefDirect,
-    ciHandlePtEndIfDirect,
-    ciHandlePtIfNDefDirect,
-    ciHandlePtIfOptDirect,
-    ciHandlePtIncludeDirect,
-    ciHandlePtResourceDirect,
-    ciHandlePtUndefDirect,
-    ciIdentifier,
-    ciIdentifierList,
-    ciIfStatement,
-    ciImplementationSection,
-    ciIncludeFile,
-    ciIndexSpecifier,
-    ciInheritedStatement,
-    ciInitializationSection,
-    ciInlineStatement,
-    ciInterfaceDeclaration,
-    ciInterfaceForward,
-    ciInterfaceGUID,
-    ciInterfaceHeritage,
-    ciInterfaceMemberList,
-    ciInterfaceSection,
-    ciInterfaceType,
-    ciLabelDeclarationSection,
-    ciLabeledStatement,
-    ciLabelId,
-    ciLibraryFile,
-    ciMainUsedUnitExpression,
-    ciMainUsedUnitName,
-    ciMainUsedUnitStatement,
-    ciMainUsesClause,
-    ciMultiplicativeOperator,
-    ciNewFormalParameterType,
-    ciNumber,
-    ciNextToken,
-    ciObjectConstructorHeading,
-    ciObjectDestructorHeading,
-    ciObjectField,
-    ciObjectForward,
-    ciObjectFunctionHeading,
-    ciObjectHeritage,
-    ciObjectMemberList,
-    ciObjectMethodDirective,
-    ciObjectMethodHeading,
-    ciObjectNameOfMethod,
-    ciObjectProcedureHeading,
-    ciObjectProperty,
-    ciObjectPropertySpecifiers,
-    ciObjectType,
-    ciObjectTypeEnd,
-    ciObjectVisibility,
-    ciOldFormalParameterType,
-    ciOrdinalIdentifier,
-    ciOrdinalType,
-    ciOutParameter,
-    ciPackageFile,
-    ciParameterFormal,
-    ciParameterName,
-    ciParameterNameList,
-    ciParseFile,
-    ciPointerType,
-    ciProceduralDirective,
-    ciProceduralType,
-    ciProcedureDeclarationSection,
-    ciProcedureHeading,
-    ciProcedureMethodDeclaration,
-    ciProcedureMethodName,
-    ciProgramBlock,
-    ciProgramFile,
-    ciPropertyDefault,
-    ciPropertyInterface,
-    ciPropertyName,
-    ciPropertyParameterConst,
-    ciPropertyParameterList,
-    ciPropertySpecifiers,
-    ciQualifiedIdentifier,
-    ciQualifiedIdentifierList,
-    ciRaiseStatement,
-    ciReadAccessIdentifier,
-    ciRealIdentifier,
-    ciRealType,
-    ciRecordConstant,
-    ciRecordFieldConstant,
-    ciRecordType,
-    ciRecordVariant,
-    ciRelativeOperator,
-    ciRepeatStatement,
-    ciRequiresClause,
-    ciRequiresIdentifier,
-    ciResolutionInterfaceName,
-    ciResourceDeclaration,
-    ciReturnType,
-    ciSEMICOLON,
-    ciSetConstructor,
-    ciSetElement,
-    ciSetType,
-    ciSimpleExpression,
-    ciSimpleStatement,
-    ciSimpleType,
-    ciSkipAnsiComment,
-    ciSkipBorComment,
-    ciSkipSlashesComment,
-    ciSkipSpace,
-    ciSkipCRLFco,
-    ciSkipCRLF,
-    ciStatement,
-    ciStatementList,
-    ciStorageExpression,
-    ciStorageIdentifier,
-    ciStorageDefault,
-    ciStorageNoDefault,
-    ciStorageSpecifier,
-    ciStorageStored,
-    ciStringIdentifier,
-    ciStringStatement,
-    ciStringType,
-    ciStructuredType,
-    ciSubrangeType,
-    ciTagField,
-    ciTagFieldName,
-    ciTagFieldTypeName,
-    ciTerm,
-    ciTryStatement,
-    ciTypedConstant,
-    ciTypeDeclaration,
-    ciTypeId,
-    ciTypeKind,
-    ciTypeName,
-    ciTypeSection,
-    ciUnitFile,
-    ciUnitId,
-    ciUsedUnitName,
-    ciUsedUnitsList,
-    ciUsesClause,
-    ciVarAbsolute,
-    ciVarEqual,
-    ciVarDeclaration,
-    ciVariable,
-    ciVariableList,
-    ciVariableReference,
-    ciVariableTwo,
-    ciVariantIdentifier,
-    ciVariantSection,
-    ciVarParameter,
-    ciVarSection,
-    ciVisibilityAutomated,
-    ciVisibilityPrivate,
-    ciVisibilityProtected,
-    ciVisibilityPublic,
-    ciVisibilityPublished,
-    ciVisibilityUnknown,
-    ciWhileStatement,
-    ciWithStatement,
-    ciWriteAccessIdentifier
-  );
-
-*)
 
 
 end.
