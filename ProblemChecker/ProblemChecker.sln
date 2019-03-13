@@ -1,6 +1,8 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # RemObjects Water
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Shared", "..\PascalParser\Source\PascalParse.Shared.elements", "{597FB294-A480-4BC1-9C5B-768828A1D2E5}"
+EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Problemchecker.Net", "Source\Problemchecker.Net.elements", "{7D40B9FE-B3E1-4AF9-B480-A71AEEE5F130}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "ProblemChecker.Shared", "Source\ProblemChecker.Shared.elements", "{890D978F-D98E-406A-9829-218266347D0D}"

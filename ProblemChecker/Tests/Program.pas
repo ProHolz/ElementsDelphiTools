@@ -9,7 +9,7 @@ uses
 implementation
 
 begin
- //WriteoutConstxml;
+// WriteoutConstxml;
 
   var lTests := Discovery.DiscoverTests();
   Runner.RunTests(lTests) withListener(Runner.DefaultListener);

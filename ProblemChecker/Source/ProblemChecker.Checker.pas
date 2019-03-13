@@ -120,7 +120,7 @@ end;
 
 method TProblem_Enums.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
 begin
-  var Lenums := NodeSolver.getPublicTypes(syntaxTree,'enum', true);
+  var Lenums := NodeSolver.getPublicTypes(syntaxTree,'enum', false);
    // Todo add Check for ScopedEnums
   result := Lenums.Count > 0;
   if result then

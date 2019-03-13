@@ -121,6 +121,65 @@ implementation
 end.
 ";
 
+
+ctestVariantRecord ="
+unit Test;
+interface
+type
+  TSQLVar = record
+    case VType: STQLDBFieldType of
+    ftInt64: (
+      VInt64: Int64);
+    ftDouble: (
+      VDouble: double);
+    ftDate: (
+      VDateTime: TDateTime);
+    ftCurrency: (
+      VCurrency: Currency);
+    ftUTF8: (
+      VText: PUTF8Char);
+    ftBlob: (
+      VBlob: pointer;
+      VBlobLen: Integer)
+  end;
+
+ TSQLVarVType = record
+  VSingle : TSQLDBFieldType;
+   case TSQLDBFieldType of
+    ftInt64: (
+      VInt64: Int64);
+    ftDouble: (
+      VDouble: double);
+    ftDate: (
+      VDateTime: TDateTime);
+    ftCurrency: (
+      VCurrency: Currency);
+    ftUTF8: (
+      VText: PUTF8Char);
+    ftBlob: (
+      VBlob: pointer;
+      VBlobLen: Integer)
+  end;
+
+ implementation
+end.
+";
+
+
+cTestArray = "
+unit Test;
+interface
+const
+SimpleIntArray : Array[0..2] of Integer = (0, 1,2);
+
+SimpleIntArray2 : Array[0..2] of Integer = (1 shl 2 -1, 1,2);
+
+ implementation
+end.
+";
+
+
+
 method WriteoutConstxml;
 begin
   var temp := TPasSyntaxTreeBuilder.RunWithString(cUnitWithResDFM, false);
@@ -135,6 +194,15 @@ begin
 
   temp := TPasSyntaxTreeBuilder.RunWithString(cConstVarRec, false);
   File.WriteText('X:\Elements\ElementsDelphiTools\ProblemChecker\Tests\XML\cConstVarRec.xml' , TSyntaxTreeWriter.ToXML(temp, true));
+
+
+  temp := TPasSyntaxTreeBuilder.RunWithString(ctestVariantRecord, true);
+  File.WriteText('X:\Elements\ElementsDelphiTools\ProblemChecker\Tests\XML\ctestVariantRecord.xml' , TSyntaxTreeWriter.ToXML(temp, true));
+
+  temp := TPasSyntaxTreeBuilder.RunWithString(cTestArray, true);
+  File.WriteText('X:\Elements\ElementsDelphiTools\ProblemChecker\Tests\XML\cTestArray.xml' , TSyntaxTreeWriter.ToXML(temp, true));
+
+
 
 end;
 

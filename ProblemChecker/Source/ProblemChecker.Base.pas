@@ -32,12 +32,12 @@ begin
   var lClasses := getNodeArrayAll(if aInterface then cPublicTypesInterface else cPublicTypesImplementation, aNode);
   for lClass in lClasses do
     begin
-    if String.EqualsIgnoringCaseInvariant(
+    if String.EqualsIgnoringCase(
     lClass.GetAttribute(if amatchname then TAttributeName.anName else TAttributeName.anType),
      aTypename) then
       result.Add(lClass);
 
-    if String.EqualsIgnoringCaseInvariant(
+    if String.EqualsIgnoringCase(
     lClass.FindNode(TSyntaxNodeType.ntName):GetAttribute(if amatchname then TAttributeName.anName else TAttributeName.anType),
     aTypename) then
       result.Add(lClass);
