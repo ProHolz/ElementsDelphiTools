@@ -7,12 +7,14 @@ uses PascalParser;
 type
   CodeBuilderMethods = static partial class
   private
+
+    method PrepareTypeExpression(const node: TSyntaxNode): CGExpression;
     method PrepareListExpression(const node: TSyntaxNode): CGExpression;
     method PrepareSetExpression(const node: TSyntaxNode): CGExpression;
     method PrepareAsExpression(const node: TSyntaxNode): CGExpression;
     method PrepareDeRefExpression(const node: TSyntaxNode): CGExpression;
     method PrepareIndexedExpression(const node: TSyntaxNode): CGExpression;
-    method PrepareDotString(const node: TSyntaxNode): String;
+
     method PrepareDotValue(const node: TSyntaxNode): CGExpression;
 
     method PrepareUnaryOp(const node: TSyntaxNode): CGExpression;
@@ -98,29 +100,18 @@ end;
 method CodeBuilderMethods.PrepareCallExpression(node: TSyntaxNode): CGExpression;
 begin
   result := nil;
-  // Search name
-  var identifier := node.FindNode(TSyntaxNodeType.ntIdentifier):AttribName;
-  if String.IsNullOrEmpty(identifier) then
-   // Search Type
-    identifier := node.FindNode(TSyntaxNodeType.ntType):AttribName;
-  // Maybe dotet name
-  if String.IsNullOrEmpty(identifier) then
-  begin
-    if node.ChildNodes[0].Typ = TSyntaxNodeType.ntDot then
-      identifier := PrepareDotString(node.ChildNodes[0]);
-  end;
 
-  if not String.IsNullOrEmpty(identifier) then
+  var lCall := PrepareSingleExpressionValue(node.ChildNodes[0]);
+  var expressions := node.FindNode(TSyntaxNodeType.ntExpressions);
+  if assigned(expressions) then
   begin
-
-    result := new CGMethodCallExpression(nil, identifier);
-    var expressions := node.FindNode(TSyntaxNodeType.ntExpressions);
-    if expressions <> nil then
+    result := new CGMethodCallExpression(lCall, '');
       for each lexpression in PrepareCallExpressions(expressions) do
         (result as CGMethodCallExpression).Parameters.Add(lexpression.AsCallParameter);
   end
   else
-   result := PrepareSingleExpressionValue(node.ChildNodes[0]);
+    exit lCall;
+
 end;
 
 method CodeBuilderMethods.PrepareCallExpressions(expressions: TSyntaxNode): Array of CGExpression;
@@ -156,32 +147,24 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareDotString(const node: TSyntaxNode): String;
-begin
-  Var s : String := nil;
-  Var Dot : String := '';
-  for each child in node.ChildNodes.where(Item->Item.Typ=TSyntaxNodeType.ntIdentifier) do
-    begin
-    s := s + Dot+child.AttribName;
-    Dot := '.';
-  end;
 
-  for each child in node.ChildNodes.where(Item->Item.Typ=TSyntaxNodeType.ntDot) do
-    begin
-    s := s + Dot+PrepareDotString(child);
-  end;
-
-  exit  s;
-end;
 
 method CodeBuilderMethods.PrepareDotValue(const node: TSyntaxNode): CGExpression;
 begin
-  {$HINT "not solved"}
-  var s := PrepareDotString(node);
-  if not String.IsNullOrEmpty(s) then
-  exit  s.AsNamedIdentifierExpression
+
+  if node.ChildCount=2 then
+  begin
+    var lLeft := PrepareSingleExpressionValue(node.ChildNodes[0]);
+    var lRight := PrepareSingleExpressionValue(node.ChildNodes[1]);
+    if assigned(lLeft) and assigned(lRight) then
+     exit new CGDotNameExpression(lLeft, lRight)
+    else
+    raise new Exception("DOT Expression not solved");
+  end
   else
-    exit  new CGNamedIdentifierExpression('======PrepareDotValue=======');
+    raise new Exception("DOT Expression not solved");
+
+  //  exit  new CGNamedIdentifierExpression('======PrepareDotValue=======');
 end;
 
 
@@ -252,6 +235,15 @@ begin
 end;
 
 
+method CodeBuilderMethods.PrepareTypeExpression(const node : Tsyntaxnode) : CGExpression;
+begin
+  exit new CGNamedIdentifierExpression(node.AttribName);
+end;
+
+
+
+
+
 method CodeBuilderMethods.PrepareSingleExpressionValue(const node: TSyntaxNode): CGExpression;
 begin
   if node = nil then exit nil;
@@ -287,13 +279,13 @@ begin
       TSyntaxNodeType.ntIndexed : exit  PrepareIndexedExpression(node);
       TSyntaxNodeType.ntDeref : exit  PrepareDeRefExpression(node);
 
-
+      TSyntaxNodeType.ntType : exit PrepareTypeExpression(node);// new CGNamedIdentifierExpression('======ntType=======');
       TSyntaxNodeType.ntIn : exit  new CGNamedIdentifierExpression('======ntIn=======');
-      TSyntaxNodeType.ntInherited : exit  new CGNamedIdentifierExpression('======ntInherited=======');
+      TSyntaxNodeType.ntInherited : exit  PrepareInheritedStatement(node);
       TSyntaxNodeType.ntGoto: exit new CGRawExpression('{$HINT "Goto '+node.ChildNodes[0].AttribName+' not Supported"}');
 
       TSyntaxNodeType.ntRecordConstant : exit  new CGNamedIdentifierExpression('======RecordConstant=======');
-
+      TSyntaxNodeType.ntAnonymousMethod : exit  PrepareAnonymousMethod(node);
       else raise new Exception(node.Typ.ToString+  '=======Unknown Paramtype in PrepareSingleExpressionValue =======');
 
     end;

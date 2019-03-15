@@ -12,11 +12,11 @@ begin
   if Environment.OS = OperatingSystem.Windows then
   File.WriteText(String.Format('d:\Test\{0}.xml', TestName),   TSyntaxTreeWriter.ToXML(Root, true));
   var lUnit := new CodeBuilder().BuildCGCodeUnitFomSyntaxNode(Root);
-   var cg := new CGDelphiCodeGenerator();
-  // var cg := new CGOxygeneCodeGenerator();
+  // var cg := new CGDelphiCodeGenerator();
+   var cg := new CGOxygeneCodeGenerator();
  // var cg2 := new CGCSharpCodeGenerator();
   //var cg := new CGCPlusPlusCPPCodeGenerator();
-  //var cg := new CGSwiftCodeGenerator();
+//  var cg2 := new CGSwiftCodeGenerator();
   //var cg := new CGGoCodeGenerator();
 
   result := cg.GenerateUnit(lUnit);
@@ -27,17 +27,25 @@ begin
 end;
 
 
-method BuildPasfromNode : String;
+method BuildPasfromNode(full : Boolean) : String;
 begin
   Var sb := new StringBuilder();
+  if full then
+  begin
   Var s := File.ReadText("D:\sourceProHolz\Abbund170\Synopse\SynCommons.pas");
   sb.Append(BuildInterfaceTest(s, 'SynCommons'));
   sb.AppendLine.Append('{Next File}').AppendLine;
-
+  end;
 
 
   //sb.Append(BuildInterfaceTest(TestTypes, 'TestTypes'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
+
+
+
+  //sb.Append(BuildInterfaceTest(TestAnonymous, 'TestAnonymous'));
+  //sb.AppendLine.Append('{Next File}').AppendLine;
+
 
    //sb.Append(BuildInterfaceTest(TestSetAndEnums, 'TestSetAndEnums'));
    //sb.AppendLine.Append('{Next File}').AppendLine;
@@ -47,8 +55,8 @@ begin
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
-  sb.Append(BuildInterfaceTest(TestExceptions, 'TestExceptions'));
-  sb.AppendLine.Append('{Next File}').AppendLine;
+  //sb.Append(BuildInterfaceTest(TestExceptions, 'TestExceptions'));
+  //sb.AppendLine.Append('{Next File}').AppendLine;
 
   //sb.Append(BuildInterfaceTest(TestConstArray, 'TestConstArray'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
@@ -60,8 +68,7 @@ begin
 
   //sb.Append(BuildInterfaceTest(TestAll, 'TestAll'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
-  //sb.Append(BuildInterfaceTest(TestUnit2, 'TestUnit2'));
-  //sb.AppendLine.Append('{Next File}').AppendLine;
+
 
   //sb.Append(BuildInterfaceTest(TestMethods, 'TestMethods'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
@@ -69,6 +76,13 @@ begin
   //sb.Append(BuildInterfaceTest(Testrecord, 'Testrecord'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
+
+  sb.Append(BuildInterfaceTest(TestGeneric, 'TestGeneric'));
+  sb.AppendLine.Append('{Next File}').AppendLine;
+
+
+// sb.Append(BuildInterfaceTest(TestUnit2, 'TestUnit2'));
+  //sb.AppendLine.Append('{Next File}').AppendLine;
 
   result := sb.ToString;
  // File.WriteText(String.Format('d:\Test\{0}.pas','AllinOne'),   result);

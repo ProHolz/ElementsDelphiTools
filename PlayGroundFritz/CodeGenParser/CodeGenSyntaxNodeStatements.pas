@@ -8,11 +8,12 @@ type
 
   CodeBuilderMethods = static partial class
   private
+    method PrepareLabaledStatement(const node: TSyntaxNode): CGStatement;
     method PrepareWithStatement(const node: TSyntaxNode): CGStatement;
     method PrepareRaiseStatement(const node: TSyntaxNode): CGStatement;
     method PrepareExceptionBlocksList(const node: TSyntaxNode): List<CGCatchBlockStatement>;
     method PrepareTryStatement(const node: TSyntaxNode): CGStatement;
-    method PrepareInheritedStatement(const node: TSyntaxNode): CGStatement;
+    method PrepareInheritedStatement(const node: TSyntaxNode): CGExpression;
     method PrepareRepeatStatement(const node: TSyntaxNode): CGStatement;
     method PrepareWhileStatement(const node: TSyntaxNode): CGStatement;
     method PrepareForStatement(const node: TSyntaxNode): CGStatement;
@@ -59,7 +60,7 @@ begin
         Var lTemp2 := PrepareSingleExpressionValue(child.ChildNodes[1]);
         if assigned(lTemp) and assigned(lTemp2) then
         begin
-          var lres := new CGArrayLiteralExpression(lTemp as not nullable, lTemp2 as not nullable);
+          var lres := new CGRangeExpression(lTemp as not nullable, lTemp2 as not nullable);
 
           result.Add(lres);
         end;
@@ -184,24 +185,24 @@ begin
   // ntFrom
   // ntTo
   // and a Statement
-    for each child in node.ChildNodes do
+  for each child in node.ChildNodes do
     begin
 
-      case child.Typ of
-        TSyntaxNodeType.ntIdentifier : lFromvar := child.AttribName;
-        TSyntaxNodeType.ntFrom : lFrom := PrepareSingleExpressionValue(child.ChildNodes[0]);
-        TSyntaxNodeType.ntTo : lTo := PrepareSingleExpressionValue(child.ChildNodes[0]);
-        TSyntaxNodeType.ntDownTo : begin
-            lTo := PrepareSingleExpressionValue(child.ChildNodes[0]);
-            Down := true;
-        end;
-        TSyntaxNodeType.ntIn : lin := PrepareSingleExpressionValue(child.ChildNodes[0]);
+    case child.Typ of
+      TSyntaxNodeType.ntIdentifier : lFromvar := child.AttribName;
+      TSyntaxNodeType.ntFrom : lFrom := PrepareSingleExpressionValue(child.ChildNodes[0]);
+      TSyntaxNodeType.ntTo : lTo := PrepareSingleExpressionValue(child.ChildNodes[0]);
+      TSyntaxNodeType.ntDownTo : begin
+        lTo := PrepareSingleExpressionValue(child.ChildNodes[0]);
+        Down := true;
       end;
+      TSyntaxNodeType.ntIn : lin := PrepareSingleExpressionValue(child.ChildNodes[0]);
+    end;
      // The lastone will win
-      if child.Typ.isStatement then
+    if child.Typ.isStatement then
       lStatement := PrepareStatement(child);
 
-    end;
+  end;
 
 // Check the type of the Loop
   if (not String.IsNullOrEmpty(lFromvar)) and assigned(lFrom) and assigned(lTo) and assigned(lStatement) then
@@ -254,11 +255,12 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareInheritedStatement(const node: TSyntaxNode): CGStatement;
+method CodeBuilderMethods.PrepareInheritedStatement(const node: TSyntaxNode): CGExpression;
 begin
   if node.ChildCount > 0 then
   begin
-    exit BuildCommentFromNode('inherited with Call is not supported', node, true);
+    var lCall := PrepareSingleExpressionValue(node.ChildNodes[0]);
+    exit new CGInheritedExpression(lCall);
   end else
     exit new CGInheritedExpression();
 end;
@@ -267,12 +269,12 @@ method CodeBuilderMethods.PrepareExceptionBlocksList(const node: TSyntaxNode): L
 begin
   result := new List<CGCatchBlockStatement>;
   for each child in node.FindNodes(TSyntaxNodeType.ntExceptionHandler) do
-  begin
+    begin
     var lVariable := child.FindNode(TSyntaxNodeType.ntVariable);
 
     var lblock := if assigned(lVariable) then
     new CGCatchBlockStatement(lVariable.FindNode(TSyntaxNodeType.ntName):AttribName,
-                                            lVariable.FindNode(TSyntaxNodeType.ntType):AttribName.AsTypeReference)
+                                             PrepareTypeRef(lVariable.FindNode(TSyntaxNodeType.ntType)))
   else new CGCatchBlockStatement();
 
     var lStatement := PrepareStatementList(child.FindNode(TSyntaxNodeType.ntStatements));
@@ -285,13 +287,13 @@ begin
   begin
     var lExceptElse := PrepareStatementList(lElse.ChildNodes[0]);
     if lExceptElse.Count > 0 then
-     begin
+    begin
 
       var ltempBlock := new CGCatchBlockStatement('ELSE', 'Exception'.AsTypeReference);
       ltempBlock.Statements.Add('{$Hint "ELSEPART inserted as Exceptblock (Needs check)"}'.AsRawExpression);
       ltempBlock.Statements.Add(lExceptElse);
       result.Add(ltempBlock);
-     end;
+    end;
   end;
 
 
@@ -307,110 +309,145 @@ begin
 
 
   for each child in node.ChildNodes do
-      case child.Typ of
-        TSyntaxNodeType.ntExcept : begin
-              lExceptBlocks := PrepareExceptionBlocksList(child);
-              if lExceptBlocks.Count = 0 then
-                lExceptStatements := PrepareStatementList(child.ChildNodes[0]);
+    case child.Typ of
+      TSyntaxNodeType.ntExcept : begin
+          lExceptBlocks := PrepareExceptionBlocksList(child);
+          if lExceptBlocks.Count = 0 then
+            lExceptStatements := PrepareStatementList(child.ChildNodes[0]);
 
-            end;
+        end;
 
         TSyntaxNodeType.ntFinally : lFinally := PrepareStatementList(child.ChildNodes[0]);
         TSyntaxNodeType.ntStatements : lTryStatement := PrepareStatementList(child);
       end;
 
-  if  assigned(lTryStatement)  then
-  begin
+    if  assigned(lTryStatement)  then
+    begin
 
 // Check the type of the Loop is the FinallyStatement when the Count > 0
-  if  assigned(lFinally) and (lFinally.Count > 0) then
-  begin
-    var lTemp :=  new CGTryFinallyCatchStatement(lTryStatement);
-    lTemp.FinallyStatements.Add(lFinally);
-    exit lTemp;
-  end
-  else
-    if  assigned(lExceptBlocks) and (lExceptBlocks.Count > 0) then
-    begin
-      var lTemp :=  new CGTryFinallyCatchStatement(lTryStatement);
-      lTemp.CatchBlocks.Add(lExceptBlocks);
-
-      exit lTemp;
-    end
-   else
-      if  assigned(lExceptStatements) and (lExceptStatements.Count > 0) then
+      if  assigned(lFinally) and (lFinally.Count > 0) then
       begin
         var lTemp :=  new CGTryFinallyCatchStatement(lTryStatement);
-        var ltempBlock := new CGCatchBlockStatement();
-        ltempBlock.Statements.Add(lExceptStatements);
-        lTemp.CatchBlocks.Add(ltempBlock);
+        lTemp.FinallyStatements.Add(lFinally);
         exit lTemp;
-      end;
-  end
+      end
+      else
+        if  assigned(lExceptBlocks) and (lExceptBlocks.Count > 0) then
+        begin
+          var lTemp :=  new CGTryFinallyCatchStatement(lTryStatement);
+          lTemp.CatchBlocks.Add(lExceptBlocks);
 
-end;
+          exit lTemp;
+        end
+        else
+          if  assigned(lExceptStatements) and (lExceptStatements.Count > 0) then
+          begin
+            var lTemp :=  new CGTryFinallyCatchStatement(lTryStatement);
+            var ltempBlock := new CGCatchBlockStatement();
+            ltempBlock.Statements.Add(lExceptStatements);
+            lTemp.CatchBlocks.Add(ltempBlock);
+            exit lTemp;
+          end;
+    end
 
-method CodeBuilderMethods.PrepareRaiseStatement(const node: TSyntaxNode): CGStatement;
-begin
-  if node.HasChildren then
-  begin
-   var lexpression := PrepareSingleExpressionValue(node.ChildNodes[0]);
-  var ltemp := new CGThrowStatement(lexpression);
-  exit ltemp;//'{$Hint "Raise not Supported"}'.AsRawExpression;
-  end
-  else exit new CGThrowStatement();
-end;
-
-method CodeBuilderMethods.PrepareWithStatement(const node: TSyntaxNode): CGStatement;
-begin
-    exit '{$Hint "With Clause  not Supported"}'.AsRawExpression;
-end;
-
-
-
-method CodeBuilderMethods.PrepareStatement(const node: TSyntaxNode): CGStatement;
-begin
-  result := nil;
-  if not assigned(node) then exit nil;
-  if node.Typ.isStatement then
-  begin
-    case node.Typ of
-      TSyntaxNodeType.ntAssign : exit PrepareAssignMentStatement(node);
-      TSyntaxNodeType.ntCall : exit PrepareCallStatement(node);
-      TSyntaxNodeType.ntIf : exit PrepareIfStatement(node);
-      TSyntaxNodeType.ntStatements: exit PrepareListStatement(node);
-      TSyntaxNodeType.ntFor : exit PrepareForStatement(node);
-      TSyntaxNodeType.ntWhile: exit PrepareWhileStatement(node);
-      TSyntaxNodeType.ntRepeat: exit PrepareRepeatStatement(node);
-      TSyntaxNodeType.ntCase : exit PrepareCaseStatement(node);
-      TSyntaxNodeType.ntEmptyStatement: exit new CGEmptyStatement();
-      TSyntaxNodeType.ntInherited: exit PrepareInheritedStatement(node);
-
-      TSyntaxNodeType.ntAsmStatement :; // Do nothing
-      TSyntaxNodeType.ntWith : exit PrepareWithStatement(node);
-      TSyntaxNodeType.ntTry : exit PrepareTryStatement(node);
-      TSyntaxNodeType.ntExpression : exit PrepareExpressionStatement(node);
-      TSyntaxNodeType.ntRaise:  exit PrepareRaiseStatement(node);
-      else raise new Exception(node.Typ.ToString+  '=======Unknown type in PrepareStatement =======');
-
-    end;
-  end
-  else
-    if node.Typ.notSupported then
-      exit BuildCommentFromNode('Unsupported', node, true)
-    else
-      exit new CGCodeCommentStatement(new CGRawStatement(node.Typ.ToString+  '======= Typ not in Statement Enum ======='));
-end;
-
-method CodeBuilderMethods.BuildStatements(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
-begin
-  for each child in node.ChildNodes do //.Where(Item->Item.Typ = TSyntaxNodeType.ntStatement) do
-    begin
-    var Statement := PrepareStatement(child);
-    if assigned(Statement)  then
-      lMethod.Statements.Add(Statement);
   end;
 
-end;
+  method CodeBuilderMethods.PrepareRaiseStatement(const node: TSyntaxNode): CGStatement;
+  begin
+    if node.HasChildren then
+    begin
+      var lexpression := PrepareSingleExpressionValue(node.ChildNodes[0]);
+      var ltemp := new CGThrowStatement(lexpression);
+      exit ltemp;//'{$Hint "Raise not Supported"}'.AsRawExpression;
+    end
+    else exit new CGThrowStatement();
+  end;
+
+  method CodeBuilderMethods.PrepareWithStatement(const node: TSyntaxNode): CGStatement;
+  begin
+    if node.ChildCount = 2 then
+    begin
+
+
+      var lExpressions := node.ChildNodes[0];
+      var lEx := new List<CGExpression>;
+      for each child in lExpressions.ChildNodes do
+        lEx.Add(PrepareSingleExpressionValue(child));
+
+      var lStatement := PrepareStatement(node.ChildNodes[1]);
+
+      if assigned(lExpressions) and assigned(lStatement) then
+      begin
+        var lHint := ('{$Hint "With Statement to check"}').AsRawExpression;
+        var lWith := new CGWithStatement(lEx,lStatement as not nullable);
+        //exit lWith;
+        exit new CGSimpleBlockStatement([lHint, lWith as not nullable]);
+
+      end
+    end
+    else exit BuildCommentFromNode('PrepareWithStatement Childcount wrong', node);
+
+
+  end;
+
+  method CodeBuilderMethods.PrepareLabaledStatement(const node: TSyntaxNode): CGStatement;
+  begin
+    if node.ChildCount = 2 then
+    begin
+      var jumpName := node.ChildNodes[0].AttribName;
+      var ltemp := PrepareStatement(node.ChildNodes[1]);
+      var lHint := ('{$Hint "Labeled Statement not Supported"}').AsRawExpression;
+      var lComment := (jumpName +':').AsComment;
+
+      result := new CGSimpleBlockStatement([lHint, lComment, ltemp as not nullable]);
+    end
+    else exit BuildCommentFromNode('PrepareLabaledStatement Childcount wrong', node);
+  end;
+
+  method CodeBuilderMethods.PrepareStatement(const node: TSyntaxNode): CGStatement;
+  begin
+    result := nil;
+    if not assigned(node) then exit nil;
+    if node.Typ.isStatement then
+    begin
+      case node.Typ of
+        TSyntaxNodeType.ntAssign : exit PrepareAssignMentStatement(node);
+        TSyntaxNodeType.ntCall : exit PrepareCallStatement(node);
+        TSyntaxNodeType.ntIf : exit PrepareIfStatement(node);
+        TSyntaxNodeType.ntStatements: exit PrepareListStatement(node);
+        TSyntaxNodeType.ntFor : exit PrepareForStatement(node);
+        TSyntaxNodeType.ntWhile: exit PrepareWhileStatement(node);
+        TSyntaxNodeType.ntRepeat: exit PrepareRepeatStatement(node);
+        TSyntaxNodeType.ntCase : exit PrepareCaseStatement(node);
+        TSyntaxNodeType.ntEmptyStatement: exit new CGEmptyStatement();
+        TSyntaxNodeType.ntInherited: exit PrepareInheritedStatement(node);
+
+        TSyntaxNodeType.ntAsmStatement :; // Do nothing
+        TSyntaxNodeType.ntWith : exit PrepareWithStatement(node);
+        TSyntaxNodeType.ntTry : exit PrepareTryStatement(node);
+        TSyntaxNodeType.ntExpression : exit PrepareExpressionStatement(node);
+        TSyntaxNodeType.ntRaise:  exit PrepareRaiseStatement(node);
+        TSyntaxNodeType.ntLabeledStatement : exit PrepareLabaledStatement(node);
+        else raise new Exception(node.Typ.ToString+  '=======Unknown type in PrepareStatement =======');
+
+      end;
+    end
+    else
+      if node.Typ.notSupported then
+        exit BuildCommentFromNode('Unsupported', node, true)
+      else
+        exit new CGCodeCommentStatement(new CGRawStatement(node.Typ.ToString+  '======= Typ not in Statement Enum ======='));
+  end;
+
+  method CodeBuilderMethods.BuildStatements(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
+  begin
+    for each child in node.ChildNodes do //.Where(Item->Item.Typ = TSyntaxNodeType.ntStatement) do
+      begin
+      var Statement := PrepareStatement(child);
+      if assigned(Statement)  then
+        lMethod.Statements.Add(Statement);
+    end;
+
+  end;
 
 end.

@@ -84,6 +84,10 @@
     <Compile Include="TestUnits\TestLoops.pas" />
     <Compile Include="TestUnits\TestExceptions.pas" />
     <Compile Include="TestUnits\TestTypes.pas" />
+    <Compile Include="CodeGenParser\CodeGenSyntaxNodeTypes.pas" />
+    <Compile Include="CodeGenParser\CodeGenSyntaxNodeAnonymous.pas" />
+    <Compile Include="TestUnits\TestAnonymous.pas" />
+    <Compile Include="TestUnits\TestGeneric.pas" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <ItemGroup>

@@ -39,7 +39,7 @@ begin
     begin
     //  var ltemp := CodeBuilderMethods.BuildMethodMangledName(child);
     //  writeLn(ltemp);
-      fInterfaceMethods.add(CodeBuilderMethods.BuildMethodMangledName(child), child);
+      fInterfaceMethods.add(CodeBuilderMethods.BuildMethodMangledName(child, true), child);
     end;
 
   if assigned(implementationNode) then
@@ -47,7 +47,7 @@ begin
     begin
      // var ltemp := CodeBuilderMethods.BuildMethodMangledName(child);
     //  writeLn(ltemp);
-      fImplementationMethods.add(CodeBuilderMethods.BuildMethodMangledName(child), child);
+      fImplementationMethods.add(CodeBuilderMethods.BuildMethodMangledName(child, false), child);
     end;
 
 end;
@@ -57,7 +57,7 @@ begin
  // We must have the node in fInterfaceMethods
   if fInterfaceMethods.ContainsValue(node) then
   begin
-    var lname := CodeBuilderMethods.BuildMethodMangledName(node);
+    var lname := CodeBuilderMethods.BuildMethodMangledName(node, true);
     if not String.IsNullOrEmpty(lname) then
     begin
       if fImplementationMethods.ContainsKey(lname) then
@@ -77,7 +77,7 @@ begin
 
    if fImplementationMethods.ContainsValue(node) then
    begin
-     var lname := CodeBuilderMethods.BuildMethodMangledName(node);
+     var lname := CodeBuilderMethods.BuildMethodMangledName(node, true);
      if not String.IsNullOrEmpty(lname) then
      begin
        if fImplementationMethods.ContainsKey(lname) then
@@ -113,17 +113,22 @@ begin
 
  method CodeBuilder.BuildPointerClause(const node: TSyntaxNode);
  begin
-   Var ptype := node.FindNode(TSyntaxNodeType.ntType):FindNode(TSyntaxNodeType.ntType);
-   if ptype <> nil then
+   Var lType := node.FindNode(TSyntaxNodeType.ntType);
+   if assigned(lType) then
    begin
-     var lclass := new CGTypeAliasDefinition(node.AttribName, new CGPointerTypeReference(ptype.AttribName.asTypeReference));
+     var lRef := CodeBuilderMethods.PrepareTypeRef(lType.FindNode(TSyntaxNodeType.ntType));
+     var lclass := new CGTypeAliasDefinition(node.AttribName, new CGPointerTypeReference(lRef));
      fUnit.Types.Add(lclass);
    end;
+
  end;
 
  method CodeBuilder.BuildGlobMethodClause(const node: TSyntaxNode; const ispublic: Boolean);
  begin
-   fUnit.Globals.Add(CodeBuilderMethods.BuildGlobMethod(node, ispublic));
+   var lTemp := CodeBuilderMethods.BuildGlobMethod(node, ispublic);
+   if assigned(lTemp) then
+    fUnit.Globals.Add(lTemp) else
+    assert(false, 'Method not solved');
  end;
 
  method CodeBuilder.BuildConstantsClause(const node: TSyntaxNode; const ispublic: Boolean);

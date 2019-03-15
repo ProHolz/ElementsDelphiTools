@@ -5,13 +5,15 @@ type
   CodeBuilderDefaultTypes = static class
 
   public
+    method GetDefaultType(const typename : String) : CGTypeReference;
     method GetType(const typename : String) : CGTypeReference;
+    method isDefaultType(const typename : String) : Boolean;
   end;
 
 implementation
 
+method CodeBuilderDefaultTypes.GetDefaultType(const typename: String): CGTypeReference;
 
-method CodeBuilderDefaultTypes.GetType(const typename:  String): CGTypeReference;
 begin
   case typename.ToLower of
   // 8 Bit
@@ -40,11 +42,31 @@ begin
 
     // Floats
     'single' : result:= CGPredefinedTypeReference.Single;
+    'real',
+    'real48',
     'extended',
     'double' : result:= CGPredefinedTypeReference.Double;
+
+    'string' : result := CGPredefinedTypeReference.String;
+    'char' : result := CGPredefinedTypeReference.UTF16Char;
+    'ansichar' : result := CGPredefinedTypeReference.AnsiChar;
+
+
      else
-       result := typename.asTypeReference;
+       result := nil;
    end;
+end;
+
+method CodeBuilderDefaultTypes.GetType(const typename:  String): CGTypeReference;
+begin
+  result := GetDefaultType(typename);
+  if not assigned(result) then
+    result := typename.asTypeReference;
+end;
+
+method CodeBuilderDefaultTypes.isDefaultType(const typename: String): Boolean;
+begin
+ result := GetDefaultType(typename) <> nil;
 end;
 
 end.

@@ -315,7 +315,7 @@ begin
          if (d > 0) and (d < Laenge) then
             A := A + [d];
          A := A + [Laenge];
-         TArray.Sort<Double>(A);
+         TArray.Sort<Double, Integer>(A);
          if length(A) > 1 then
             begin
                k.p2 := k.p1 + lp.Norm * A[0,3];

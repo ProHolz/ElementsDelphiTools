@@ -13,6 +13,7 @@ interface
   Test_record = record
    private
      fData : integer;
+     fTemp : Tarray<string>;
     function GetData : integer;
    public
     constructor Create(aData : Integer);

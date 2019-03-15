@@ -8,10 +8,14 @@ type
 
   CodeBuilderMethods = static partial class
   private
+    method GetReturnType(const node: TSyntaxNode) : CGTypeReference;
+    method BuildLocalMethod(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
     method PrepareLocalVarOrConstant(const constnode: TSyntaxNode; const isConst: Boolean): CGVariableDeclarationStatement;
     method BuildVariablesMethod(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
     method BuildConstantsMethodClause(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
     method BuildTypesMethodClause(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
+
+    method getGenericTypeNames(const node : TSyntaxNode) : List<String>;
 
   end;
 implementation
@@ -23,24 +27,48 @@ begin
 
   Var typeName := typeNode:AttribName;
   Var typeType := typeNode:AttribType;
-  var linit : CGExpression := nil;
+//  var linit : CGExpression := nil;
 
-  //if typeType <> nil then
-    //case typeType.ToLower of
-    //// Special Handling of Array Constants
-      //'array' :
-      //exit  new CGVariableDeclarationStatement(PrepareArrayVarOrConstant(constnode, isConst, ispublic));
-    //end;
+ if not String.IsNullOrEmpty(typeType) then
+    case typeType.ToLower of
+    // Special Handling of Array Constants
+      'array' : begin
+                  var larray := PrepareArrayVarOrConstant(constnode, isConst, false);
+                  //CGTypeDefinition
+
+                   exit  new CGVariableDeclarationStatement(constName, larray.Type );
+                end;
+
+      'pointer' : begin
+                   typeName := typeNode.FindNode(TSyntaxNodeType.ntType):AttribName;
+
+                   exit new CGVariableDeclarationStatement(constName, new CGPointerTypeReference(typeName:AsTypeReference));
+                  end;
+
+    end;
 
   var valuenode := constnode.FindNode(TSyntaxNodeType.ntValue);
-  if valuenode <> nil then
-    linit := PrepareExpressionValue(valuenode);
+  //if valuenode <> nil then
+    //linit := PrepareExpressionValue(valuenode);
 
-   result :=  new CGVariableDeclarationStatement(constName, typeName:AsTypeReference, PrepareExpressionValue(valuenode));
+   result :=  new CGVariableDeclarationStatement(constName, PrepareTypeRef(typeNode), PrepareExpressionValue(valuenode));
    result.Constant := isConst;
 
 end;
 
+
+method CodeBuilderMethods.BuildLocalMethod(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
+begin
+  var lTemp := PrepareMethod(node, nil);
+  if assigned(lTemp) and (lTemp is CGMethodDefinition) then
+    begin
+    if not assigned(lMethod.LocalMethods) then
+      lMethod.LocalMethods := new List<CGMethodDefinition>;
+
+    lMethod.LocalMethods.Add(CGMethodDefinition(lTemp));
+    end;
+
+end;
 
 
 method CodeBuilderMethods.BuildVariablesMethod(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
@@ -88,19 +116,45 @@ begin
         if lTyp = '' then
           lTyp := lTypNode.GetAttribute(TAttributeName.anName).ToLower;
 
-        //case lTyp  of
+         if not assigned(lMethod.LocalTypes) then
+           lMethod.LocalTypes := new List<CGTypeDefinition>;
+
+        case lTyp  of
           //'class' : lMethod.LocalVariables.Add(BuildClass(lTypNode, child.GetAttribute(TAttributeName.anName)));
           //'interface' : lMethod.LocalVariables.Add(BuildInterface(lTypNode, child.GetAttribute(TAttributeName.anName)));
-          //'record' :  lMethod.LocalVariables.Add(BuildRecord(lTypNode, child.GetAttribute(TAttributeName.anName)));
+          'record' :  lMethod.LocalTypes.Add(BuildRecord(lTypNode, child.AttribName, nil));
           ////'pointer' : BuildPointerClause(child);
           //'enum' : lMethod.LocalVariables.Add(BuildEnum(lTypNode, child.GetAttribute(TAttributeName.anName)));
           //'set' : lMethod.LocalVariables.Add(BuildSet(lTypNode, child.GetAttribute(TAttributeName.anName)));
 
-        //end;
+        end;
       end;
 
     end;
 
+end;
+
+method CodeBuilderMethods.GetReturnType(const node: TSyntaxNode): CGTypeReference;
+begin
+  if not assigned(node) then exit nil;
+  assert(node.Typ = TSyntaxNodeType.ntReturnType);
+  var lReturn := node.FindNode(TSyntaxNodeType.ntType);
+  if assigned(lReturn) then
+    exit PrepareTypeRef(lReturn)
+    else
+      exit nil;
+end;
+
+method CodeBuilderMethods.getGenericTypeNames(const node: TSyntaxNode): List<String>;
+begin
+ result := nil;
+ var TypParams := node.FindNode(TSyntaxNodeType.ntTypeParams);
+ if assigned(TypParams) then
+  begin
+    result := new List<String>;
+    for each child in TypParams.FindNodes(TSyntaxNodeType.ntParameter) do
+     result.Add(child.FindNode(TSyntaxNodeType.ntName).AttribName);
+  end;
 end;
 
 end.

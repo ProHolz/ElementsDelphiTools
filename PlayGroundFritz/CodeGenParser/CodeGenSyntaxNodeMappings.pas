@@ -2,7 +2,6 @@
 uses
   PascalParser;
 
-
 type
   CodeBuilderMethods = static partial class
   private
@@ -59,6 +58,45 @@ type
         end;
     end;
 
+method mapCallingConvention(const Value: String): CGCallingConventionKind;
+begin
+  case Value.ToLower of
+    'stdcall' : exit CGCallingConventionKind.StdCall;
+    'cdecl' : exit CGCallingConventionKind.CDecl;
+    'pascal': exit CGCallingConventionKind.Pascal;
+    'safecall': exit CGCallingConventionKind.SafeCall;
+    else
+      exit CGCallingConventionKind.Register;
   end;
+end;
+
+method mapBinding(const Value: String): CGMemberVirtualityKind;
+begin
+  case Value.ToLower of
+    'abstract' : exit CGMemberVirtualityKind.Abstract;
+    'virtual' : exit CGMemberVirtualityKind.Virtual;
+    'override' : exit CGMemberVirtualityKind.Override;
+    'reintroduce' : exit CGMemberVirtualityKind.Reintroduce;
+    else
+      exit CGMemberVirtualityKind.None;
+  end;
+end;
+
+
+method mapVisibility(Value: TSyntaxNodeType): CGMemberVisibilityKind;
+begin
+  case Value of
+    TSyntaxNodeType.ntPrivate : exit CGMemberVisibilityKind.Private;
+    TSyntaxNodeType.ntStrictPrivate : exit CGMemberVisibilityKind.Private;
+    TSyntaxNodeType.ntProtected : exit CGMemberVisibilityKind.Protected;
+    TSyntaxNodeType.ntStrictProtected : exit CGMemberVisibilityKind.Protected;
+    TSyntaxNodeType.ntPublic : exit CGMemberVisibilityKind.Public;
+    TSyntaxNodeType.ntPublished : exit CGMemberVisibilityKind.Published;
+    else
+      exit CGMemberVisibilityKind.Unspecified;
+  end;
+end;
+end;
+
 
 end.

@@ -8,6 +8,11 @@ interface
   System.UiTypes,
    System.Classes;
  type
+
+ myString = String;
+
+
+
  // Pointer Type
   PmyInteger = ^Integer;
 
