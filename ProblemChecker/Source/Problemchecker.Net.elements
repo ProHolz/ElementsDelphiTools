@@ -65,6 +65,7 @@
     </None>
     <Compile Include="Properties\Settings.Designer.pas" />
     <Compile Include="ProblemChecker.Runner.pas" />
+    <None Include="todo.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <Import Project="ProblemChecker.Shared.projitems" Label="Shared" />
