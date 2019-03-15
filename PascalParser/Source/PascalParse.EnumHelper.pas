@@ -51,7 +51,8 @@
     TSyntaxNodeType.ntAsmStatement,
     TSyntaxNodeType.ntAsmFragment,
     TSyntaxNodeType.ntExpression,
-    TSyntaxNodeType.ntRaise
+    TSyntaxNodeType.ntRaise,
+    TSyntaxNodeType.ntLabeledStatement
   ];
 
 
@@ -69,6 +70,7 @@
     TSyntaxNodeType.ntElement,
     TSyntaxNodeType.ntIdentifier,
     TSyntaxNodeType.ntInherited,
+    TSyntaxNodeType.ntAnonymousMethod,
 
     TSyntaxNodeType.ntLHS,
      TSyntaxNodeType.ntLiteral,
@@ -110,7 +112,7 @@
 // Anonym Methods
 
     TSyntaxnodeTypeAnonymous : set of TSyntaxNodeType =[
-    TSyntaxNodeType.ntAnonymousMethod,
+
     TSyntaxNodeType.ntAnonymousMethodType
     ];
 
@@ -163,8 +165,8 @@
 
 // Not Supported
     TSyntaxnodeTypeNotSupported : set of TSyntaxNodeType =[
-    TSyntaxNodeType.ntLabel,
-    TSyntaxNodeType.ntLabeledStatement
+    TSyntaxNodeType.ntLabel
+
     ];
 
 
