@@ -12,7 +12,7 @@ type
     method AddFields(const Value : CGClassOrStructTypeDefinition; const node : TSyntaxNode);
     method PrepareArrayType(const Node: TSyntaxNode; const ClassName: not nullable String): CGArrayTypeReference;
     method PrepareProperty(prop: TSyntaxNode): CGPropertyDefinition;
-    method PrepareVarOrConstant(const constnode: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGGlobalVariableDefinition;
+    method PrepareVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGGlobalVariableDefinition;
 
     method PrepareDefaultValue(const paramnode: TSyntaxNode; paramkind : String): CGExpression;
     method PrepareParam(const node: TSyntaxNode): CGParameterDefinition;
@@ -119,28 +119,27 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareVarOrConstant(const constnode: TSyntaxnode; const isConst : Boolean; const ispublic : Boolean) : CGGlobalVariableDefinition;
+method CodeBuilderMethods.PrepareVarOrConstant(const node: TSyntaxnode; const isConst : Boolean; const ispublic : Boolean) : CGGlobalVariableDefinition;
 begin
-  Var constName := constnode.FindNode(TSyntaxNodeType.ntName).AttribName;
-  Var typeNode := constnode.FindNode(TSyntaxNodeType.ntType);
+  Var constName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
+  Var typeNode := node.FindNode(TSyntaxNodeType.ntType);
 
-  Var typeName := typeNode:AttribName;
-  Var typeType := typeNode:AttribType;
-  var lGlobalSet : CGFieldDefinition := nil;
-
-    case typeType.ToLower of
+  if assigned(typeNode) then
+  begin
+    case typeNode.AttribName.ToLower of
     // Special Handling of Array Constants
       'array' :
-      exit  new CGGlobalVariableDefinition(PrepareArrayVarOrConstant(constnode, isConst, ispublic));
+      exit  new CGGlobalVariableDefinition(PrepareArrayVarOrConstant(node, isConst, ispublic));
     end;
+  end;
 
-  if String.IsNullOrEmpty(typeName) then
-    lGlobalSet := new CGFieldDefinition(constName)
-  else
-    lGlobalSet := new CGFieldDefinition(constName, PrepareTypeRef( typeNode));
+  Var typeName := typeNode:AttribName;
+  var lGlobalSet := if String.IsNullOrEmpty(typeName) then  new CGFieldDefinition(constName)
+else
+  new CGFieldDefinition(constName, PrepareTypeRef( typeNode));
 
-  var valuenode := constnode.FindNode(TSyntaxNodeType.ntValue);
-  if valuenode <> nil then
+  var valuenode := node.FindNode(TSyntaxNodeType.ntValue);
+  if assigned(valuenode) then
     lGlobalSet.Initializer := PrepareExpressionValue(valuenode);
 
   lGlobalSet.Constant := isConst;
@@ -236,10 +235,16 @@ begin
 
   lMethod.CallingConvention := mapCallingConvention(methodnode.GetAttribute(TAttributeName.anCallingConvention));
   lMethod.Visibility := mapVisibility(methodnode.ParentNode.Typ);
+  if methodnode.getAttribute(TAttributeName.anAbstract).ToLower = 'true' then
+    lMethod.Virtuality := CGMemberVirtualityKind.Abstract
+    else
   lMethod.Virtuality := mapBinding(methodnode.GetAttribute(TAttributeName.anMethodBinding));
      // Class Method?
   if methodnode.GetAttribute(TAttributeName.anClass).ToLower = 'true' then
     lMethod.Static := true;
+
+  if methodnode.getAttribute(TAttributeName.anReintroduce).ToLower = 'true' then
+    lMethod.Reintroduced := true;
 
   for each &Param in methodnode.FindNodes(TSyntaxNodeType.ntParameter) do
     lMethod.Parameters.Add(PrepareParam(&Param));
@@ -286,11 +291,11 @@ begin
       var lCgType : CGTypeReference;
       case lFieldType.AttribType.ToLower of
         'array' : begin
-                    lCgType := PrepareArrayType(lFieldType, lFieldName);
-                  end;
+          lCgType := PrepareArrayType(lFieldType, lFieldName);
+        end;
         else
           lCgType := PrepareTypeRef(lFieldType);
-      end;
+end;
 
 
       var lField := new CGFieldDefinition(lFieldName, lCgType);
@@ -332,11 +337,11 @@ begin
   var TypParams := node.FindNode(TSyntaxNodeType.ntTypeParams);
   if assigned(TypParams) then
   begin
-   for each child in TypParams.FindNodes(TSyntaxNodeType.ntTypeParam) do
-    begin
-     result.Add(new CGGenericParameterDefinition(child.FindNode(TSyntaxNodeType.ntType).AttribName));
+    for each child in TypParams.FindNodes(TSyntaxNodeType.ntTypeParam) do
+      begin
+      result.Add(new CGGenericParameterDefinition(child.FindNode(TSyntaxNodeType.ntType).AttribName));
     end;
- end;
+  end;
 
 
     //var GenericNames := getGenericTypeNames(methodnode);
@@ -431,7 +436,7 @@ begin
     var FieldType := FieldNode.FindNode(TSyntaxNodeType.ntType);
     Var cgType :=
     if assigned(FieldType) then PrepareTypeRef(FieldType)
-    else ''.AsTypeReference;
+  else ''.AsTypeReference;
 
 
     Var lField := new CGFieldDefinition(Fieldname, cgType);
@@ -480,6 +485,7 @@ begin
       'constructor' : MethodName := methodnode.AttribName;
       'destructor' :  MethodName:=  methodnode.AttribName;
       'operator'   : MethodName := methodnode.FindNode(TSyntaxNodeType.ntName):AttribName;
+      else MethodName := 'UNKNOWN_METHODTYPE';
     end;
 
   Var ReturnType :=  methodnode.FindNode(TSyntaxNodeType.ntReturnType):FindNode(TSyntaxNodeType.ntType).AttribName;
@@ -489,19 +495,18 @@ begin
     lParam := lParam + &Param.Findnode(TSyntaxNodeType.ntName):AttribName+'_'+&Param.Findnode(TSyntaxNodeType.ntType):AttribName;
 
 
-  if not isInterface then
+  if not isInterface  then
   begin
-   Var last := MethodName.SubstringFromLastOccurrenceOf('>').Trim;
-   Var start := MethodName.SubstringToFirstOccurrenceOf('<').Trim;
-   if (last <> '') and (start <> '') then
-     MethodName := start+last;
+    if MethodName.Contains('.') then
+    begin
+      Var last := MethodName.SubstringFromLastOccurrenceOf('>').Trim;
+      Var start := MethodName.SubstringToFirstOccurrenceOf('<').Trim;
+      if (last <> '') and (start <> '')  then
+        MethodName := start+last;
+    end;
   end;
-
   result := (MethodName+'_'+lParam+'_'+ReturnType).ToLower;
 end;
-
-
-
 
 method CodeBuilderMethods.BuildArray(const ClassTypeNode: TSyntaxNode; const ClassName: not nullable String): CGTypeDefinition;
 begin

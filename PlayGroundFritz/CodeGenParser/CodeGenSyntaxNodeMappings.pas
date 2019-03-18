@@ -76,7 +76,6 @@ begin
     'abstract' : exit CGMemberVirtualityKind.Abstract;
     'virtual' : exit CGMemberVirtualityKind.Virtual;
     'override' : exit CGMemberVirtualityKind.Override;
-    'reintroduce' : exit CGMemberVirtualityKind.Reintroduce;
     else
       exit CGMemberVirtualityKind.None;
   end;
