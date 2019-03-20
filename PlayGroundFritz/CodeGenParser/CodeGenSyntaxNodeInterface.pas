@@ -6,6 +6,7 @@ uses PascalParser;
 type
   CodeBuilderMethods = static partial class
   private
+
     method PrepareGenericParameterDefinition(const node: TSyntaxNode): List<CGGenericParameterDefinition>;
 
     method AddAncestors(const Value : CGClassOrStructTypeDefinition; const Types : TSyntaxNode);
@@ -34,8 +35,8 @@ type
     method BuildBlockType(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
 
 
-    method BuildMethodMangledName(const methodnode: TSyntaxNode; const isInterface : Boolean): String;
-
+    method BuildMethodMangledName(const node: TSyntaxNode): String;
+    method PrepareGenericParameterName(const node: TSyntaxNode): String;
   end;
 
 implementation
@@ -343,29 +344,48 @@ begin
     end;
   end;
 
+end;
 
-    //var GenericNames := getGenericTypeNames(methodnode);
-    //if assigned(GenericNames) then
-    //begin
-      //GenericTypes :=  '<';
-      //for each ltype in GenericNames  index i do
-        //begin
-          //if i > 0 then
-            //GenericTypes := GenericTypes + ",";
-        //GenericTypes := GenericTypes + ltype;
+method CodeBuilderMethods.PrepareGenericParameterName(const node: TSyntaxNode): String;
+begin
+  result := nil;
+  if assigned(node) then
+  begin
+    var largs := new List<String>;
+    for each child in node.ChildNodes.where(Item->Item.Typ = TSyntaxNodeType.ntTypeParam) do
+      largs.Add(child.FindNode(TSyntaxNodeType.ntType).AttribName);
 
-        //end;
-      //GenericTypes := GenericTypes + '>';
-    //end;
+    if largs.Count > 0 then
+    begin
+      var dot := '';
+      result := '<';
+      for each s in largs  do
+        begin
+        result := result+dot+s;
+        dot := ',';
+      end;
+      result := result+'>';
+    end;
+  end;
 
 end;
+
 
 
 method CodeBuilderMethods.BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassTypeDefinition;
 begin
   //public var GenericParameters = List<CGGenericParameterDefinition>()
   result := new CGClassTypeDefinition(name);
-  result.GenericParameters.Add(PrepareGenericParameterDefinition(node.ParentNode).ToArray);
+  var lGenerics := PrepareGenericParameterDefinition(node.ParentNode).ToArray;
+
+  result.GenericParameters.Add(lGenerics);
+
+  var lTypeParams := node.ParentNode.FindNode(TSyntaxNodeType.ntTypeParams);
+  var lname : String := '';
+  if assigned(lTypeParams) then
+    lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
+
+
 
 
     // Descenting from
@@ -374,11 +394,18 @@ begin
 
   for each &method in node.FindNodes(TSyntaxNodeType.ntMethod) do
     begin
-    var Search := name.ToLower+'.'+BuildMethodMangledName(&method, true);
+    var Search := (name+lname+'.'+BuildMethodMangledName(&method)).ToLower;
 
     if methodBodys.ContainsKey(Search) then
     begin
-      result.Members.Add(PrepareMethod(&method, methodBodys[Search]));
+      var lmethod := PrepareMethod(&method, methodBodys[Search]);
+      //if assigned(lGenerics) and (length(lGenerics)>0) then
+      //if lmethod is CGMethodDefinition then
+        //begin
+         //CGMethodDefinition(lmethod).GenericParameters := new List<CGGenericParameterDefinition>(lGenerics);
+        //end;
+     if assigned(lmethod)  then
+      result.Members.Add(lmethod);
     end
     else
 
@@ -448,7 +475,7 @@ begin
   for each &method in RecordTypeNode.FindNodes(TSyntaxNodeType.ntMethod) do
     begin
 
-    var Search := recordName.ToLower+'.'+BuildMethodMangledName(&method, true);
+    var Search := recordName.ToLower+'.'+BuildMethodMangledName(&method);
 
     if methodBodys:ContainsKey(Search) then
     begin
@@ -475,51 +502,30 @@ begin
 end;
 
 
-method CodeBuilderMethods.BuildMethodMangledName(const methodnode: TSyntaxNode; const isInterface : boolean): String;
+method CodeBuilderMethods.BuildMethodMangledName(const node: TSyntaxNode ): String;
 begin
-  Var MethodName := methodnode.Findnode(TSyntaxNodeType.ntName):AttribName;
-  Var MethodType := methodnode.AttribKind;
-
-  if String.IsNullOrEmpty(MethodName) then
-    case MethodType.ToLower of
-      'constructor' : MethodName := methodnode.AttribName;
-      'destructor' :  MethodName:=  methodnode.AttribName;
-      'operator'   : MethodName := methodnode.FindNode(TSyntaxNodeType.ntName):AttribName;
-      else MethodName := 'UNKNOWN_METHODTYPE';
-    end;
-
-  Var ReturnType :=  methodnode.FindNode(TSyntaxNodeType.ntReturnType):FindNode(TSyntaxNodeType.ntType).AttribName;
+  var lName := node.Findnode(TSyntaxNodeType.ntName);
+  var MethodName := lName:AttribName;
+  Var ReturnType :=  node.FindNode(TSyntaxNodeType.ntReturnType):FindNode(TSyntaxNodeType.ntType).AttribName;
   var lParam : String;
 
-  for each &Param in methodnode.FindNodes(TSyntaxNodeType.ntParameter) do
+  for each &Param in node.FindNodes(TSyntaxNodeType.ntParameter) do
     lParam := lParam + &Param.Findnode(TSyntaxNodeType.ntName):AttribName+'_'+&Param.Findnode(TSyntaxNodeType.ntType):AttribName;
 
-
-  if not isInterface  then
-  begin
-    if MethodName.Contains('.') then
-    begin
-      Var last := MethodName.SubstringFromLastOccurrenceOf('>').Trim;
-      Var start := MethodName.SubstringToFirstOccurrenceOf('<').Trim;
-      if (last <> '') and (start <> '')  then
-        MethodName := start+last;
-    end;
-  end;
   result := (MethodName+'_'+lParam+'_'+ReturnType).ToLower;
 end;
+
+
+
+
 
 method CodeBuilderMethods.BuildArray(const ClassTypeNode: TSyntaxNode; const ClassName: not nullable String): CGTypeDefinition;
 begin
   var lArray := PrepareArrayType(ClassTypeNode, ClassName);
   if assigned(lArray) then
     exit new CGTypeAliasDefinition(ClassName, lArray)
-
   else raise new Exception("Array Type Alias not solved");
-
 end;
-
-
-
 
 method CodeBuilderMethods.BuildAlias(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
 require
@@ -564,10 +570,6 @@ begin
   end
   else raise new Exception("BuildBlockType not solved");
 end;
-
-
-
-
 
 
 end.

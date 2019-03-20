@@ -2,28 +2,49 @@
 
 const TestGeneric = "
 unit TestGeneric;
+
 interface
+
 type
-TGenericClass<T> = class
- private
- fData : Array of T;
- public
- constructor Create;
+TGenericClass = class
  procedure Test;
 end;
 
+TGenericClass<T> = class
+ private
+ fData : Array of T;
+  b : integer;
+ public
+ constructor Create;
+ procedure Test<A>;  overload;
+ procedure Test;  overload;
+
+end;
+
 implementation
-{ TGenericClass<T> }
+
 constructor TGenericClass<T>.Create;
 begin
- fdata := [];
+
 end;
+
+procedure TGenericClass<T>.Test<A>;
+begin
+  b := 1;
+end;
+
+procedure TGenericClass.Test;
+begin
+  b := 3;
+end;
+
+
 procedure TGenericClass<T>.Test;
 begin
-  fdata[0] := '';
+  b := 2;
 end;
-end.
 
+end.
 ";
 
 end.

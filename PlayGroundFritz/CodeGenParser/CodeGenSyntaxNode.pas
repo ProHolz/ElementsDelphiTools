@@ -34,20 +34,24 @@ implementation
 
 method CodeBuilder.FillMethods(const interfaceNode, implementationNode: TSyntaxNode);
 begin
+  writeLn('**** Interface  **** ' );
   if assigned(interfaceNode) then
+   begin
+    for each child in interfaceNode.FindNodes(TSyntaxNodeType.ntMethod) do
+      writeLn(CodeBuilderMethods.BuildMethodMangledName(child));
+
+
     for each child in interfaceNode.ChildNodes.where(Item->Item.Typ = TSyntaxNodeType.ntMethod) do
     begin
-    //  var ltemp := CodeBuilderMethods.BuildMethodMangledName(child);
-    //  writeLn(ltemp);
-      fInterfaceMethods.add(CodeBuilderMethods.BuildMethodMangledName(child, true), child);
+      fInterfaceMethods.add(CodeBuilderMethods.BuildMethodMangledName(child), child);
     end;
-
+  end;
+  writeLn('**** implementationNode  **** ' );
   if assigned(implementationNode) then
     for each child in implementationNode.ChildNodes.where(Item->Item.Typ = TSyntaxNodeType.ntMethod) do
     begin
-     // var ltemp := CodeBuilderMethods.BuildMethodMangledName(child);
-    //  writeLn(ltemp);
-      fImplementationMethods.add(CodeBuilderMethods.BuildMethodMangledName(child, false), child);
+      writeLn(CodeBuilderMethods.BuildMethodMangledName(child));
+      fImplementationMethods.add(CodeBuilderMethods.BuildMethodMangledName(child), child);
     end;
 
 end;
@@ -57,7 +61,7 @@ begin
  // We must have the node in fInterfaceMethods
   if fInterfaceMethods.ContainsValue(node) then
   begin
-    var lname := CodeBuilderMethods.BuildMethodMangledName(node, true);
+    var lname := CodeBuilderMethods.BuildMethodMangledName(node);
     if not String.IsNullOrEmpty(lname) then
     begin
       if fImplementationMethods.ContainsKey(lname) then
@@ -73,11 +77,11 @@ end;
 
 method CodeBuilder.ResolveImplemenationMethod(const node: TSyntaxNode);
 begin
- // We must have the node in fInterfaceMethods
+ // We must have the node in fImplementationMethods
 
    if fImplementationMethods.ContainsValue(node) then
    begin
-     var lname := CodeBuilderMethods.BuildMethodMangledName(node, true);
+     var lname := CodeBuilderMethods.BuildMethodMangledName(node);
      if not String.IsNullOrEmpty(lname) then
      begin
        if fImplementationMethods.ContainsKey(lname) then
@@ -156,7 +160,7 @@ begin
      if child.HasChildren then
      begin
        Var lTypNode := child.FindNode(TSyntaxNodeType.ntType);
-       if lTypNode <> nil then
+       if assigned(lTypNode) then
        begin
          Var lTyp := lTypNode.AttribType.ToLower;
          if lTyp = '' then
@@ -164,7 +168,12 @@ begin
 
          case lTyp  of
            'class' : begin
-             var lList := getImplementationMethodNodesFor(child.AttribName);
+             var lTypeParams := child.FindNode(TSyntaxNodeType.ntTypeParams);
+             var lname : String := '';
+             if assigned(lTypeParams) then
+             lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
+
+             var lList := getImplementationMethodNodesFor((child.AttribName+lname).ToLower);
                fUnit.Types.Add(CodeBuilderMethods.BuildClass(lTypNode, child.AttribName, lList));
            end;
 
@@ -269,7 +278,6 @@ begin
    for each lkey in fImplementationMethods.Keys do
      if lkey.StartsWith(lname) then
      begin
-     //  var check := lkey.SubString(length(lname));
        result.Add(lkey, fImplementationMethods[lkey]);
      end;
 

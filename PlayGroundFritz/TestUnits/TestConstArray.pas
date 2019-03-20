@@ -37,11 +37,7 @@ const
 
 pAddrTest = @TEST;
 
-
 SimpleIntArray : Array[0..2] of Integer = (0, 1,2);
-
-
-
 
 AllInt : Array[0..1, 3..4] of integer = ((3,4), (5,6));
 

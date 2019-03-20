@@ -40,16 +40,9 @@ begin
  begin
    result := a*a;
  end;
-
  TestCall(ltemp);
-
-
 end;
-
-
-
 end.
-
 
 ";
 

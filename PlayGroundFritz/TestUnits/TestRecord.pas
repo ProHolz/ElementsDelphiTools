@@ -20,7 +20,7 @@ interface
     class operator Add(a, b: Test_record): Test_record;
     class operator Implicit(value: integer): Test_record;
     class operator Implicit(value: Test_record): integer;
-    Procedure Test;
+    Procedure Test<A>;
     property Data : integer read GetData write fData;
   end;
 
@@ -47,7 +47,10 @@ begin
    result := Test_record.create(a.fData + b.Fdata);
 end;
 
-
+procedure Test_record.test<a>;
+begin
+ a := b+c;
+end;
 
 
 class operator Test_record.Implicit(value: integer): Test_record;

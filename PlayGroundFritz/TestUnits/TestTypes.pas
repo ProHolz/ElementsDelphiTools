@@ -3,17 +3,9 @@ const TestTypes = "
 unit TestTypes;
 
 interface
-  uses
-  System.Sysutils,
-  System.UiTypes,
-   System.Classes;
- type
-
+type
  myString = String;
-
-
-
- // Pointer Type
+// Pointer Type
   PmyInteger = ^Integer;
 
  // record

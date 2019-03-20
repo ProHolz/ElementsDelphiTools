@@ -14,9 +14,9 @@ begin
   var lUnit := new CodeBuilder().BuildCGCodeUnitFomSyntaxNode(Root);
   // var cg := new CGDelphiCodeGenerator();
    var cg := new CGOxygeneCodeGenerator();
- // var cg2 := new CGCSharpCodeGenerator();
+ // var cg := new CGCSharpCodeGenerator();
   //var cg := new CGCPlusPlusCPPCodeGenerator();
-//  var cg2 := new CGSwiftCodeGenerator();
+  //var cg := new CGSwiftCodeGenerator();
   //var cg := new CGGoCodeGenerator();
 
   result := cg.GenerateUnit(lUnit);
@@ -63,8 +63,8 @@ begin
 
 
 
- // sb.Append(BuildInterfaceTest(TestMethodimplementation, 'TestMethodimplementation'));
-  //sb.AppendLine.Append('{Next File}').AppendLine;
+ //sb.Append(BuildInterfaceTest(TestMethodimplementation, 'TestMethodimplementation'));
+ //sb.AppendLine.Append('{Next File}').AppendLine;
 
   //sb.Append(BuildInterfaceTest(TestAll, 'TestAll'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
@@ -73,12 +73,12 @@ begin
   //sb.Append(BuildInterfaceTest(TestMethods, 'TestMethods'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
-  //sb.Append(BuildInterfaceTest(Testrecord, 'Testrecord'));
-  //sb.AppendLine.Append('{Next File}').AppendLine;
+  sb.Append(BuildInterfaceTest(Testrecord, 'Testrecord'));
+  sb.AppendLine.Append('{Next File}').AppendLine;
 
 
   sb.Append(BuildInterfaceTest(TestGeneric, 'TestGeneric'));
-  sb.AppendLine.Append('{Next File}').AppendLine;
+  //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
 // sb.Append(BuildInterfaceTest(TestUnit2, 'TestUnit2'));

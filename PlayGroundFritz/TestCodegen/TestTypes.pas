@@ -54,21 +54,21 @@ type
   Assert.AreEqual(lunit.Globals.Count, 3, 'There are 3 const defined');
   Assert.AreEqual(lunit.Types.Count, 10, 'There are 10 types defined');
 
-    for each matching GV : CGGlobalVariableDefinition in lunit.Globals  do
-      with f := GV.Variable do
-      begin
-        Check.IsTrue(f.Constant);
-      end;
+  for each matching GV : CGGlobalVariableDefinition in lunit.Globals  do
+    with f := GV.Variable do
+    begin
+      Check.IsTrue(f.Constant);
+    end;
 
   for each matching GT: CGTypeAliasDefinition  in lunit.Types index i do
     begin
-      Check.AreEqual(GT.Name, cAlias[i],  $' {GT.Name} Loop [{i}]');
-    end;
+    Check.AreEqual(GT.Name, cAlias[i],  $' {GT.Name} Loop [{i}]');
+  end;
 
   for each matching GT: CGStructTypeDefinition  in lunit.Types index i do
     begin
-     Check.AreEqual(GT.Name, cAlias[i],  $' {GT.Name} Loop [{i}]');
-   end;
+    Check.AreEqual(GT.Name, cAlias[i],  $' {GT.Name} Loop [{i}]');
+  end;
 
   for each matching GT: CGEnumTypeDefinition  in lunit.Types index i do
     begin
@@ -78,8 +78,8 @@ type
 
   for each matching GT: CGBlockTypeDefinition  in lunit.Types index i do
     begin
-      Check.AreEqual(GT.Name, cAlias[i],  $' {GT.Name} Loop [{i}]');
-    end;
+    Check.AreEqual(GT.Name, cAlias[i],  $' {GT.Name} Loop [{i}]');
+  end;
 
 end;
 

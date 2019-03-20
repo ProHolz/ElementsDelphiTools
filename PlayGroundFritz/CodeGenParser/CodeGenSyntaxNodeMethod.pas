@@ -15,8 +15,6 @@ type
     method BuildConstantsMethodClause(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
     method BuildTypesMethodClause(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
 
-    method getGenericTypeNames(const node : TSyntaxNode) : List<String>;
-
   end;
 implementation
 
@@ -148,16 +146,6 @@ begin
       exit nil;
 end;
 
-method CodeBuilderMethods.getGenericTypeNames(const node: TSyntaxNode): List<String>;
-begin
- result := nil;
- var TypParams := node.FindNode(TSyntaxNodeType.ntTypeParams);
- if assigned(TypParams) then
-  begin
-    result := new List<String>;
-    for each child in TypParams.FindNodes(TSyntaxNodeType.ntParameter) do
-     result.Add(child.FindNode(TSyntaxNodeType.ntName).AttribName);
-  end;
-end;
+
 
 end.

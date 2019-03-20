@@ -8,8 +8,10 @@ type
   // This part is used for ntTypes
   CodeBuilderMethods = static partial class
   public
+
     method PrepareTypeRef(const node: TSyntaxNode): CGTypeReference;
   end;
+
 implementation
 
 method CodeBuilderMethods.PrepareTypeRef(const node: TSyntaxNode): CGTypeReference;
@@ -36,7 +38,10 @@ else
         CGNamedTypeReference(lTemp).GenericArguments := largs;
     end;
   end;
- exit lTemp;
+  exit lTemp;
 end;
+
+
+
 
 end.

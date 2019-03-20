@@ -10,6 +10,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
+    <TestProject>TestCodegen</TestProject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
@@ -63,29 +64,17 @@
     </None>
     <Compile Include="Properties\Settings.Designer.pas" />
     <Compile Include="FirstPas.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNode.pas" />
     <Compile Include="TestUnits\TestConstArray.pas" />
     <Compile Include="TestUnits\Test2.pas" />
     <Compile Include="TestUnits\Marc.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeDefaultTypes.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeEnum.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeInterface.pas" />
     <Compile Include="TestUnits\TestMethods.pas" />
     <Compile Include="TestUnits\TestAll.pas" />
     <Compile Include="TestUnits\TestRecord.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeConstArray.pas" />
     <Compile Include="TestUnits\TestMethodResolve.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeMethod.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeStatements.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeMappings.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeComments.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeExpressions.pas" />
     <Compile Include="TestUnits\TestSetAndEnums.pas" />
     <Compile Include="TestUnits\TestLoops.pas" />
     <Compile Include="TestUnits\TestExceptions.pas" />
     <Compile Include="TestUnits\TestTypes.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeTypes.pas" />
-    <Compile Include="CodeGenParser\CodeGenSyntaxNodeAnonymous.pas" />
     <Compile Include="TestUnits\TestAnonymous.pas" />
     <Compile Include="TestUnits\TestGeneric.pas" />
   </ItemGroup>
@@ -96,4 +85,5 @@
   </ItemGroup>
   <Import Project="..\PascalParser\Source\PascalParse.Shared.projitems" Label="Shared" />
   <Import Project="..\..\CodeGen4\Codegen4.Shared.projitems" Label="Shared" />
+  <Import Project="CodeGenParser\CodeGenDelphi.projitems" Label="Shared" />
 </Project>
