@@ -16,9 +16,10 @@ type
     method TestCompilerDirectives;
     method TestSynEditUnit;
     method TestVariantRecord;
-   public
-
     method TestConstArrays;
+   public
+     method TestNames;
+
   end;
 
 implementation
@@ -117,5 +118,31 @@ begin
   Check.IsNotNil(const1.FindNode(TSyntaxNodeType.ntValue).FindNode(TSyntaxNodeType.ntExpression));
   Check.IsNotNil(const2.FindNode(TSyntaxNodeType.ntValue).FindNode(TSyntaxNodeType.ntExpression));
 end;
+
+method TestTreeBuilder.TestNames;
+begin
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+  Var Root := Builder.RunWithString(cTestClassMethodNames );
+  var node := Root.FindNode(TSyntaxNodeType.ntInterface):FindNode(TSyntaxNodeType.ntTypeSection);
+  Assert.IsnotNil(node);
+   for each ltypedecl in node.FindNodes(TSyntaxNodeType.ntTypeDecl) do
+     for each ltype in ltypedecl.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntType)  do
+    begin
+          if ltype.AttribType.ToLower = 'class' then
+           begin
+            for each proc in ltype.FindNode(TSyntaxNodeType.ntPublic):FindNodes(TSyntaxNodeType.ntMethod) index i do
+               begin
+               var s := proc.FindNode(TSyntaxNodeType.ntName):AttribName.ToLower;
+                case i of
+                  0 : Check.AreEqual(s, 'test<t>');
+                  1 : Check.AreEqual(s, 'create');
+                  2 : Check.AreEqual(s, 'destroy');
+                end;
+           end;
+        end;
+      end;
+    end;
+
+
 
 end.

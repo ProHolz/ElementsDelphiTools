@@ -209,4 +209,32 @@ SimpleIntArray2 : Array[0..2] of Integer = (1 shl 2 -1, 1, 2);
 end.
 ";
 
+cTestClassMethodNames = "
+unit Test;
+interface
+  type
+    testclass<T> = class
+    public
+      procedure Test<T>;
+      constructor Create;
+      destructor Destroy;
+    end;
+
+ implementation
+
+ procedure testclass<T>.Test<T>;
+ begin
+ end;
+
+ constructor testclass<T>.Create;
+ begin
+ end;
+
+ destructor testclass<T>.Destroy;
+ begin
+ end;
+
+end.
+";
+
 end.
