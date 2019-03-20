@@ -10,9 +10,9 @@ type
       var showNotfound : Boolean := true;
       // add your own code here
       writeLn('The magic happens here.');
-      var project := new ProjectRunner("X:\Projekte\SynEdit\Packages\XE7\SynEdit_R.dpk");
+    //  var project := new ProjectRunner("X:\Projekte\SynEdit\Packages\XE7\SynEdit_R.dpk");
      // var project := new ProjectRunner("X:\Projekte\SynEdit\Source\SynEditMiscClasses.pas");
-
+      var project := new ProjectRunner("X:\Projekte\Rtl_Delphi_Elements\rtl\BuildWinRTL.dpk");
       project.Run;
       if project.Problems.Count > 0 then
       begin
@@ -72,7 +72,7 @@ type
         end;
       end;
 
-      File.WriteText("X:\Projekte\SynEdit\Packages\XE7\SynEdit_R.txt", project.GetAllProblemsText);
+      File.WriteText("X:\Projekte\Rtl_Delphi_Elements\RTL_Problems.txt", project.GetAllProblemsText);
 
 
     end;

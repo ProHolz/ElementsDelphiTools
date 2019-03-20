@@ -47,10 +47,6 @@
     <Reference Include="Echoes">
       <Private>True</Private>
     </Reference>
-    <Reference Include="PascalParser">
-      <HintPath>..\..\PascalParser\Bin\Debug\PascalParser.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.pas" />
@@ -69,4 +65,5 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <Import Project="ProblemChecker.Shared.projitems" Label="Shared" />
+  <Import Project="..\..\PascalParser\Source\PascalParse.Shared.projitems" Label="Shared" />
 </Project>

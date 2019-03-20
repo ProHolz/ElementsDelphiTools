@@ -37,15 +37,15 @@ begin
   eEleCheck.eWith, // with clause in source
   eEleCheck.eInitializations, // initialization found
   eEleCheck.eFinalizations, // finalization found
-  eEleCheck.ePublicVars, // There are public Global Vars in initialization
-  eEleCheck.eGlobalMethods, // Global Methods
-  eEleCheck.eDestructors, // There is a Destructor in classes
-  eEleCheck.eMultiConstructors, // There is more then on public Constructor for a class
-  eEleCheck.eMoreThenOneClass, // There is more then on class in the file
-  eEleCheck.eInterfaceandImplement,   // declaration of a Interface and Implementatiion of a class that use it
+//  eEleCheck.ePublicVars, // There are public Global Vars in initialization
+//  eEleCheck.eGlobalMethods, // Global Methods
+//  eEleCheck.eDestructors, // There is a Destructor in classes
+//  eEleCheck.eMultiConstructors, // There is more then on public Constructor for a class
+//  eEleCheck.eMoreThenOneClass, // There is more then on class in the file
+//  eEleCheck.eInterfaceandImplement,   // declaration of a Interface and Implementatiion of a class that use it
   eEleCheck.eVariantRecord,       // Record with Variant parts
-  eEleCheck.ePublicEnums,        // Enum Types shuld be check ScopedEnums, not done yet
-  eEleCheck.eClassDeclImpl,      // Class defined in implementation
+//  eEleCheck.ePublicEnums,        // Enum Types shuld be check ScopedEnums, not done yet
+//  eEleCheck.eClassDeclImpl,      // Class defined in implementation
   eEleCheck.eConstRecord     // Const Records with initialisation, Should be extend]);
   ]);
   fProjectfile := projectfile;
