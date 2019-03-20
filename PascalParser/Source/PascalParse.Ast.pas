@@ -1093,11 +1093,41 @@ type
       method TPasSyntaxTreeBuilder.ConstructorName;
       var
       Temp: TSyntaxNode;
+      NameNode : TSyntaxNode;
+      FullName, Dot, Comma: String;
       begin
         Temp := FStack.Peek;
         Temp.SetAttribute(TAttributeName.anKind, AttributeValues[TAttributeValue.atConstructor]);
         Temp.SetAttribute(TAttributeName.anName, Lexer.Token);
-        inherited;
+        NameNode:= FStack.Push(TSyntaxNodeType.ntName);
+        try
+          inherited;
+        finally
+          FStack.Pop;
+        end;
+        assert(NameNode.HasChildren);
+        Dot:= '';
+        for each ChildNode in NameNode.ChildNodes do begin
+          case ChildNode.Typ of
+            TSyntaxNodeType.ntName: begin
+              FullName:= FullName + Dot + ChildNode.Attributes[TAttributeName.anName];
+              Dot:= '.';
+            end; {ntName}
+            TSyntaxNodeType.ntTypeParams: begin
+              Comma:= '';
+              FullName:= FullName + '<';
+              for TypeParam in ChildNode.ChildNodes do begin
+                FullName:= FullName + Comma + TypeParam.FindNode(TSyntaxNodeType.ntType).Attributes[TAttributeName.anName];
+                Comma:= ',';
+              end;
+
+              FullName:= FullName + '>';
+            end; {ntTypeParams:}
+
+          end;
+        end;
+        NameNode.Attributes[TAttributeName.anName]:= FullName;
+
       end;
 
       method TPasSyntaxTreeBuilder.GetMainSection(Node: TSyntaxNode): TSyntaxNode;
@@ -1342,11 +1372,41 @@ type
       method TPasSyntaxTreeBuilder.DestructorName;
       var
       Temp: TSyntaxNode;
+      NameNode : TSyntaxNode;
+      FullName, Dot, Comma: String;
       begin
         Temp := FStack.Peek;
         Temp.SetAttribute(TAttributeName.anKind, AttributeValues[TAttributeValue.atDestructor]);
         Temp.SetAttribute(TAttributeName.anName, Lexer.Token);
-        inherited;
+        NameNode:= FStack.Push(TSyntaxNodeType.ntName);
+        try
+          inherited;
+        finally
+          FStack.Pop;
+        end;
+        assert(NameNode.HasChildren);
+        Dot:= '';
+        for each ChildNode in NameNode.ChildNodes do begin
+          case ChildNode.Typ of
+            TSyntaxNodeType.ntName: begin
+              FullName:= FullName + Dot + ChildNode.Attributes[TAttributeName.anName];
+              Dot:= '.';
+            end; {ntName}
+            TSyntaxNodeType.ntTypeParams: begin
+              Comma:= '';
+              FullName:= FullName + '<';
+              for TypeParam in ChildNode.ChildNodes do begin
+                FullName:= FullName + Comma + TypeParam.FindNode(TSyntaxNodeType.ntType).Attributes[TAttributeName.anName];
+                Comma:= ',';
+              end;
+
+              FullName:= FullName + '>';
+            end; {ntTypeParams:}
+
+          end;
+        end;
+        NameNode.Attributes[TAttributeName.anName]:= FullName;
+
       end;
 
       method TPasSyntaxTreeBuilder.DirectiveAbstract;

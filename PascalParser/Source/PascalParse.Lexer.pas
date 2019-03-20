@@ -1565,7 +1565,8 @@ end;
 
       method TmwSimplePasPar.ConstructorName;
       begin
-        Expected(TptTokenKind.ptIdentifier);
+       // Expected(TptTokenKind.ptIdentifier);
+        ObjectNameOfMethod;
       end;
 
       method TmwSimplePasPar.DestructorHeading;
@@ -1582,7 +1583,8 @@ end;
 
       method TmwSimplePasPar.DestructorName;
       begin
-        Expected(TptTokenKind.ptIdentifier);
+       // Expected(TptTokenKind.ptIdentifier);
+        ObjectNameOfMethod;
       end;
 
       method TmwSimplePasPar.ClassMethod;

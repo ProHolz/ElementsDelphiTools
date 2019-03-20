@@ -13,7 +13,9 @@
                  'CONDITIONALEXPRESSIONS',
                  'UNICODE',
                  'WIN32',
-                 'XE7'];
+                 'XE7',
+                 'CPUX86',
+                 'PUREPASCAL'];
     end;
 
 
