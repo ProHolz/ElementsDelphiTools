@@ -11,6 +11,7 @@ type
   protected
   public
     method TestSimpleGenericClass;
+    method TestComplexerGenericClass;
   end;
 
 implementation
@@ -23,11 +24,15 @@ type
   private
    fdata : Array of T;
    procedure Test;
+
   end;
 
   implementation
 
-  procedure TGenericClass<T>.Test;beginend;
+  procedure TGenericClass<T>.Test;
+begin
+
+end;
 
 ");
 
@@ -61,6 +66,83 @@ type
     end;
 
  end;
+end;
+
+method TestGenricClass.TestComplexerGenericClass;
+begin
+  var lunit := BuildUnit(tbUnitType.Body ,"
+type
+  TGenericClass<U,T> = class
+  private
+   fdata : Array of T;
+   procedure Test<U>;
+   procedure TestString<U, T>(const value : String);
+
+  end;
+
+  implementation
+
+  procedure TGenericClass<U,T>.Test<U>;
+begin
+
+end;
+
+  procedure TGenericClass<U,T>.TestString<U,T>(const value : String);
+begin
+
+end;
+
+");
+
+  Assert.IsNotNil(lunit);
+  Assert.AreEqual(lunit.Types.Count, 1);
+  for each matching GV : CGClassTypeDefinition in lunit.Types do
+    begin
+
+    Check.AreEqual(GV.GenericParameters.Count, 2);
+    Check.AreEqual(GV.Members.Count, 3);
+    for each matching f : CGFieldDefinition in GV.Members index i do
+      begin
+      case i of
+        0 : begin
+          Check.AreEqual(f.Name, 'fdata');
+          Check.AreEqual( f.Visibility, CGMemberVisibilityKind.Private);
+          Check.IsTrue(f.Type is CGArrayTypeReference);
+        end;
+      end;
+    end;
+
+    for each matching m : CGMethodDefinition in GV.Members index i do
+      begin
+      case i of
+        1 : begin
+          Check.AreEqual(m.Name, 'Test');
+          Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Private);
+          Assert.IsNotNil(m.GenericParameters);
+          Check.AreEqual(m.GenericParameters.Count, 1);
+          for each mg in m.GenericParameters do
+           begin
+            Check.AreEqual(mg.Name, 'U');
+           end;
+
+        end;
+        2 : begin
+          Check.AreEqual(m.Name, 'TestString');
+          Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Private);
+          Assert.IsNotNil(m.GenericParameters);
+          Check.AreEqual(m.GenericParameters.Count, 2);
+          for each mg in m.GenericParameters index j do
+            begin
+            case j of
+              0 :   Check.AreEqual(mg.Name, 'U');
+              1 :   Check.AreEqual(mg.Name, 'T');
+           end;
+         end;
+        end;
+      end;
+   end;
+
+  end;
 end;
 
 

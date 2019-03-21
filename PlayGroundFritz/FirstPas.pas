@@ -12,9 +12,9 @@ begin
   if Environment.OS = OperatingSystem.Windows then
   File.WriteText(String.Format('d:\Test\{0}.xml', TestName),   TSyntaxTreeWriter.ToXML(Root, true));
   var lUnit := new CodeBuilder().BuildCGCodeUnitFomSyntaxNode(Root);
-  // var cg := new CGDelphiCodeGenerator();
+ //  var cg := new CGDelphiCodeGenerator();
    var cg := new CGOxygeneCodeGenerator();
- // var cg := new CGCSharpCodeGenerator();
+  //var cg := new CGCSharpCodeGenerator();
   //var cg := new CGCPlusPlusCPPCodeGenerator();
   //var cg := new CGSwiftCodeGenerator();
   //var cg := new CGGoCodeGenerator();
@@ -77,12 +77,20 @@ begin
   sb.AppendLine.Append('{Next File}').AppendLine;
 
 
-  sb.Append(BuildInterfaceTest(TestGeneric, 'TestGeneric'));
+  //sb.Append(BuildInterfaceTest(TestGeneric, 'TestGeneric'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
 // sb.Append(BuildInterfaceTest(TestUnit2, 'TestUnit2'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
+
+ sb.Append(BuildInterfaceTest(TestInterfaceImpl, 'TestInterfaceImpl'));
+  sb.AppendLine.Append('{Next File}').AppendLine;
+
+  sb.Append(BuildInterfaceTest(TestAttributes, 'TestAttributes'));
+   //sb.AppendLine.Append('{Next File}').AppendLine;
+
+
 
   result := sb.ToString;
  // File.WriteText(String.Format('d:\Test\{0}.pas','AllinOne'),   result);

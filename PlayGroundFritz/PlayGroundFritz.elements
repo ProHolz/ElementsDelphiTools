@@ -77,10 +77,11 @@
     <Compile Include="TestUnits\TestTypes.pas" />
     <Compile Include="TestUnits\TestAnonymous.pas" />
     <Compile Include="TestUnits\TestGeneric.pas" />
+    <Compile Include="TestUnits\testInterfaceImpl.pas" />
+    <Compile Include="TestUnits\TestAttributes.pas" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <ItemGroup>
-    <Folder Include="CodeGenParser" />
     <Folder Include="TestUnits" />
   </ItemGroup>
   <Import Project="..\PascalParser\Source\PascalParse.Shared.projitems" Label="Shared" />

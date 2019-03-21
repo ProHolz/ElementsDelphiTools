@@ -8,10 +8,12 @@ uses
 type
   TestInterfaces = public class(TestParserBase)
   private
-  protected
+
   public
     method TestInterface;
     method TestInterfaceIndexProp;
+
+    method TestImplementsMethod;
   end;
 
 implementation
@@ -61,7 +63,7 @@ method TestInterfaces.TestInterfaceIndexProp;
 begin
   var lunit := BuildUnit(tbUnitType.interface ,"
 type
-Isimple = Interface
+Isimple<T> = Interface
 ['{E277B1D4-88D3-4D1B-8541-39939F683D87}']
  function GetIntProp(Index: Integer): Integer;
  procedure SetIntProp(Index: Integer; const Value: Integer);
@@ -74,6 +76,9 @@ end;
   Assert.AreEqual(lunit.Types.Count, 1);
   for each matching GV : CGInterfaceTypeDefinition in lunit.Types do
     begin
+
+    Check.AreEqual(GV.Name, 'Isimple');
+    Check.AreEqual(GV.GenericParameters.Count, 1);
     Check.AreEqual(GV.Members.Count, 3);
     Check.IsNotNil(GV.InterfaceGuid);
     for each  m  in GV.Members index i do
@@ -97,6 +102,38 @@ end;
           Check.AreEqual(CGPropertyDefinition(m).Parameters.Count , 1);
 
         end;
+      end;
+    end;
+  end;
+end;
+
+method TestInterfaces.TestImplementsMethod;
+begin
+  var lunit := BuildUnit(tbUnitType.interface ,"
+type
+Tsimple = class
+ procedure IBase.TestBase = Allocate;
+end;
+
+");
+
+  Assert.IsNotNil(lunit);
+  Assert.AreEqual(lunit.Types.Count, 1);
+  for each matching GV : CGClassTypeDefinition in lunit.Types do
+    begin
+    Check.AreEqual(GV.Members.Count, 1);
+
+    for each  m  in GV.Members index i do
+      begin
+      case i of
+        0 : begin
+          Assert.IsTrue(m is CGMethodLikeMemberDefinition);
+          Check.AreEqual(CGMethodLikeMemberDefinition(m).Name, 'IBase.TestBase');
+          Check.AreEqual(CGMethodLikeMemberDefinition(m).Parameters.Count , 0);
+          Check.AreEqual(m.ImplementsInterfaceMember, 'Allocate');
+        end;
+
+
       end;
     end;
   end;

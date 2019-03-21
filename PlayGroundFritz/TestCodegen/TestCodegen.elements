@@ -75,6 +75,7 @@
     <Compile Include="TestSimpleStatements.pas" />
     <Compile Include="TestGenricClass.pas" />
     <Compile Include="TestMangling.pas" />
+    <Compile Include="TestAttributes.pas" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

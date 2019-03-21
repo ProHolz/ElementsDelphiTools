@@ -10,7 +10,7 @@ interface
 
  type
 
-  Test_record = record
+  Test_record<T> = record
    private
      fData : integer;
      fTemp : Tarray<string>;
@@ -32,33 +32,33 @@ implementation
 
 { tTestrecord }
 
-function Test_record.GetData : integer;
+function Test_record<T>.GetData : integer;
 begin
   exit (fData);
 end;
 
-constructor Test_record.Create(aData: Integer);
+constructor Test_record<T>.Create(aData: Integer);
 begin
  fdata := aData;
 end;
 
-class operator Test_record.Add(a, b: Test_record): Test_record;
+class operator Test_record<T>.Add(a, b: Test_record): Test_record;
 begin
    result := Test_record.create(a.fData + b.Fdata);
 end;
 
-procedure Test_record.test<a>;
+procedure Test_record<T>.test<a>;
 begin
  a := b+c;
 end;
 
 
-class operator Test_record.Implicit(value: integer): Test_record;
+class operator Test_record<T>.Implicit(value: integer): Test_record;
 begin
   result.fData := value;
 end;
 
-class operator Test_record.Implicit(value: Test_record): integer;
+class operator Test_record<T>.Implicit(value: Test_record): integer;
 begin
    result := value.fData;
 end;

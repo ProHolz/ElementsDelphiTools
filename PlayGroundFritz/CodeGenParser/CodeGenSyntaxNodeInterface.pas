@@ -6,11 +6,15 @@ uses PascalParser;
 type
   CodeBuilderMethods = static partial class
   private
+    method AddMembers(const res : CGClassOrStructTypeDefinition; const node: TSyntaxNode; const visibility :CGMemberVisibilityKind; const name: not nullable String;
+    const methodBodys: Dictionary<String,TSyntaxNode>);
 
     method PrepareGenericParameterDefinition(const node: TSyntaxNode): List<CGGenericParameterDefinition>;
 
     method AddAncestors(const Value : CGClassOrStructTypeDefinition; const Types : TSyntaxNode);
-    method AddFields(const Value : CGClassOrStructTypeDefinition; const node : TSyntaxNode);
+
+
+
     method PrepareArrayType(const Node: TSyntaxNode; const ClassName: not nullable String): CGArrayTypeReference;
     method PrepareProperty(prop: TSyntaxNode): CGPropertyDefinition;
     method PrepareVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGGlobalVariableDefinition;
@@ -20,9 +24,9 @@ type
     method PrepareMethod(const methodnode : TSyntaxNode;  const implnode: TSyntaxNode = nil; const isBlock : Boolean = false) : CGMethodLikeMemberDefinition;
 
   public
-    method BuildInterface(const InterfaceTypeNode : TSyntaxNode; const interfaceName : not nullable String): CGInterfaceTypeDefinition;
+    method BuildInterface(const node : TSyntaxNode; const name : not nullable String): CGInterfaceTypeDefinition;
     method BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassTypeDefinition;
-    method BuildRecord(const RecordTypeNode : TSyntaxNode; const recordName : not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGStructTypeDefinition;
+    method BuildRecord(const node : TSyntaxNode; const name : not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGStructTypeDefinition;
     method BuildGlobMethod(const methodnode : TSyntaxNode; const ispublic : Boolean) : CGGlobalFunctionDefinition;
 
     method BuildSet(const node: TSyntaxNode; const ClassName: not nullable String): CGTypeDefinition;
@@ -37,6 +41,7 @@ type
 
     method BuildMethodMangledName(const node: TSyntaxNode): String;
     method PrepareGenericParameterName(const node: TSyntaxNode): String;
+    method PrepareAttribute(node: TSyntaxNode): CGAttribute;
   end;
 
 implementation
@@ -106,6 +111,15 @@ begin
     if prop.findnode(TSyntaxNodeType.ntDefault) <> nil then
       result.Default := true;
 
+  end;
+
+
+  var lImpl := prop.FindNode(TSyntaxNodeType.ntImplements);
+  if assigned(lImpl) then
+  begin
+    var lType :=  PrepareTypeRef(lImpl.FindNode(TSyntaxNodeType.ntType));
+    if assigned(lType) then
+      result.ImplementsInterface := lType;
   end;
 
 
@@ -219,16 +233,51 @@ method CodeBuilderMethods.PrepareMethod(const methodnode : TSyntaxNode; const im
 begin
   Var MethodType := methodnode.AttribKind;
   var lMethod : CGMethodLikeMemberDefinition;
+  var lMethodNameNode := methodnode.FindNode(TSyntaxNodeType.ntName);
+  var lMethodName := lMethodNameNode:AttribName;
+  var lGenerics : List<CGGenericParameterDefinition> := nil;
+  var lImplementationName : String;
+
+  if not assigned(lMethodNameNode) then
+  begin
+    var lResClause := methodnode.FindNode(TSyntaxNodeType.ntResolutionClause);
+    if assigned(lResClause) then
+    begin
+      var lNames := lResClause.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntName).toArray;
+      if lNames.Count = 2 then
+      begin
+        lMethodNameNode := lNames[0];
+        lMethodName := lMethodNameNode:AttribName;
+        lImplementationName := lNames[1].AttribName;
+      end
+      else raise new Exception("Could not resolve ntResolutionClause");
+    end
+    else raise new Exception("Could not resolve Methodname");
+  end;
+
+   // Check for TypeParams
+  // This done with a check for TypeParams in NameNode
+  var lTypeParams := lMethodNameNode.FindNode(TSyntaxNodeType.ntTypeParams);
+  if assigned(lTypeParams) then
+  begin
+    lMethodName := lMethodNameNode.FindNode(TSyntaxNodeType.ntName):AttribName;
+    lGenerics := PrepareGenericParameterDefinition(lMethodNameNode);
+  end;
 
   case MethodType.ToLower of
-    'constructor' : lMethod := new CGConstructorDefinition(methodnode.AttribName);
-    'destructor' : lMethod := new CGDestructorDefinition(methodnode.AttribName);
-    'operator'   : lMethod := new CGCustomOperatorDefinition(methodnode.FindNode(TSyntaxNodeType.ntName):AttribName);
+    'constructor' : lMethod := new CGConstructorDefinition(lMethodName);
+    'destructor' : lMethod := new CGDestructorDefinition(lMethodName);
+    'operator'   : lMethod := new CGCustomOperatorDefinition(lMethodName);
     else
       begin
-        lMethod := new CGMethodDefinition(methodnode.FindNode(TSyntaxNodeType.ntName):AttribName);
+        lMethod := new CGMethodDefinition(lMethodName);
+        CGMethodDefinition(lMethod).GenericParameters := lGenerics;
+        if not String.IsNullOrEmpty(lImplementationName) then
+          lMethod.ImplementsInterfaceMember := lImplementationName;
       end;
   end;
+
+
 
   Var ReturnType :=  GetReturnType( methodnode.FindNode(TSyntaxNodeType.ntReturnType));
   If assigned(ReturnType) then
@@ -238,12 +287,13 @@ begin
   lMethod.Visibility := mapVisibility(methodnode.ParentNode.Typ);
   if methodnode.getAttribute(TAttributeName.anAbstract).ToLower = 'true' then
     lMethod.Virtuality := CGMemberVirtualityKind.Abstract
-    else
-  lMethod.Virtuality := mapBinding(methodnode.GetAttribute(TAttributeName.anMethodBinding));
+  else
+    lMethod.Virtuality := mapBinding(methodnode.GetAttribute(TAttributeName.anMethodBinding));
      // Class Method?
   if methodnode.GetAttribute(TAttributeName.anClass).ToLower = 'true' then
     lMethod.Static := true;
 
+// Reintroduce?
   if methodnode.getAttribute(TAttributeName.anReintroduce).ToLower = 'true' then
     lMethod.Reintroduced := true;
 
@@ -276,41 +326,12 @@ begin
     Value.Ancestors.Add(PrepareTypeRef(Node));
 end;
 
-method CodeBuilderMethods.AddFields(const Value: CGClassOrStructTypeDefinition; const node: TSyntaxNode);
+
+method CodeBuilderMethods.BuildInterface(const node: TSyntaxNode; const name: not nullable String): CGInterfaceTypeDefinition;
 begin
-  const visibiltyFilter : set of TSyntaxNodeType = [TSyntaxNodeType.ntPrivate,
-                                                    TSyntaxNodeType.ntStrictPrivate,
-                                                    TSyntaxNodeType.ntStrictProtected,
-                                                    TSyntaxNodeType.ntProtected,
-                                                    TSyntaxNodeType.ntPublic];
-
-  for each visibility in node.ChildNodes.FindAll(Item -> Item.Typ in visibiltyFilter )  do
-    for each child in visibility.ChildNodes.FindAll(Item -> Item.Typ =  TSyntaxNodeType.ntField) do
-      begin
-      Var lFieldName := child.FindNode(TSyntaxNodeType.ntName).AttribName;
-      Var lFieldType := child.FindNode(TSyntaxNodeType.ntType);
-      var lCgType : CGTypeReference;
-      case lFieldType.AttribType.ToLower of
-        'array' : begin
-          lCgType := PrepareArrayType(lFieldType, lFieldName);
-        end;
-        else
-          lCgType := PrepareTypeRef(lFieldType);
-end;
-
-
-      var lField := new CGFieldDefinition(lFieldName, lCgType);
-      lField.Visibility :=  mapVisibility(visibility.Typ);
-      Value.Members.Add(lField);
-    end;
-
-end;
-
-method CodeBuilderMethods.BuildInterface(const InterfaceTypeNode: TSyntaxNode; const interfaceName: not nullable String): CGInterfaceTypeDefinition;
-begin
-  result := new CGInterfaceTypeDefinition(interfaceName);
-  result.GenericParameters.Add(PrepareGenericParameterDefinition(InterfaceTypeNode).ToArray);
-  Var NodeGuid := InterfaceTypeNode.FindNode(TSyntaxNodeType.ntGuid);
+  result := new CGInterfaceTypeDefinition(name);
+  result.GenericParameters.Add(PrepareGenericParameterDefinition(node.ParentNode).ToArray);
+  Var NodeGuid := node.FindNode(TSyntaxNodeType.ntGuid);
   Var NodeValue := NodeGuid:FindNode(TSyntaxNodeType.ntLiteral);
   If assigned(NodeValue) then
   begin
@@ -319,15 +340,8 @@ begin
       result.InterfaceGuid := new Guid(StringGuid);
   end;
 
-  AddAncestors(result, InterfaceTypeNode);
-
-  for each &method in InterfaceTypeNode.FindNodes(TSyntaxNodeType.ntMethod) do
-    begin
-    result.Members.Add(PrepareMethod(&method));
-  end;
-
-  for each prop in InterfaceTypeNode.FindNodes(TSyntaxNodeType.ntProperty) do
-    result.Members.Add(PrepareProperty(prop));
+  AddAncestors(result, node);
+  AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name, nil);
 
 end;
 
@@ -370,6 +384,94 @@ begin
 
 end;
 
+method CodeBuilderMethods.AddMembers(const res : CGClassOrStructTypeDefinition; const node: TSyntaxNode;
+const visibility :CGMemberVisibilityKind; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>);
+begin
+  if assigned(node) then
+  begin
+    var lAttributes := new List<CGAttribute>;
+    for each child in node.ChildNodes do
+      begin
+      case child.Typ of
+        TSyntaxNodeType.ntField : begin
+          Var lFieldName := child.FindNode(TSyntaxNodeType.ntName).AttribName;
+          Var lFieldType := child.FindNode(TSyntaxNodeType.ntType);
+          var lCgType : CGTypeReference;
+          case lFieldType.AttribType.ToLower of
+            'array' : begin
+              lCgType := PrepareArrayType(lFieldType, lFieldName);
+            end;
+            else
+              lCgType := PrepareTypeRef(lFieldType);
+          end;
+
+
+          var lField := new CGFieldDefinition(lFieldName, lCgType);
+          lField.Visibility :=  visibility;
+          res.Members.Add(lField);
+          if lAttributes.Count > 0  then
+          begin
+            lField.Attributes.add(lAttributes);
+            lAttributes.RemoveAll;
+          end;
+
+
+        end;
+
+        TSyntaxNodeType.ntMethod :
+        begin
+          var Search := (name+'.'+BuildMethodMangledName(child)).ToLower;
+          var lMethod :=
+          if (assigned(methodBodys) and methodBodys.ContainsKey(Search)) then
+            PrepareMethod(child, methodBodys[Search])
+        else
+          PrepareMethod(child);
+
+          if assigned(lMethod)  then
+          begin
+            if lAttributes.Count > 0  then
+            begin
+              lMethod.Attributes.add(lAttributes);
+             lAttributes.RemoveAll;
+           end;
+
+            res.Members.Add(lMethod);
+          end;
+        end;
+
+        TSyntaxNodeType.ntProperty : begin
+          var lProp := PrepareProperty(child);
+          if lAttributes.Count > 0  then
+          begin
+            lProp.Attributes.add(lAttributes);
+            lAttributes.RemoveAll;
+          end;
+
+          res.Members.Add(lProp);
+        end;
+
+        TSyntaxNodeType.ntAttributes : begin
+          for each lNodeAttr in child.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntAttribute) do
+          begin
+            var lattr := PrepareAttribute(lNodeAttr);
+            if assigned(lattr) then
+              lAttributes.Add(lattr);
+          end;
+         end;
+
+
+        // Visibilitys
+        TSyntaxNodeType.ntPrivate : AddMembers(res, child, CGMemberVisibilityKind.Private, name, methodBodys);
+        TSyntaxNodeType.ntStrictPrivate :  AddMembers(res, child, CGMemberVisibilityKind.Private, name, methodBodys);
+        TSyntaxNodeType.ntStrictProtected : AddMembers(res, child, CGMemberVisibilityKind.Protected, name, methodBodys);
+        TSyntaxNodeType.ntProtected : AddMembers(res, child, CGMemberVisibilityKind.Protected, name, methodBodys);
+        TSyntaxNodeType.ntPublic : AddMembers(res, child, CGMemberVisibilityKind.Public, name, methodBodys);
+        TSyntaxNodeType.ntPublished : AddMembers(res, child, CGMemberVisibilityKind.Published, name, methodBodys);
+
+      end;
+    end;
+  end;
+end;
 
 
 method CodeBuilderMethods.BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassTypeDefinition;
@@ -377,7 +479,6 @@ begin
   //public var GenericParameters = List<CGGenericParameterDefinition>()
   result := new CGClassTypeDefinition(name);
   var lGenerics := PrepareGenericParameterDefinition(node.ParentNode).ToArray;
-
   result.GenericParameters.Add(lGenerics);
 
   var lTypeParams := node.ParentNode.FindNode(TSyntaxNodeType.ntTypeParams);
@@ -385,36 +486,9 @@ begin
   if assigned(lTypeParams) then
     lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
 
-
-
-
     // Descenting from
   AddAncestors(result, node);
-  AddFields(result,  node);
-
-  for each &method in node.FindNodes(TSyntaxNodeType.ntMethod) do
-    begin
-    var Search := (name+lname+'.'+BuildMethodMangledName(&method)).ToLower;
-
-    if methodBodys.ContainsKey(Search) then
-    begin
-      var lmethod := PrepareMethod(&method, methodBodys[Search]);
-      //if assigned(lGenerics) and (length(lGenerics)>0) then
-      //if lmethod is CGMethodDefinition then
-        //begin
-         //CGMethodDefinition(lmethod).GenericParameters := new List<CGGenericParameterDefinition>(lGenerics);
-        //end;
-     if assigned(lmethod)  then
-      result.Members.Add(lmethod);
-    end
-    else
-
-      result.Members.Add(PrepareMethod(&method));
-  end;
-
-  for each prop in node.FindNodes(TSyntaxNodeType.ntProperty) do
-    result.Members.Add(PrepareProperty(prop));
-
+  AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name+lname, methodBodys);
 
 end;
 
@@ -454,41 +528,20 @@ begin
   else exit nil;
 end;
 
-method CodeBuilderMethods.BuildRecord(const RecordTypeNode: TSyntaxNode; const recordName: not nullable String;const methodBodys : Dictionary<String,TSyntaxNode>) : CGStructTypeDefinition;
+method CodeBuilderMethods.BuildRecord(const node: TSyntaxNode; const name: not nullable String;const methodBodys : Dictionary<String,TSyntaxNode>) : CGStructTypeDefinition;
 begin
-  result :=  new CGStructTypeDefinition(recordName);
-  for each FieldNode in RecordTypeNode.FindNodes(TSyntaxNodeType.ntField) do
-    begin
-    var Fieldname := FieldNode.FindNode(TSyntaxNodeType.ntName).AttribName;
-    var FieldType := FieldNode.FindNode(TSyntaxNodeType.ntType);
-    Var cgType :=
-    if assigned(FieldType) then PrepareTypeRef(FieldType)
-  else ''.AsTypeReference;
+  result :=  new CGStructTypeDefinition(name);
+  var lGenerics := PrepareGenericParameterDefinition(node.ParentNode).ToArray;
+  result.GenericParameters.Add(lGenerics);
 
+  var lTypeParams := node.ParentNode.FindNode(TSyntaxNodeType.ntTypeParams);
+  var lname : String := '';
+  if assigned(lTypeParams) then
+    lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
 
-    Var lField := new CGFieldDefinition(Fieldname, cgType);
-    lField.Visibility :=  mapVisibility(FieldNode.ParentNode.Typ);
-
-    result.Members.Add(lField);
-  end;
-
-  for each &method in RecordTypeNode.FindNodes(TSyntaxNodeType.ntMethod) do
-    begin
-
-    var Search := recordName.ToLower+'.'+BuildMethodMangledName(&method);
-
-    if methodBodys:ContainsKey(Search) then
-    begin
-      result.Members.Add(PrepareMethod(&method, methodBodys[Search]));
-    end
-    else
-
-      result.Members.Add(PrepareMethod(&method));
-  end;
-
-  for each prop in RecordTypeNode.FindNodes(TSyntaxNodeType.ntProperty) do
-    result.Members.Add(PrepareProperty(prop));
-
+    // Descenting from
+  AddAncestors(result, node);
+  AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name+lname, methodBodys);
 end;
 
 method CodeBuilderMethods.BuildVariable(const node: TSyntaxnode; const ispublic : Boolean) : CGGlobalVariableDefinition;
@@ -514,9 +567,6 @@ begin
 
   result := (MethodName+'_'+lParam+'_'+ReturnType).ToLower;
 end;
-
-
-
 
 
 method CodeBuilderMethods.BuildArray(const ClassTypeNode: TSyntaxNode; const ClassName: not nullable String): CGTypeDefinition;
@@ -570,6 +620,29 @@ begin
   end
   else raise new Exception("BuildBlockType not solved");
 end;
+
+method CodeBuilderMethods.PrepareAttribute(node: TSyntaxNode): CGAttribute;
+begin
+  Var lName := node.FindNode(TSyntaxNodeType.ntName):AttribName;
+  if not String.IsNullOrEmpty(lName) then
+  begin
+    var lparameter := new List<CGCallParameter>;
+    var lArguments := node.FindNode(TSyntaxNodeType.ntArguments);
+
+    for each posarg in lArguments:ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntPositionalArgument) do
+      begin
+      var lattr := PrepareExpressionValue(posarg.FindNode(TSyntaxNodeType.ntValue));
+      if assigned(lattr) then
+        lparameter.Add(new CGCallParameter(lattr));
+    end;
+    if lparameter.Count > 0 then
+      result := new CGAttribute(lName.AsTypeReference, lparameter)
+      else
+    result := new CGAttribute(lName.AsTypeReference);
+  end;
+end;
+
+
 
 
 end.
