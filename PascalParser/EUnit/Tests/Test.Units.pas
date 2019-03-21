@@ -237,4 +237,21 @@ interface
 end.
 ";
 
+cTestAsm ="
+unit Test;
+interface
+implementation
+procedure Handler(Params: Pointer);
+asm
+        .NOFRAME
+        SUB     RSP, 28H
+        CALL    InternalHandler
+        MOV     [RSP], RAX
+        MOVSD   XMM0, [RSP]
+        ADD     RSP, 28H
+end;
+end.
+";
+
+
 end.

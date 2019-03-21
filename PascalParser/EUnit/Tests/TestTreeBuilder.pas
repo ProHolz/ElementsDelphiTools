@@ -19,6 +19,7 @@ type
     method TestConstArrays;
    public
      method TestNames;
+     method TestAsm;
 
   end;
 
@@ -142,6 +143,15 @@ begin
         end;
       end;
     end;
+
+method TestTreeBuilder.TestAsm;
+begin
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+  Var Root := Builder.RunWithString(cTestAsm );
+  //var Xml2 := TSyntaxTreeWriter.ToXML(Root, true);
+  //File.WriteText('D:\Test\Testasm.xml', Xml2);
+
+end;
 
 
 
