@@ -24,6 +24,8 @@ type
     method BuildConstantsClause(const node : TSyntaxNode; const ispublic : Boolean);
     method BuildVariablesClause(const node : TSyntaxNode; const ispublic : Boolean);
     method BuildTypesClause(const node : TSyntaxNode);
+    method BuildGlobMethodWithStatements(const node : TSyntaxNode; const prefix : String; const name : String);
+
 
   public
     method BuildCGCodeUnitFomSyntaxNode(const rootnode : TSyntaxNode) : CGCodeUnit;
@@ -141,10 +143,18 @@ begin
   begin
     for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntConstant) do
       fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
+
+    for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntResourceString) do
+      fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
+
   end
   else
+   begin
     for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntConstant) do
-      fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic))
+      fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
+    for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntResourceString) do
+      fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
+   end;
 end;
 
 method CodeBuilder.BuildVariablesClause(const node: TSyntaxNode; const ispublic: Boolean);
@@ -294,6 +304,15 @@ begin
        end;
      end;
 
+  lInterface := rootnode.FindNode(TSyntaxNodeType.ntInitialization):FindNode(TSyntaxNodeType.ntStatements);
+  if lInterface:HasChildren then
+   BuildGlobMethodWithStatements(lInterface, 'Initialize_', fUnit.Namespace.Name);
+
+
+  lInterface := rootnode.FindNode(TSyntaxNodeType.ntFinalization):FindNode(TSyntaxNodeType.ntStatements);
+  if lInterface:HasChildren then
+    BuildGlobMethodWithStatements(lInterface, 'Finalize_', fUnit.Namespace.Name);
+
      result := fUnit;
    end;
 
@@ -318,5 +337,18 @@ begin
        fImplementationMethods.Remove(lkey);
 
    end;
+
+method CodeBuilder.BuildGlobMethodWithStatements(const node: TSyntaxNode; const prefix: String; const name: String);
+begin
+  var methodname := prefix+name.Replace('.', '_');
+
+  var lmethod := new CGMethodDefinition(methodname);
+  lmethod.Visibility := CGMemberVisibilityKind.Public;
+  lmethod.Statements.add(new CGRawStatement('{$HINT "Replaces Initialization/Finalization"}'));
+  CodeBuilderMethods.BuildStatements(node, lmethod);
+
+  fUnit.Globals.Add(lmethod.AsGlobal);
+
+end;
 
 end.

@@ -7,6 +7,7 @@ uses PascalParser;
 type
   CodeBuilderMethods = static partial class
   private
+    method PrepareGenricExpression(const node: TSyntaxNode): CGExpression;
 
     method PrepareTypeExpression(const node: TSyntaxNode): CGExpression;
     method PrepareListExpression(const node: TSyntaxNode): CGExpression;
@@ -138,12 +139,16 @@ method CodeBuilderMethods.PrepareExpressionValue(const valuenode: TSyntaxNode): 
 begin
   result := nil;
   if valuenode = nil then exit;
-  var ExpressionNode := valuenode.FindNode(TSyntaxNodeType.ntExpression);
-  if assigned(ExpressionNode) and ExpressionNode.HasChildren then
-  begin
-    var literalnode := ExpressionNode.ChildNodes[0];
-    result := PrepareSingleExpressionValue(literalnode);
-  end;
+
+  if valuenode.HasChildren then
+    exit  PrepareSingleExpressionValue(valuenode.ChildNodes[0]);
+
+  //var ExpressionNode := valuenode.FindNode(TSyntaxNodeType.ntExpression);
+  //if assigned(ExpressionNode) and ExpressionNode.HasChildren then
+  //begin
+    //var literalnode := ExpressionNode.ChildNodes[0];
+    //result := PrepareSingleExpressionValue(literalnode);
+  //end;
 
 end;
 
@@ -241,7 +246,39 @@ begin
 end;
 
 
+method CodeBuilderMethods.PrepareGenricExpression(const node : Tsyntaxnode) : CGExpression;
+begin
+  var lIdent := PrepareSingleExpressionValue(node.FindNode(TSyntaxNodeType.ntIdentifier));
 
+  // if it is a named reference check further.....
+  if lIdent is CGNamedIdentifierExpression then
+  begin
+    var lTypename := node.FindNode(TSyntaxNodeType.ntIdentifier).AttribName;
+    var typeArgs := node.FindNode(TSyntaxNodeType.ntTypeArgs);
+    if assigned(typeArgs) then
+    begin
+      var largs := new List<CGTypeReference>;
+      for each child in typeArgs.ChildNodes.where(Item->Item.Typ = TSyntaxNodeType.ntType) do
+        largs.Add(PrepareTypeRef(child));
+
+        if largs.Count > 0 then
+        begin
+          var ls := '';
+          var dot := '';
+          ls := '<';
+          for each s in largs  do
+            begin
+            ls := ls+dot+s;
+            dot := ',';
+          end;
+          ls := ls+'>';
+         exit new CGNamedIdentifierExpression(lTypename+ls);
+     end;
+    end;
+  end;
+
+  exit lIdent;
+end;
 
 
 method CodeBuilderMethods.PrepareSingleExpressionValue(const node: TSyntaxNode): CGExpression;
@@ -280,12 +317,15 @@ begin
       TSyntaxNodeType.ntDeref : exit  PrepareDeRefExpression(node);
 
       TSyntaxNodeType.ntType : exit PrepareTypeExpression(node);// new CGNamedIdentifierExpression('======ntType=======');
-      TSyntaxNodeType.ntIn : exit  new CGNamedIdentifierExpression('======ntIn=======');
+   //   TSyntaxNodeType.ntIn : exit  new CGNamedIdentifierExpression('======ntIn=======');
       TSyntaxNodeType.ntInherited : exit  PrepareInheritedStatement(node);
       TSyntaxNodeType.ntGoto: exit new CGRawExpression('{$HINT "Goto '+node.ChildNodes[0].AttribName+' not Supported"}');
 
       TSyntaxNodeType.ntRecordConstant : exit  new CGNamedIdentifierExpression('======RecordConstant=======');
       TSyntaxNodeType.ntAnonymousMethod : exit  PrepareAnonymousMethod(node);
+      TSyntaxNodeType.ntGeneric : exit PrepareGenricExpression(node);
+
+
       else raise new Exception(node.Typ.ToString+  '=======Unknown Paramtype in PrepareSingleExpressionValue =======');
 
     end;

@@ -6,6 +6,7 @@ uses PascalParser;
 type
   CodeBuilderMethods = static partial class
   private
+    method PrepareClassCreateMethod(const methodnode: TSyntaxNode; const name : not nullable String): CGMethodLikeMemberDefinition;
     method AddMembers(const res : CGClassOrStructTypeDefinition; const node: TSyntaxNode; const visibility :CGMemberVisibilityKind; const name: not nullable String;
     const methodBodys: Dictionary<String,TSyntaxNode>);
 
@@ -21,7 +22,10 @@ type
 
     method PrepareDefaultValue(const paramnode: TSyntaxNode; paramkind : String): CGExpression;
     method PrepareParam(const node: TSyntaxNode): CGParameterDefinition;
-    method PrepareMethod(const methodnode : TSyntaxNode;  const implnode: TSyntaxNode = nil; const isBlock : Boolean = false) : CGMethodLikeMemberDefinition;
+
+  //  method PrepareAnonymousParam(const node: TSyntaxNode): CGAnonymousMethodParameterDefinition;
+
+    method PrepareMethod(const methodnode : TSyntaxNode; implnode: TSyntaxNode) : CGMethodLikeMemberDefinition;
 
   public
     method BuildInterface(const node : TSyntaxNode; const name : not nullable String): CGInterfaceTypeDefinition;
@@ -228,8 +232,56 @@ end;
 
 
 
+method CodeBuilderMethods.PrepareClassCreateMethod(const methodnode : TSyntaxNode; const name : not nullable String): CGMethodLikeMemberDefinition;
+begin
+  Var MethodType := methodnode.AttribKind;
+  var lMethod : CGMethodLikeMemberDefinition;
+  var lMethodNameNode := methodnode.FindNode(TSyntaxNodeType.ntName);
+  var lMethodName := lMethodNameNode:AttribName;
 
-method CodeBuilderMethods.PrepareMethod(const methodnode : TSyntaxNode; const implnode: TSyntaxNode = nil;const isBlock : Boolean = false ): CGMethodLikeMemberDefinition;
+
+     // Check for TypeParams
+  // This done with a check for TypeParams in NameNode
+  //var lTypeParams := lMethodNameNode.FindNode(TSyntaxNodeType.ntTypeParams);
+  //if assigned(lTypeParams) then
+  //begin
+    //lMethodName := lMethodNameNode.FindNode(TSyntaxNodeType.ntName):AttribName;
+    //lGenerics := PrepareGenericParameterDefinition(lMethodNameNode);
+  //end;
+
+  lMethod := new CGMethodDefinition(lMethodName);
+  lMethod.Static := true;
+  lMethod.Visibility := CGMemberVisibilityKind.Public;
+  lMethod.ReturnType := name.AsTypeReference() isClassType(true);
+
+  var lParams := new List<CGParameterDefinition>;
+
+  for each &Param in methodnode.FindNodes(TSyntaxNodeType.ntParameter) do
+    begin
+      var lparam := PrepareParam(&Param);
+      lMethod.Parameters.Add(lparam);
+      lParams.Add(lparam);
+    end;
+
+  lMethod.Statements.add(new CGRawStatement('{$HINT "Check call to constructor"}'));
+
+  var lCall := new CGMethodCallExpression(('new '+ name).AsNamedIdentifierExpression, '');
+
+  for each lparam in lParams do
+    lCall.Parameters.add(new CGCallParameter(lparam.Name.AsNamedIdentifierExpression));
+
+
+  var lCreate := new CGReturnStatement(lCall);
+  lMethod.Statements.add(lCreate);
+
+
+
+  exit lMethod;
+
+end;
+
+
+method CodeBuilderMethods.PrepareMethod(const methodnode : TSyntaxNode; implnode: TSyntaxNode): CGMethodLikeMemberDefinition;
 begin
   Var MethodType := methodnode.AttribKind;
   var lMethod : CGMethodLikeMemberDefinition;
@@ -237,6 +289,8 @@ begin
   var lMethodName := lMethodNameNode:AttribName;
   var lGenerics : List<CGGenericParameterDefinition> := nil;
   var lImplementationName : String;
+  var lChangedDestructor : Boolean := false;
+
 
   if not assigned(lMethodNameNode) then
   begin
@@ -265,17 +319,28 @@ begin
   end;
 
   case MethodType.ToLower of
-    'constructor' : lMethod := new CGConstructorDefinition(lMethodName);
-    'destructor' : lMethod := new CGDestructorDefinition(lMethodName);
-    'operator'   : lMethod := new CGCustomOperatorDefinition(lMethodName);
-    else
-      begin
-        lMethod := new CGMethodDefinition(lMethodName);
-        CGMethodDefinition(lMethod).GenericParameters := lGenerics;
-        if not String.IsNullOrEmpty(lImplementationName) then
-          lMethod.ImplementsInterfaceMember := lImplementationName;
-      end;
+    'destructor' : begin
+      lMethodName := 'destruct_'+lMethodName;
+      lChangedDestructor := true;
+    end;
   end;
+
+
+
+  case MethodType.ToLower of
+    'constructor' : begin
+      lMethod := new CGConstructorDefinition('');
+    end;
+   // 'destructor' : lMethod := new CGDestructorDefinition(lMethodName);
+    'operator'   : lMethod := new CGCustomOperatorDefinition(lMethodName);
+else
+  begin
+    lMethod := new CGMethodDefinition(lMethodName);
+    CGMethodDefinition(lMethod).GenericParameters := lGenerics;
+    if not String.IsNullOrEmpty(lImplementationName) then
+      lMethod.ImplementsInterfaceMember := lImplementationName;
+  end;
+end;
 
 
 
@@ -316,7 +381,17 @@ begin
         TSyntaxNodeType.ntStatements : BuildStatements(ltypesec, lMethod);
       end;
   end;
-  result := lMethod;
+
+ // if we have changed the destructor to a method we
+ // Adding a hint do the statements in the method
+if lChangedDestructor then
+begin
+  lMethod.Statements.Insert(0, new CGRawStatement('{$HINT "destructor changed to method"}'));
+   // lMethod.Comment.Lines.Add('destructor changed');
+ end;
+
+
+result := lMethod;
 end;
 
 
@@ -425,17 +500,25 @@ begin
           if (assigned(methodBodys) and methodBodys.ContainsKey(Search)) then
             PrepareMethod(child, methodBodys[Search])
         else
-          PrepareMethod(child);
+          PrepareMethod(child, nil);
 
           if assigned(lMethod)  then
           begin
             if lAttributes.Count > 0  then
             begin
               lMethod.Attributes.add(lAttributes);
-             lAttributes.RemoveAll;
-           end;
+              lAttributes.RemoveAll;
+            end;
 
             res.Members.Add(lMethod);
+
+            if (lMethod is CGConstructorDefinition) and (not lMethod.Static) then
+            begin
+              var lClassMethod := PrepareClassCreateMethod(child, name);
+              lClassMethod.ReturnType := name.AsTypeReference;
+              res.Members.Add(lClassMethod);
+            end;
+
           end;
         end;
 
@@ -452,12 +535,12 @@ begin
 
         TSyntaxNodeType.ntAttributes : begin
           for each lNodeAttr in child.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntAttribute) do
-          begin
+            begin
             var lattr := PrepareAttribute(lNodeAttr);
-            if assigned(lattr) then
-              lAttributes.Add(lattr);
-          end;
-         end;
+              if assigned(lattr) then
+                lAttributes.Add(lattr);
+            end;
+        end;
 
 
         // Visibilitys
@@ -519,11 +602,11 @@ end;
 
 method CodeBuilderMethods.BuildGlobMethod(const methodnode: TSyntaxNode; const ispublic : Boolean): CGGlobalFunctionDefinition;
 begin
-  Var res := PrepareMethod(methodnode);
+  Var res := PrepareMethod(methodnode, nil);
   if res is CGMethodDefinition then
   begin
     result := (res as CGMethodDefinition).AsGlobal;
-    result.Function.Visibility := if ispublic then CGMemberVisibilityKind.Public else CGMemberVisibilityKind.Private;
+    result.Function.Visibility := if ispublic then CGMemberVisibilityKind.Public else CGMemberVisibilityKind.Unit;
   end
   else exit nil;
 end;
@@ -637,12 +720,34 @@ begin
     end;
     if lparameter.Count > 0 then
       result := new CGAttribute(lName.AsTypeReference, lparameter)
-      else
-    result := new CGAttribute(lName.AsTypeReference);
+    else
+      result := new CGAttribute(lName.AsTypeReference);
   end;
 end;
 
+(*
+method CodeBuilderMethods.PrepareAnonymousParam(const node: TSyntaxNode): CGAnonymousMethodParameterDefinition;
+begin
+  result := nil;
+  var paramName := node.FindNode(TSyntaxNodeType.ntName):AttribName;
+{$HINT "No Modifier yet"}
+   var Modifier := CGParameterModifierKind.In;
+   case node.AttribKind.ToLower of
+     'const' : Modifier := CGParameterModifierKind.Const;
+     'var' : Modifier := CGParameterModifierKind.Var;
+     'out' : Modifier := CGParameterModifierKind.Out;
+   end;
 
+  result:= new CGAnonymousMethodParameterDefinition(paramName);
+
+   var paramTypenode := node.FindNode(TSyntaxNodeType.ntType);
+   if assigned(paramTypenode) then
+     result.Type:=  PrepareTypeRef(paramTypenode);
+
+
+end;
+
+*)
 
 
 end.

@@ -27,6 +27,7 @@ type
     method PrepareStatementBlockOrSingle(const node: TSyntaxNode): CGStatement;
     method PrepareCaseStatement(const node: TSyntaxNode): CGStatement;
     method PrepareStatement(const node : TSyntaxNode) : CGStatement;
+   public
     method BuildStatements(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
 
   end;
