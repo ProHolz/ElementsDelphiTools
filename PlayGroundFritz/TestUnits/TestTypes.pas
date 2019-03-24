@@ -34,9 +34,18 @@ type
   tmyfunc = function(value : integer) : integer of object;
   tmyref = reference to procedure(value : integer);
 
+
+resourceString
+r1 = 'Hello';
+r2 = 'Hello2';
+
 implementation
 
+ initialization
 
+   a := b;
+   finalization
+   a := b;
 end.
 
 ";
