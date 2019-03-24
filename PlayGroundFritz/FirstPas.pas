@@ -38,8 +38,8 @@ begin
   end;
 
 
-  //sb.Append(BuildInterfaceTest(TestTypes, 'TestTypes'));
-  //sb.AppendLine.Append('{Next File}').AppendLine;
+  sb.Append(BuildInterfaceTest(TestTypes, 'TestTypes'));
+  sb.AppendLine.Append('{Next File}').AppendLine;
 
 
 
@@ -81,8 +81,8 @@ begin
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
-// sb.Append(BuildInterfaceTest(TestUnit2, 'TestUnit2'));
-  //sb.AppendLine.Append('{Next File}').AppendLine;
+ sb.Append(BuildInterfaceTest(TestUnit2, 'TestUnit2'));
+  sb.AppendLine.Append('{Next File}').AppendLine;
 
  sb.Append(BuildInterfaceTest(TestInterfaceImpl, 'TestInterfaceImpl'));
   sb.AppendLine.Append('{Next File}').AppendLine;
