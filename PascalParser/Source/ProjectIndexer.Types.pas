@@ -54,7 +54,7 @@ type
     FIncludeCache: TIncludeCache;
     FIndexer     : TProjectIndexer;
     FProblems    : TParseProblems;
-    FUnitFile           : String;
+  //  FUnitFile           : String;
     FUnitFileFolder     : String;
   public
     constructor (indexer: TProjectIndexer; includeCache: TIncludeCache; problemList: TParseProblems; const currentFile: String);
@@ -71,7 +71,7 @@ begin
   FIncludeCache := includeCache;
   FProblems := problemList;
   FUnitFileFolder :=   Path.GetParentDirectory(currentFile);
-  FUnitFile := Path.GetFileNameWithoutExtension(currentFile);
+//  FUnitFile := Path.GetFileNameWithoutExtension(currentFile);
 end;
 
 method TProjectIncludeHandler.GetIncludeFileContent(const fileName: not nullable string): not nullable string;
@@ -81,14 +81,8 @@ filePath   : String;
 includeInfo: TIncludeInfo;
 key        : String;
 begin
-  //fileName);
 
-  //if fileName.StartsWith('*.') then
-    //fName := FUnitFile + fileName.Remove(0 {0-based}, 1)
-  //else if fileName.Contains('*') then
-    //fName := fileName.Replace('*', '')
-  //else
-  var  fName := fileName.ToLowerInvariant;
+  var  fName := fileName.ToLower;
 
   key := fName + #13 + FUnitFileFolder;
   if FIncludeCache.ContainsKey(key) then

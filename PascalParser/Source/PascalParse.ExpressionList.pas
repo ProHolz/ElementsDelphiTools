@@ -147,7 +147,7 @@ begin
 
     Root.AddChild(Stack.Pop);
 
-    assert(Stack.Count = 0);
+  //  assert(Stack.Count = 0);
   finally
     Stack := nil;
   end;

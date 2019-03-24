@@ -87,7 +87,8 @@
     TSyntaxNodeType.ntType,
     TSyntaxNodeType.ntValue,
     TSyntaxNodeType.ntWrite,
-    TSyntaxNodeType.ntGoto
+    TSyntaxNodeType.ntGoto,
+    TSyntaxNodeType.ntGeneric
 
     ];
 

@@ -52,7 +52,7 @@ type
   // Blocks
   TDirectiveEvent =  public block(Sender: TmwBasePasLex);// of object;
   TCommentEvent = public block(Sender: Object; const Text: not nullable String);// of object;
-
+  TParseCompilerDirectiveEvent = public block (Sender: Object; const directive: String; out res : Boolean) : Boolean;
 
 
   TDefineRec =  class
@@ -271,6 +271,7 @@ type
     method HashValue(AChar: Char): Integer;
     method EvaluateComparison(AValue1: Double; const AOper: not nullable String; AValue2: Double): Boolean;
     method EvaluateConditionalExpression(const AParams: not nullable String): Boolean;
+    method EvaluateSpeciaConditionalExpression(const AParams: not nullable String): Boolean;
     method IncludeFile;
     method GetIncludeFileNameFromToken(const IncludeToken: not nullable String): not nullable String;
     method GetOrigin: not nullable String;
@@ -353,7 +354,7 @@ type
     property OnElseIfDirect: TDirectiveEvent read  write ;
     property OnResourceDirect: TDirectiveEvent read  write ;
     property OnUnDefDirect: TDirectiveEvent read  write ;
-
+    property OnParseCompilerDirectiveEvent : TParseCompilerDirectiveEvent read write;
 
   end;
 
@@ -1635,6 +1636,24 @@ begin
     Result := False;
 end;
 
+method TmwBasePasLex.EvaluateSpeciaConditionalExpression(const AParams: not nullable String): Boolean;
+begin
+  var LParams := AParams.Replace(' ','');
+
+  result := false;
+
+  if assigned(OnParseCompilerDirectiveEvent) then
+   begin
+     var res : Boolean := false;
+    if OnParseCompilerDirectiveEvent(self, AParams, out res) then
+      exit res;
+   end;
+
+  // We should raise a Exception...........
+  if not result then
+    raise new EParserException(PosXY.Y, PosXY.X,'',$"can not solve Compiler directive [{AParams}]");
+
+end;
 
 method TmwBasePasLex.EvaluateConditionalExpression(const AParams: not nullable String): Boolean;
 var
@@ -1742,8 +1761,9 @@ begin
           LParams := TrimLeft(CopyOneBased(LParams, 3, length(LParams) - 2));
         end;
     end;
-  end else
-    Result := False;
+  end
+  else
+      result := EvaluateSpeciaConditionalExpression(LParams);
 end;
 
 method TmwBasePasLex.ColonProc;
@@ -2576,6 +2596,7 @@ end;
       FTokenID := ALexer.TokenID;
       FExID := ALexer.ExID;
       CloneDefinesFrom(ALexer);
+      OnParseCompilerDirectiveEvent := ALexer.OnParseCompilerDirectiveEvent;
     end;
 
     method TmwBasePasLex.InitDefinesDefinedByCompiler;
@@ -2709,6 +2730,7 @@ begin
   FAheadLex.FCommentState := FCommentState;
   FAheadLex.CloneDefinesFrom(Self);
   FAheadLex.SetSharedBuffer(Buffer);
+  FAheadLex.OnParseCompilerDirectiveEvent := OnParseCompilerDirectiveEvent;
   while FAheadLex.IsJunk do
     FAheadLex.Next;
 end;

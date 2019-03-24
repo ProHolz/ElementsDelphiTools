@@ -97,7 +97,7 @@ implementation
 constructor ESyntaxTreeException(Line, Col: Integer; const FileName, Msg: string;
 aSyntaxTree: TSyntaxNode);
 begin
-  inherited (Line, Col, FileName, String.Format('Line: {0} Pos: {1} {2}',[Line, Col, Msg]));
+  inherited (Line, Col, FileName, Msg);
   SyntaxTree := aSyntaxTree;
 end;
 

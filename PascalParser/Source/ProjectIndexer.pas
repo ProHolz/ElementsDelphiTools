@@ -11,6 +11,8 @@ type
     FNotFoundUnits  : StringList;
     FOnGetUnitSyntax: TGetUnitSyntaxEvent;
     FOnUnitParsed   : TUnitParsedEvent;
+    FonParseCompilerDirective : TParseCompilerDirectiveEvent;
+
     FParsedUnits    : TParsedUnitsCache;
     FParsedUnitsInfo: TParsedUnits;
     FProblems       : TParseProblems;
@@ -49,7 +51,7 @@ type
     property SearchPath: StringList read FSearchPathRel write FSearchPathRel;
     property OnGetUnitSyntax: TGetUnitSyntaxEvent read FOnGetUnitSyntax write FOnGetUnitSyntax;
     property OnUnitParsed: TUnitParsedEvent read FOnUnitParsed write FOnUnitParsed;
-
+    property OnParseCompilerDirective : TParseCompilerDirectiveEvent read FonParseCompilerDirective write FonParseCompilerDirective;
 
   end;
 
@@ -71,7 +73,7 @@ begin
         if unitPath <> '' then begin
           if Searchpaths.IsRelativeWinPath(unitPath) then
             unitPath :=  Path.GetFullPath(Path.Combine( filePath , unitPath));
-          FUnitPaths.Add(unitName + '.pas', unitPath);
+          FUnitPaths.Add(unitName + '.pas', unitPath.ToLower);
         end;
       end;
     end;
@@ -158,7 +160,7 @@ begin
   if doParseUnit then
     RunParserOnUnit(fileName, var  syntaxTree);
 
-  FParsedUnits.Add(unitName, syntaxTree);
+  FParsedUnits.Add(unitName.ToLower, syntaxTree);
 
   if (not FAborting) and assigned(syntaxTree) then
     ScanUsedUnits(unitName, fileName, isProject, syntaxTree, doParseUnit);
@@ -228,7 +230,7 @@ end;
 
 begin
   Result := false;
-  var fName :=   StrHelper.AnsiDequotedStr(fileName, Char("'"));
+  var fName :=   StrHelper.AnsiDequotedStr(fileName, Char("'")).ToLower;
 
   if FUnitPaths.ContainsKey(fName) then
   begin
@@ -290,6 +292,8 @@ begin
       builder := new TPasSyntaxTreeBuilder(Compiler);
 
       builder.IncludeHandler := new TProjectIncludeHandler(Self, FIncludeCache, FProblems, fileName);
+
+      TmwSimplePasPar(builder).Lexer.OnParseCompilerDirectiveEvent := FonParseCompilerDirective;
 
       for define in FDefinesList do
         TmwSimplePasPar(builder).Lexer.AddDefine(define);

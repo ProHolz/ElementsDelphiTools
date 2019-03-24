@@ -15,6 +15,7 @@
                  'WIN32',
                  'XE7',
                  'CPUX86',
+                 'X86ASM',
                  'PUREPASCAL'];
     end;
 
@@ -70,7 +71,9 @@
                   'CONDITIONALEXPRESSIONS',
                   'UNICODE',
                   'WIN32',
-                  'RIO'];
+                  'RIO',
+                 'CPUX86',
+                 'PUREPASCAL'];
 
      end;
 
