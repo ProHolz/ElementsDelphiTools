@@ -15,9 +15,10 @@ type
 
     constructor (const aFilename : String; aFilePath : String);
     begin
-      FileName := aFilename;
-      FilePath := aFilePath;
+      FileName := aFilename:ToLower;
+      FilePath := aFilePath:ToLower;
     end;
+
     method AddProblem(Prob : eEleCheck; Line : Integer; Pos : Integer);
     begin
       var msg := String.Format('Line: {0} Pos{1} , {2} ', [Line, Pos, cEleProbsnames[Prob]]);

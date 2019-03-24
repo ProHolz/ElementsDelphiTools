@@ -10,9 +10,33 @@ type
       var showNotfound : Boolean := true;
       // add your own code here
       writeLn('The magic happens here.');
-    //  var project := new ProjectRunner("X:\Projekte\SynEdit\Packages\XE7\SynEdit_R.dpk");
-     // var project := new ProjectRunner("X:\Projekte\SynEdit\Source\SynEditMiscClasses.pas");
-      var project := new ProjectRunner("X:\Projekte\Rtl_Delphi_Elements\rtl\BuildWinRTL.dpk");
+
+      const actualCompiler =
+      DelphiCompiler.dcXe7;
+      //DelphiCompiler.dcRio;
+
+      var projectname :=
+    //  "D:\Komps_Xe7\dwscript\Packages\DXE7\dwsLibRuntime.dpk";
+
+   //   "X:\Projekte\SynEdit\Packages\XE7\SynEdit_R.dpk";
+     // "X:\Projekte\SynEdit\Source\SynEditMiscClasses.pas";
+   //   "X:\Projekte\Rtl_Delphi_Elements\rtl\BuildWinRTL.dpk";
+     // "C:\Program Files (x86)\Embarcadero\Studio\20.0\source\rtl\BuildWinRTL.dpk"; // Rio
+
+      //"X:\Projekte\Rtl_Delphi_Elements\System.Classes.pas"; // Rio
+
+     // "X:\Projekte\pascalscript\Source\PascalScript_Core_D21.dpk");
+      "D:\sourceProHolz\Abbund170\ABBUNDXE7.dpr";
+   //   "X:\Projekte\Rtl_Delphi_Elements\rtl\common\System.ObjAuto.pas";
+
+      var projectProblems :=  Path.ChangeExtension(projectname, '.txt');
+      var project := new ProjectRunner(actualCompiler, projectname);
+
+      project.NotFoundDirectives := 'D:\Test\Defines.txt';
+      project.FalseDefinesfile := 'D:\Test\falseDefines.txt';
+      project.TrueDefinesfile := 'D:\Test\trueDefines.txt';
+
+
       project.Run;
       if project.Problems.Count > 0 then
       begin
@@ -23,7 +47,9 @@ type
       //.Where((item)->(item.ProblemType <> TProblemType.ptCantFindFile))  do
         do
         begin
-         writeLn(String.Format('{2} {1} {0}', [problem.Description, problem.FileName, problem.ProblemType.ToString]));
+          writeLn(problem.FileName);
+
+         writeLn(String.Format('{1} {0}', [problem.Description,  problem.ProblemType.ToString]));
         //writeLn(String.Format('{0}', [problem.Description]));
       end;
       writeLn;
@@ -72,8 +98,8 @@ type
         end;
       end;
 
-      File.WriteText("X:\Projekte\Rtl_Delphi_Elements\RTL_Problems.txt", project.GetAllProblemsText);
 
+      File.WriteText(projectProblems, project.GetAllProblemsText);
 
     end;
 

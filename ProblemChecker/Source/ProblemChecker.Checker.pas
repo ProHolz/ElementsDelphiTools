@@ -89,8 +89,14 @@ type
 
   TProblem_RES = class( ISingleProbSolver)
     method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
-    property CheckTyp : eEleCheck read eEleCheck.eDfm;
+    property CheckTyp : eEleCheck read eEleCheck.eHasResources;
   end;
+
+
+  TProblem_ResString = class( ISingleProbSolver)
+    method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
+     property CheckTyp : eEleCheck read eEleCheck.eHasResourceStrings;
+   end;
 
 implementation
 
@@ -124,8 +130,16 @@ begin
    // Todo add Check for ScopedEnums
   result := Lenums.Count > 0;
   if result then
+   begin
+    result := false;
     for node in Lenums do
+     begin
+      if node.GetAttribute(TAttributeName.anVisibility) = 'scoped' then
+       continue;
+      result := true;
       ProblemLog.Problem_At(CheckTyp, node.Line, node.Col);
+     end;
+   end;
 end;
 
 method TProblem_GlobVars.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -189,7 +203,7 @@ begin
 
   var Nodes := NodeSolver.getPublicClass(syntaxTree);
   result := Nodes.Count > 0;
-
+  if result then
     for  each node in Nodes do
       ProblemLog.Problem_At(CheckTyp, node.Line, node.Col);
 end;
@@ -294,6 +308,13 @@ begin
     end;
   end;
 
+end;
+
+method TProblem_ResString.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
+begin
+  result := false;
+  var Nodes := syntaxTree.FindNodes(SNT.ntResourceString);
+  result := Nodes:Count > 0
 end;
 
 

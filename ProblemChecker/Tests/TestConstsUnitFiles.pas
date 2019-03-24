@@ -23,7 +23,7 @@ unit TestPublic;
 interface
 
 Var Test : Integer;
-
+{.$SCOPEDENUMS ON}
 type
   TEnum = (first, second);
 
@@ -55,6 +55,10 @@ interface
    Classes;
 
   type
+    {$SCOPEDENUMS ON}
+
+  TEnum = (first, second);
+
     testRecord = record
        x,y : integer;
     end;
