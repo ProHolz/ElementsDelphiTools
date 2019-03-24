@@ -11,6 +11,7 @@ type
   protected
   public
     method TestSimpleAssign;
+    method TestFor;
   end;
 
 implementation
@@ -97,6 +98,48 @@ end;
 
     end;
   end;
+end;
+
+method TestSimpleStatements.testFor;
+begin
+  var lunit := BuildUnit(tbUnitType.implementation ,"
+
+procedure TestLoops;
+var i : integer;
+begin
+  for i := 0 to 2 do;
+  for j in check do;
+   while false do;
+   repeat until false;
+end;
+
+
+");
+
+  Assert.IsNotNil(lunit);
+  Assert.AreEqual(lunit.Globals.Count, 1);
+  for each matching GV : CGGlobalFunctionDefinition in lunit.Globals  do
+    begin
+    var func := GV.Function;
+    Check.AreEqual(func.Statements.Count, 4);
+    for each s  in  func.Statements index i do
+      begin
+        case i of
+          0 : begin
+              Check.IsTrue(s is CGForToLoopStatement);
+            end;
+          1 : begin
+              Check.IsTrue(s is CGForEachLoopStatement);
+          end;
+          2 : begin
+              Check.IsTrue(s is CGWhileDoLoopStatement);
+           end;
+          3 : begin
+              Check.IsTrue(s is CGDoWhileLoopStatement);
+           end;
+        end;
+      end;
+    end;
 end;
 
 end.

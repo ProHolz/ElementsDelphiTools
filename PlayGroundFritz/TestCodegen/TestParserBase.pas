@@ -36,7 +36,7 @@ const cBaseUnit = "
 ";
 
 const cBaseUnitImpl = "
- unit Test;
+ unit Test.Special.part;
  interface
 
  implementation

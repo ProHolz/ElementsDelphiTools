@@ -152,13 +152,13 @@ end;
       case i of
         0 : begin
             Check.IsTrue(m is CGConstructorDefinition);
-            Check.AreEqual(m.Name, 'Create');
+            Check.AreEqual(m.Name, '');
             Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
             Check.IsTrue( m.Static);
         end;
         1 : begin
-            Check.IsTrue(m is CGDestructorDefinition);
-          Check.AreEqual(m.Name, 'Destroy');
+          //  Check.IsTrue(m is CGDestructorDefinition);
+          Check.EndsWith('Destroy', m.Name);
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsTrue( m.Static);
         end;
@@ -191,22 +191,37 @@ end;
   Assert.AreEqual(lunit.Types.Count, 1);
   for each matching GV : CGClassTypeDefinition in lunit.Types do
     begin
-    Check.AreEqual(GV.Members.Count, 2);
+
+    // we should have 3 Members now
+    // constructor without name.....
+    // class function with name and result Type
+    // destructor as method
+
+    Check.AreEqual(GV.Members.Count, 3);
     for each matching m : CGMethodLikeMemberDefinition in GV.Members index i do
       begin
       case i of
         0 : begin
           Check.IsTrue(m is CGConstructorDefinition);
-          Check.AreEqual(m.Name, 'Create');
+          Check.AreEqual(m.Name, '');
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
         end;
         1 : begin
-          Check.IsTrue(m is CGDestructorDefinition);
-          Check.AreEqual(m.Name, 'Destroy');
+          Check.IsTrue(m is CGMethodDefinition);
+           Check.AreEqual(m.Name, 'Create');
+           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
+           Check.IsTrue( m.Static);
+         end;
+
+        2 : begin
+          Check.IsFalse(m is CGDestructorDefinition);
+          Check.IsTrue(m is CGMethodDefinition);
+          Check.Contains('Destroy', m.Name);
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
           Check.AreEqual( m.Virtuality, CGMemberVirtualityKind.Virtual);
+          Check.AreEqual(m.Statements.Count, 1);
         end;
       end;
     end;
@@ -252,38 +267,47 @@ end;
   Assert.AreEqual(lunit.Types.Count, 1);
   for each matching GV : CGClassTypeDefinition in lunit.Types do
     begin
-    Check.AreEqual(GV.Members.Count, 5);
+    Check.AreEqual(GV.Members.Count, 6);
     for each matching m : CGMethodLikeMemberDefinition in GV.Members index i do
       begin
       case i of
         0 : begin
           Check.IsTrue(m is CGConstructorDefinition);
-          Check.AreEqual(m.Name, 'Create');
+          Check.AreEqual(m.Name, '');
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
           Check.AreEqual( m.Virtuality, CGMemberVirtualityKind.Override);
         end;
+
         1 : begin
-          Check.IsTrue(m is CGDestructorDefinition);
-          Check.AreEqual(m.Name, 'Destroy');
+          Check.IsTrue(m is CGMethodDefinition);
+           Check.AreEqual(m.Name, 'Create');
+           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
+           Check.IsTrue( m.Static);
+           Check.AreNotEqual( m.Virtuality, CGMemberVirtualityKind.Override);
+         end;
+
+        2 : begin
+          Check.Isfalse(m is CGDestructorDefinition);
+          Check.EndsWith('Destroy', m.Name );
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
           Check.AreEqual( m.Virtuality, CGMemberVirtualityKind.Virtual);
         end;
-        2 : begin
+        3 : begin
 
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
           Check.AreEqual( m.Virtuality, CGMemberVirtualityKind.None);
         end;
-        3 : begin
+        4 : begin
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
           Check.AreEqual( m.Virtuality, CGMemberVirtualityKind.Virtual);
           // Will fail until we have a list for Virtuality
           Check.IsTrue( m.Reintroduced);
         end;
-        4 : begin
+        5 : begin
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
 

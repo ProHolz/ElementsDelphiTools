@@ -99,9 +99,10 @@ for each matching GV : CGStructTypeDefinition in lunit.Types do
       1 : Check.AreEqual(m.Name, 'b');
       2 : begin
         Check.IsTrue(m is CGConstructorDefinition);
-        Check.AreEqual(m.Name, 'Create');
+        Check.AreEqual(m.Name, '');
         Check.IsTrue(m.Static);
       end;
+
 
     end;
   end;

@@ -89,7 +89,8 @@ end;
 
   procedure TGenericClass<U,T>.TestString<U,T>(const value : String);
 begin
-
+   //TArray.Sort<Double, Integer>(value);
+   TArray.Sort<U, T>(value);
 end;
 
 ");
