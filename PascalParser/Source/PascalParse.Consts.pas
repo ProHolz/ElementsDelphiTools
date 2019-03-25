@@ -44,7 +44,7 @@ local
 
 Known Issues:
 -----------------------------------------------------------------------------}
-namespace PascalParser;
+namespace ProHolz.Ast;
 type
   TSyntaxNodeType = public enum (
     ntAddr, //unary

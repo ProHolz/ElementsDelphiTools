@@ -1,4 +1,4 @@
-﻿namespace PascalParser;
+﻿namespace ProHolz.Ast;
 interface
 
 type
@@ -65,7 +65,7 @@ begin
   for childNode in usesNode.ChildNodes do
     if childNode.Typ = TSyntaxNodeType.ntUnit then
     begin
-      var unitName := childNode.GetAttribute(TAttributeName.anName).ToLower;
+      var unitName := childNode.AttribName.ToLower;
       unitList.Add(unitName);
       if not FUnitPaths.ContainsKey(unitName) then
       begin

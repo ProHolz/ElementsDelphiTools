@@ -45,7 +45,7 @@ local
 Known Issues:
 -----------------------------------------------------------------------------}
 {$HIDE H7}
-namespace PascalParser;
+namespace ProHolz.Ast;
 interface
 
 type
@@ -1638,11 +1638,8 @@ end;
 
 method TmwBasePasLex.EvaluateSpeciaConditionalExpression(const AParams: not nullable String): Boolean;
 begin
-  var LParams := AParams.Replace(' ','');
-
   result := false;
-
-  if assigned(OnParseCompilerDirectiveEvent) then
+ if assigned(OnParseCompilerDirectiveEvent) then
    begin
      var res : Boolean := false;
     if OnParseCompilerDirectiveEvent(self, AParams, out res) then

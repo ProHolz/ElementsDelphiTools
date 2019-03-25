@@ -1,4 +1,4 @@
-﻿namespace PascalParser;
+﻿namespace ProHolz.Ast;
 
 type
   TptTokenKindHelper = public extension class(TptTokenKind)

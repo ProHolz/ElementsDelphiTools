@@ -44,7 +44,7 @@ local
 
 Known Issues:
 -----------------------------------------------------------------------------}
-namespace PascalParser;
+namespace ProHolz.Ast;
 type
   TCompoundSyntaxNode = public class(TSyntaxNode)
   public

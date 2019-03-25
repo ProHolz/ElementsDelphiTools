@@ -1,4 +1,4 @@
-﻿namespace PascalParser;
+﻿namespace ProHolz.Ast;
 
 type
   StrHelper =  static public class

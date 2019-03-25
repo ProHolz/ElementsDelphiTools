@@ -1,4 +1,4 @@
-﻿namespace PascalParser;
+﻿namespace ProHolz.Ast;
 
 type
   IIncludeHandler = public interface

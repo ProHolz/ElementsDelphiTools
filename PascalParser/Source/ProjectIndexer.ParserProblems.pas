@@ -1,4 +1,4 @@
-﻿namespace PascalParser;
+﻿namespace ProHolz.Ast;
 
 type
   TParseProblemType = public enum(ptCantFindFile, ptCantOpenFile, ptCantParseFile);

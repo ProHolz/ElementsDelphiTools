@@ -1,4 +1,4 @@
-﻿namespace PascalParser;
+﻿namespace ProHolz.Ast;
 
 interface
 
@@ -111,7 +111,7 @@ begin
   var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
   Var Root := Builder.RunWithString(cTestArray );
 
-  Var lConsts := Root.FindInterfaceNodes(TSyntaxNodeType.ntConstants);
+  Var lConsts := Root.FindNode(TSyntaxNodeType.ntInterface):FindChilds(TSyntaxNodeType.ntConstants);
   Assert.AreEqual(length(lConsts), 1);
   Assert.AreEqual(lConsts[0].ChildCount, 2);
   Var const1 := lConsts[0].ChildNodes[0];
@@ -126,12 +126,12 @@ begin
   Var Root := Builder.RunWithString(cTestClassMethodNames );
   var node := Root.FindNode(TSyntaxNodeType.ntInterface):FindNode(TSyntaxNodeType.ntTypeSection);
   Assert.IsnotNil(node);
-   for each ltypedecl in node.FindNodes(TSyntaxNodeType.ntTypeDecl) do
+   for each ltypedecl in node.FindChilds(TSyntaxNodeType.ntTypeDecl) do
      for each ltype in ltypedecl.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntType)  do
     begin
           if ltype.AttribType.ToLower = 'class' then
            begin
-            for each proc in ltype.FindNode(TSyntaxNodeType.ntPublic):FindNodes(TSyntaxNodeType.ntMethod) index i do
+            for each proc in ltype.FindNode(TSyntaxNodeType.ntPublic):FindChilds(TSyntaxNodeType.ntMethod) index i do
                begin
                var s := proc.FindNode(TSyntaxNodeType.ntName):AttribName.ToLower;
                 case i of

@@ -44,7 +44,7 @@ local
 
 Known Issues:
 -----------------------------------------------------------------------------}
-namespace PascalParser;
+namespace ProHolz.Ast;
 
 interface
 

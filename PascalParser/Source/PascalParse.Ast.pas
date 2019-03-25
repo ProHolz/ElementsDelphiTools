@@ -44,7 +44,7 @@ local
 
 Known Issues:
 -----------------------------------------------------------------------------}
-unit PascalParser;
+namespace ProHolz.Ast;
 
 interface
 
@@ -780,7 +780,7 @@ type
           for ParamList in &Params.ChildNodes do
             begin
             TypeInfo := ParamList.FindNode(TSyntaxNodeType.ntType);
-            ParamKind := ParamList.GetAttribute(TAttributeName.anKind);
+            ParamKind := ParamList.AttribKind;
             ParamExpr := ParamList.FindNode(TSyntaxNodeType.ntExpression);
             var Attributes:= ParamList.FindNode(TSyntaxNodeType.ntAttributes);
 
@@ -2540,7 +2540,7 @@ type
           begin
           if (result <> '') then
             result := result + '.';
-          result := result + NamePartNode.GetAttribute(TAttributeName.anName);
+          result := result + NamePartNode.AttribName;
         end;
         DoHandleString(var result);
       end;
@@ -2835,7 +2835,7 @@ type
                 InnerTypeNode := TypeNode.FindNode(TSyntaxNodeType.ntType);
                 if assigned(InnerTypeNode) then
                 begin
-                  InnerTypeName := InnerTypeNode.GetAttribute(TAttributeName.anName);
+                  InnerTypeName := InnerTypeNode.AttribName;
                   for SubNode in InnerTypeNode.ChildNodes do
                     TypeNode.AddChild(SubNode.Clone);
 
@@ -2851,7 +2851,7 @@ type
                     if TypeName <> '' then
                       TypeName := '.' + TypeName;
 
-                    TypeName := SubNode.GetAttribute(TAttributeName.anName) + TypeName;
+                    TypeName := SubNode.AttribName + TypeName;
                     TypeNode.DeleteChild(SubNode);
                   end;
                 end;

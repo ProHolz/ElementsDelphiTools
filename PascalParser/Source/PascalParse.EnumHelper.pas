@@ -1,4 +1,4 @@
-﻿namespace PascalParser;
+﻿namespace ProHolz.Ast;
 
 //  TSyntaxNodeType
   const
@@ -88,7 +88,8 @@
     TSyntaxNodeType.ntValue,
     TSyntaxNodeType.ntWrite,
     TSyntaxNodeType.ntGoto,
-    TSyntaxNodeType.ntGeneric
+    TSyntaxNodeType.ntGeneric,
+    TSyntaxNodeType.ntField
 
     ];
 

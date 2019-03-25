@@ -15,7 +15,7 @@ unit CastaliaPasLexTypes;
 
 ----------------------------------------------------------------------------}
 
-namespace PascalParser;
+namespace ProHolz.Ast;
 
 type
   TMessageEventType = public enum(meError, meNotSupported);

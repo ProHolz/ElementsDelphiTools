@@ -44,7 +44,7 @@ local
 
 Known Issues:
 -----------------------------------------------------------------------------}
-namespace PascalParser;
+namespace ProHolz.Ast;
 interface
 
 type
@@ -86,9 +86,8 @@ type
     method ChildCount : Integer;
 
     method FindNode(aTyp: TSyntaxNodeType): TSyntaxNode;
-    method FindNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
-    method FindInterfaceNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
-    method FindImplemenationNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
+    method FindAllNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
+    method FindChilds(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
 
     property Typ: TSyntaxNodeType read  protected write;
 
@@ -195,39 +194,25 @@ require
     exit  FChildNodes.FirstOrDefault((Item)->(Item.Typ = aTyp));
   end;
 
-  method TSyntaxNode.FindNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
+  method TSyntaxNode.FindAllNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
   begin
     var ltemp := new List<TSyntaxNode>();
     for lNode in ChildNodes do
       begin
       if lNode.Typ = aTyp then
         ltemp.Add(lNode);
-      ltemp.Add(lNode.FindNodes(aTyp));
+      ltemp.Add(lNode.FindAllNodes(aTyp));
     end;
     result := ltemp.ToArray;
   end;
 
-  method TSyntaxNode.FindInterfaceNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
+  method TSyntaxNode.FindChilds(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
   begin
     var ltemp := new List<TSyntaxNode>();
-    var lInterface := FindNode(TSyntaxNodeType.ntInterface);
-    if assigned(lInterface) then
-      for lNode in lInterface.ChildNodes.FindAll(Item->Item.Typ = aTyp) do
-        ltemp.Add(lNode);
+    for each lNode in ChildNodes.Where(Item->Item.Typ = aTyp) do
+     ltemp.Add(lNode);
     result := ltemp.ToArray;
   end;
-
-
-  method TSyntaxNode.FindImplemenationNodes(aTyp: TSyntaxNodeType): array of TSyntaxNode;
-  begin
-    var ltemp := new List<TSyntaxNode>();
-    var lImplementation := FindNode(TSyntaxNodeType.ntImplementation);
-    if assigned(lImplementation) then
-      for lNode in lImplementation.ChildNodes.FindAll(Item->Item.Typ = aTyp) do
-        ltemp.Add(lNode);
-    result := ltemp.ToArray;
-  end;
-
 
 
   method TSyntaxNode.GetAttribute(const Key: TAttributeName): not nullable string;
