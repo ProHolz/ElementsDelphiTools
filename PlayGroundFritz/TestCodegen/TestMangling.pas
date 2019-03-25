@@ -4,7 +4,7 @@ interface
 
 uses
   RemObjects.Elements.EUnit,
-  PascalParser;
+  ProHolz.Ast;
 
 type
   TestMangling = public class(TestParserBase)
@@ -171,7 +171,7 @@ end.
 
   var fSection := lunit.FindNode(TSyntaxNodeType.ntInterface);
   Assert.isnotnil(fSection);
-  for each m in fSection.FindNodes( TSyntaxNodeType.ntMethod) index i do
+  for each m in fSection.FindAllNodes( TSyntaxNodeType.ntMethod) index i do
     begin
     var lname := PlayGroundFritz.CodeBuilderMethods.BuildMethodMangledName(m).ToLower;
     case i of

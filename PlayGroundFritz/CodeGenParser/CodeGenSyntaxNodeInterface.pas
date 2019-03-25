@@ -1,7 +1,7 @@
 ﻿namespace PlayGroundFritz;
 
 interface
-uses PascalParser;
+uses ProHolz.Ast;
 
 type
   CodeBuilderMethods = static partial class
@@ -22,8 +22,6 @@ type
 
     method PrepareDefaultValue(const paramnode: TSyntaxNode; paramkind : String): CGExpression;
     method PrepareParam(const node: TSyntaxNode): CGParameterDefinition;
-
-  //  method PrepareAnonymousParam(const node: TSyntaxNode): CGAnonymousMethodParameterDefinition;
 
     method PrepareMethod(const methodnode : TSyntaxNode; implnode: TSyntaxNode) : CGMethodLikeMemberDefinition;
 
@@ -74,12 +72,15 @@ begin
         result := new CGArrayTypeReference((typeNode.AttribName).AsTypeReference, '***Combined__TYPES'.AsTypeReference)
       else
         if lArrayBounds.Count > 0 then
-          result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference, lArrayBounds)
+        begin
+          result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference, lArrayBounds);
+          result.ArrayKind := CGArrayKind.Static;
+        end
         else
-          if lTypeBounds.Count > 0 then
-            result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference, lTypeBounds)
-          else
-            result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference)
+        if lTypeBounds.Count > 0 then
+          result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference, lTypeBounds)
+        else
+          result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference)
 
     end
     else
@@ -107,7 +108,7 @@ begin
   var lParams := prop.findnode(TSyntaxNodeType.ntParameters);
   if lParams <> nil then
   begin
-    for each &param in lParams.FindNodes(TSyntaxNodeType.ntParameter) do
+    for each &param in lParams.FindChilds(TSyntaxNodeType.ntParameter) do
       begin
       result.Parameters.Add(PrepareParam(&param));
     end;
@@ -150,6 +151,14 @@ begin
       'array' :
       exit  new CGGlobalVariableDefinition(PrepareArrayVarOrConstant(node, isConst, ispublic));
     end;
+
+    case typeNode.AttribType.ToLower of
+   // Special Handling of Array Constants
+      'array' :
+      exit  new CGGlobalVariableDefinition(PrepareArrayVarOrConstant(node, isConst, ispublic));
+    end;
+
+
   end;
 
   Var typeName := typeNode:AttribName;
@@ -234,7 +243,7 @@ end;
 
 method CodeBuilderMethods.PrepareClassCreateMethod(const methodnode : TSyntaxNode; const name : not nullable String): CGMethodLikeMemberDefinition;
 begin
-  Var MethodType := methodnode.AttribKind;
+//  Var MethodType := methodnode.AttribKind;
   var lMethod : CGMethodLikeMemberDefinition;
   var lMethodNameNode := methodnode.FindNode(TSyntaxNodeType.ntName);
   var lMethodName := lMethodNameNode:AttribName;
@@ -256,26 +265,22 @@ begin
 
   var lParams := new List<CGParameterDefinition>;
 
-  for each &Param in methodnode.FindNodes(TSyntaxNodeType.ntParameter) do
+  for each &Param in methodnode.FindNode(TSyntaxNodeType.ntParameters):FindChilds(TSyntaxNodeType.ntParameter) do
     begin
-      var lparam := PrepareParam(&Param);
-      lMethod.Parameters.Add(lparam);
-      lParams.Add(lparam);
-    end;
+    var lparam := PrepareParam(&Param);
+    lMethod.Parameters.Add(lparam);
+    lParams.Add(lparam);
+  end;
 
   lMethod.Statements.add(new CGRawStatement('{$HINT "Check call to constructor"}'));
 
-  var lCall := new CGMethodCallExpression(('new '+ name).AsNamedIdentifierExpression, '');
+  var lCall := new CGNewInstanceExpression(name.AsNamedIdentifierExpression);
 
   for each lparam in lParams do
     lCall.Parameters.add(new CGCallParameter(lparam.Name.AsNamedIdentifierExpression));
 
-
   var lCreate := new CGReturnStatement(lCall);
   lMethod.Statements.add(lCreate);
-
-
-
   exit lMethod;
 
 end;
@@ -333,14 +338,14 @@ begin
     end;
    // 'destructor' : lMethod := new CGDestructorDefinition(lMethodName);
     'operator'   : lMethod := new CGCustomOperatorDefinition(lMethodName);
-else
-  begin
-    lMethod := new CGMethodDefinition(lMethodName);
-    CGMethodDefinition(lMethod).GenericParameters := lGenerics;
-    if not String.IsNullOrEmpty(lImplementationName) then
-      lMethod.ImplementsInterfaceMember := lImplementationName;
+    else
+      begin
+        lMethod := new CGMethodDefinition(lMethodName);
+        CGMethodDefinition(lMethod).GenericParameters := lGenerics;
+        if not String.IsNullOrEmpty(lImplementationName) then
+          lMethod.ImplementsInterfaceMember := lImplementationName;
+      end;
   end;
-end;
 
 
 
@@ -362,7 +367,11 @@ end;
   if methodnode.getAttribute(TAttributeName.anReintroduce).ToLower = 'true' then
     lMethod.Reintroduced := true;
 
-  for each &Param in methodnode.FindNodes(TSyntaxNodeType.ntParameter) do
+
+//  var lParams :=
+  for each &Param in
+    methodnode.FindNode(TSyntaxNodeType.ntParameters):ChildNodes.where(Item-> Item.Typ = TSyntaxNodeType.ntParameter)
+    do
     lMethod.Parameters.Add(PrepareParam(&Param));
 
 // Is there an implementation?
@@ -384,14 +393,14 @@ end;
 
  // if we have changed the destructor to a method we
  // Adding a hint do the statements in the method
-if lChangedDestructor then
-begin
-  lMethod.Statements.Insert(0, new CGRawStatement('{$HINT "destructor changed to method"}'));
+  if lChangedDestructor then
+  begin
+    lMethod.Statements.Insert(0, new CGRawStatement('{$HINT "destructor changed to method"}'));
    // lMethod.Comment.Lines.Add('destructor changed');
- end;
+  end;
 
 
-result := lMethod;
+  result := lMethod;
 end;
 
 
@@ -427,7 +436,7 @@ begin
   var TypParams := node.FindNode(TSyntaxNodeType.ntTypeParams);
   if assigned(TypParams) then
   begin
-    for each child in TypParams.FindNodes(TSyntaxNodeType.ntTypeParam) do
+    for each child in TypParams.FindChilds(TSyntaxNodeType.ntTypeParam) do
       begin
       result.Add(new CGGenericParameterDefinition(child.FindNode(TSyntaxNodeType.ntType).AttribName));
     end;
@@ -537,9 +546,9 @@ begin
           for each lNodeAttr in child.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntAttribute) do
             begin
             var lattr := PrepareAttribute(lNodeAttr);
-              if assigned(lattr) then
-                lAttributes.Add(lattr);
-            end;
+            if assigned(lattr) then
+              lAttributes.Add(lattr);
+          end;
         end;
 
 
@@ -606,7 +615,7 @@ begin
   if res is CGMethodDefinition then
   begin
     result := (res as CGMethodDefinition).AsGlobal;
-    result.Function.Visibility := if ispublic then CGMemberVisibilityKind.Public else CGMemberVisibilityKind.Unit;
+    result.Function.Visibility := if ispublic then CGMemberVisibilityKind.Public else CGMemberVisibilityKind.Private;
   end
   else exit nil;
 end;
@@ -645,7 +654,7 @@ begin
   Var ReturnType :=  node.FindNode(TSyntaxNodeType.ntReturnType):FindNode(TSyntaxNodeType.ntType).AttribName;
   var lParam : String;
 
-  for each &Param in node.FindNodes(TSyntaxNodeType.ntParameter) do
+  for each &Param in node.FindNode(TSyntaxNodeType.ntParameters):FindChilds(TSyntaxNodeType.ntParameter) do
     lParam := lParam + &Param.Findnode(TSyntaxNodeType.ntName):AttribName+'_'+&Param.Findnode(TSyntaxNodeType.ntType):AttribName;
 
   result := (MethodName+'_'+lParam+'_'+ReturnType).ToLower;
@@ -692,7 +701,7 @@ begin
     If assigned(ReturnType) then
       ltemp.ReturnType := ReturnType;
 
-    for each &Param in typenode.FindNodes(TSyntaxNodeType.ntParameter) do
+    for each &Param in typenode.FindNode(TSyntaxNodeType.ntParameters):FindChilds(TSyntaxNodeType.ntParameter) do
       ltemp.Parameters.Add(PrepareParam(&Param));
 
     if String.IsNullOrEmpty(typenode.AttribKind) then
@@ -725,29 +734,7 @@ begin
   end;
 end;
 
-(*
-method CodeBuilderMethods.PrepareAnonymousParam(const node: TSyntaxNode): CGAnonymousMethodParameterDefinition;
-begin
-  result := nil;
-  var paramName := node.FindNode(TSyntaxNodeType.ntName):AttribName;
-{$HINT "No Modifier yet"}
-   var Modifier := CGParameterModifierKind.In;
-   case node.AttribKind.ToLower of
-     'const' : Modifier := CGParameterModifierKind.Const;
-     'var' : Modifier := CGParameterModifierKind.Var;
-     'out' : Modifier := CGParameterModifierKind.Out;
-   end;
 
-  result:= new CGAnonymousMethodParameterDefinition(paramName);
-
-   var paramTypenode := node.FindNode(TSyntaxNodeType.ntType);
-   if assigned(paramTypenode) then
-     result.Type:=  PrepareTypeRef(paramTypenode);
-
-
-end;
-
-*)
 
 
 end.

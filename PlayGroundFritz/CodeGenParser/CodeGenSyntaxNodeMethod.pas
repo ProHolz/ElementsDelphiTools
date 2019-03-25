@@ -1,7 +1,7 @@
 ﻿namespace PlayGroundFritz;
 
 interface
-uses PascalParser;
+uses ProHolz.Ast;
 
 type
   // This part is used for Methods
@@ -113,21 +113,15 @@ begin
       Var lTypNode := child.FindNode(TSyntaxNodeType.ntType);
       if lTypNode <> nil then
       begin
-        Var lTyp := lTypNode.GetAttribute(TAttributeName.anType).ToLower;
+        Var lTyp := lTypNode.AttribType.ToLower;
         if lTyp = '' then
-          lTyp := lTypNode.GetAttribute(TAttributeName.anName).ToLower;
+          lTyp := lTypNode.AttribName.ToLower;
 
          if not assigned(lMethod.LocalTypes) then
            lMethod.LocalTypes := new List<CGTypeDefinition>;
 
         case lTyp  of
-          //'class' : lMethod.LocalVariables.Add(BuildClass(lTypNode, child.GetAttribute(TAttributeName.anName)));
-          //'interface' : lMethod.LocalVariables.Add(BuildInterface(lTypNode, child.GetAttribute(TAttributeName.anName)));
           'record' :  lMethod.LocalTypes.Add(BuildRecord(lTypNode, child.AttribName, nil));
-          ////'pointer' : BuildPointerClause(child);
-          //'enum' : lMethod.LocalVariables.Add(BuildEnum(lTypNode, child.GetAttribute(TAttributeName.anName)));
-          //'set' : lMethod.LocalVariables.Add(BuildSet(lTypNode, child.GetAttribute(TAttributeName.anName)));
-
         end;
       end;
 

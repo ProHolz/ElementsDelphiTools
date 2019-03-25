@@ -4,7 +4,7 @@ interface
 
 uses
   RemObjects.Elements.EUnit,
-  PascalParser,
+  ProHolz.Ast,
   PlayGroundFritz;
 
 

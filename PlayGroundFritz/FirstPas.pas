@@ -1,7 +1,7 @@
 ﻿namespace PlayGroundFritz;
 
 uses
-  PascalParser;
+  ProHolz.Ast;
   //RemObjects.CodeGen4;
 
 
@@ -12,7 +12,7 @@ begin
   if Environment.OS = OperatingSystem.Windows then
   File.WriteText(String.Format('d:\Test\{0}.xml', TestName),   TSyntaxTreeWriter.ToXML(Root, true));
   var lUnit := new CodeBuilder().BuildCGCodeUnitFomSyntaxNode(Root);
- //  var cg := new CGDelphiCodeGenerator();
+  //var cg := new CGDelphiCodeGenerator();
    var cg := new CGOxygeneCodeGenerator();
   //var cg := new CGCSharpCodeGenerator();
   //var cg := new CGCPlusPlusCPPCodeGenerator();
@@ -38,8 +38,8 @@ begin
   end;
 
 
-  sb.Append(BuildInterfaceTest(TestTypes, 'TestTypes'));
-  sb.AppendLine.Append('{Next File}').AppendLine;
+  //sb.Append(BuildInterfaceTest(TestTypes, 'TestTypes'));
+  //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
 
@@ -55,8 +55,8 @@ begin
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
-  //sb.Append(BuildInterfaceTest(TestExceptions, 'TestExceptions'));
-  //sb.AppendLine.Append('{Next File}').AppendLine;
+  sb.Append(BuildInterfaceTest(TestExceptions, 'TestExceptions'));
+  sb.AppendLine.Append('{Next File}').AppendLine;
 
   //sb.Append(BuildInterfaceTest(TestConstArray, 'TestConstArray'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
@@ -73,21 +73,21 @@ begin
   //sb.Append(BuildInterfaceTest(TestMethods, 'TestMethods'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
-  sb.Append(BuildInterfaceTest(Testrecord, 'Testrecord'));
-  sb.AppendLine.Append('{Next File}').AppendLine;
+  //sb.Append(BuildInterfaceTest(Testrecord, 'Testrecord'));
+  //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
   //sb.Append(BuildInterfaceTest(TestGeneric, 'TestGeneric'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
- sb.Append(BuildInterfaceTest(TestUnit2, 'TestUnit2'));
-  sb.AppendLine.Append('{Next File}').AppendLine;
+ //sb.Append(BuildInterfaceTest(TestUnit2, 'TestUnit2'));
+  //sb.AppendLine.Append('{Next File}').AppendLine;
 
- sb.Append(BuildInterfaceTest(TestInterfaceImpl, 'TestInterfaceImpl'));
-  sb.AppendLine.Append('{Next File}').AppendLine;
+ //sb.Append(BuildInterfaceTest(TestInterfaceImpl, 'TestInterfaceImpl'));
+  //sb.AppendLine.Append('{Next File}').AppendLine;
 
-  sb.Append(BuildInterfaceTest(TestAttributes, 'TestAttributes'));
+  //sb.Append(BuildInterfaceTest(TestAttributes, 'TestAttributes'));
    //sb.AppendLine.Append('{Next File}').AppendLine;
 
 

@@ -5,14 +5,6 @@ unit TestAll;
 
 interface
 
-
-
-const
-  OperatorsInfo: array [0..2] of TOperatorInfo =
-    ((Typ: ntAddr;         AssocType: atRight),
-     (Typ: ntDeref;        AssocType: atLeft),
-     (Typ: ntGeneric;      AssocType: atRight));
-
  const
    // First without types.....
    cInt  = 42;  // Should be Literal Numeric
@@ -25,6 +17,11 @@ const
 
    cintArray2 : Array of Integer  = [1,2,3];
 
+
+ OperatorsInfo: array [0..2] of TOperatorInfo =
+    ((Typ: ntAddr;         AssocType: atRight),
+     (Typ: ntDeref;        AssocType: atLeft),
+     (Typ: ntGeneric;      AssocType: atRight));
 
   type
    eEnum = (first, second, third);

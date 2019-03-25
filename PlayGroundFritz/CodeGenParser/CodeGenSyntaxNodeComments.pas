@@ -1,7 +1,7 @@
 ﻿namespace PlayGroundFritz;
 
 interface
-uses PascalParser;
+uses ProHolz.Ast;
 
 type
   CodeBuilderMethods = static partial class

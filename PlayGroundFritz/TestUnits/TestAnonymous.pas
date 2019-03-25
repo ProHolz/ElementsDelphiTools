@@ -1,46 +1,48 @@
 ﻿namespace PlayGroundFritz;
 
 const TestAnonymous = "
-unit TestAnonTypes;
+unit TestBlocks;
 
 interface
 
 type
- tCallFunc = reference to function (const a: integer ) : integer;
- tCallFuncTArray = reference to function (const a: Tarray<integer>) : integer;
+  tCallFunc = reference to function (var  b: Integer ) : Integer;
 
- procedure TestCall(acallfunc : Tcallfunc);
- procedure testDirect;
+  procedure TestCall(var value : Integer; acallfunc : tCallFunc);
+  procedure testDirect;
 
 implementation
 
 
-procedure TestCall(acallfunc : Tcallfunc);
-Var a : integer;
+procedure TestCall(var value : integer; acallfunc : Tcallfunc);
 begin
- a := acallfunc(1);
+  value := acallfunc(value);
 end;
 
 procedure testDirect;
+var val : Integer;
 begin
- Testcall(
- function (const a : integer) : integer
- begin
-   result := a*a;
- end
- );
+  val := 2;
+  TestCall(val,
+  function (var a : Integer) : Integer
+  begin
+    result := a*a;
+  end
+  );
 
 end;
 
 procedure testinDirect;
 var ltemp : tCallFunc;
+    val : Integer;
 begin
 
- ltemp := function (const a : integer) : integer
- begin
-   result := a*a;
- end;
- TestCall(ltemp);
+  ltemp := function (var a : Integer) : Integer
+  begin
+    result := a*a;
+  end;
+  val := 3;
+  TestCall(val, ltemp);
 end;
 end.
 

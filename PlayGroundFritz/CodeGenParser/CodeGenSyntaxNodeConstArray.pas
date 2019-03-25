@@ -1,6 +1,6 @@
 ﻿namespace PlayGroundFritz;
 interface
-uses PascalParser;
+uses ProHolz.Ast;
 
 type
 
@@ -67,6 +67,16 @@ begin
         result := lSet;
 
       end;
+
+      TSyntaxNodeType.ntSet :
+      begin
+        var lSet := new CGArrayLiteralExpression();
+        for each child in  ExpressionNode.ChildNodes do
+          lSet.Elements.Add(PrepareSingleExpressionValue(child));
+        result := lSet;
+
+      end;
+
     end;
 end;
 
@@ -76,7 +86,7 @@ begin
   var lBounds := value.FindNode(TSyntaxNodeType.ntBounds);
   if lBounds <> nil then
   begin
-    var lDimensions := lBounds.FindNodes(TSyntaxNodeType.ntDimension);
+    var lDimensions := lBounds.FindChilds(TSyntaxNodeType.ntDimension);
     if lDimensions <> nil then
     begin
       result := new List<CGEntity>;
@@ -90,9 +100,10 @@ begin
           begin
             var lmin : Integer  := CGIntegerLiteralExpression(resDimensions[0]).Value;
             var lmax : Integer := CGIntegerLiteralExpression(resDimensions[1]).Value;
-            var temp := new CGArrayBounds();
-            temp.Start := lmin;
-            temp.End := lmax;
+            var temp := new CGArrayBounds(lmin) &end(lmax);
+            //temp.Start := lmin;
+            //temp.End := lmax;
+            assert(temp.End=lmax);
             result.Add(temp);//,  end_:= lmax));
           end;
         end

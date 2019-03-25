@@ -1,7 +1,7 @@
 ﻿namespace PlayGroundFritz;
 
 interface
-uses PascalParser;
+uses ProHolz.Ast;
 
 type
   // This part is used for ntAnonym* Types
@@ -51,11 +51,13 @@ begin
     Var ReturnType := GetReturnType(typenode.FindNode(TSyntaxNodeType.ntReturnType));
     If assigned(ReturnType) then
       ltemp.ReturnType :=  ReturnType;
-    for each &Param in typenode.FindNodes(TSyntaxNodeType.ntParameter) do
+    for each &Param in typenode.FindNode(TSyntaxNodeType.ntParameters):FindChilds(TSyntaxNodeType.ntParameter) do
       ltemp.Parameters.Add(PrepareParam(&Param));
 
     if String.IsNullOrEmpty(typenode.AttribKind) then
       ltemp.IsPlainFunctionPointer := true;
+
+    ltemp.Visibility := CGTypeVisibilityKind.Public;
 
 
     exit ltemp;

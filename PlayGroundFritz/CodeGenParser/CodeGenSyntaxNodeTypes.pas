@@ -2,7 +2,7 @@
 
 
 interface
-uses PascalParser;
+uses ProHolz.Ast;
 
 type
   // This part is used for ntTypes

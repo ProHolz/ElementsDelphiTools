@@ -2,11 +2,12 @@
 
 
 interface
-uses PascalParser;
+uses ProHolz.Ast;
 
 type
   CodeBuilderMethods = static partial class
   private
+    method PrepareFieldExpression(const node: TSyntaxNode): CGExpression;
     method PrepareGenricExpression(const node: TSyntaxNode): CGExpression;
 
     method PrepareTypeExpression(const node: TSyntaxNode): CGExpression;
@@ -69,7 +70,7 @@ begin
   if (literalnode is TValuedSyntaxNode)  then
   begin
     var lValueStr := (literalnode as TValuedSyntaxNode).Value;
-    case literalnode.GetAttribute(TAttributeName.anType).ToLower of
+    case literalnode.AttribType.ToLower of
       'numeric' : begin
           if lValueStr.StartsWith('$') then
           begin
@@ -156,7 +157,6 @@ end;
 
 method CodeBuilderMethods.PrepareDotValue(const node: TSyntaxNode): CGExpression;
 begin
-
   if node.ChildCount=2 then
   begin
     var lLeft := PrepareSingleExpressionValue(node.ChildNodes[0]);
@@ -165,6 +165,7 @@ begin
      exit new CGDotNameExpression(lLeft, lRight)
     else
     raise new Exception("DOT Expression not solved");
+
   end
   else
     raise new Exception("DOT Expression not solved");
@@ -281,6 +282,12 @@ begin
 end;
 
 
+method CodeBuilderMethods.PrepareFieldExpression(const node : TSyntaxNode) : CGExpression;
+begin
+raise new  Exception(node.Typ.ToString+  '=======Unknown Paramtype in PrepareSingleExpressionValue =======');
+end;
+
+
 method CodeBuilderMethods.PrepareSingleExpressionValue(const node: TSyntaxNode): CGExpression;
 begin
   if node = nil then exit nil;
@@ -324,6 +331,8 @@ begin
       TSyntaxNodeType.ntRecordConstant : exit  new CGNamedIdentifierExpression('======RecordConstant=======');
       TSyntaxNodeType.ntAnonymousMethod : exit  PrepareAnonymousMethod(node);
       TSyntaxNodeType.ntGeneric : exit PrepareGenricExpression(node);
+      TSyntaxNodeType.ntField : exit PrepareFieldExpression(node);
+      TSyntaxNodeType.ntElement : exit PrepareSingleExpressionValue(node.ChildNodes[0]);
 
 
       else raise new Exception(node.Typ.ToString+  '=======Unknown Paramtype in PrepareSingleExpressionValue =======');

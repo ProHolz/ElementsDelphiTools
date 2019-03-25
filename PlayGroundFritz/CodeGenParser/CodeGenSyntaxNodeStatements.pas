@@ -1,14 +1,14 @@
 ﻿namespace PlayGroundFritz;
 
 interface
-uses PascalParser;
+uses ProHolz.Ast;
 
 type
   // This part is used for Statements
 
   CodeBuilderMethods = static partial class
   private
-    method PrepareLabaledStatement(const node: TSyntaxNode): CGStatement;
+    method PrepareLabeledStatement(const node: TSyntaxNode): CGStatement;
     method PrepareWithStatement(const node: TSyntaxNode): CGStatement;
     method PrepareRaiseStatement(const node: TSyntaxNode): CGStatement;
     method PrepareExceptionBlocksList(const node: TSyntaxNode): List<CGCatchBlockStatement>;
@@ -22,7 +22,7 @@ type
     method PrepareCallStatement(const node: TSyntaxNode): CGStatement;
     method PrepareAssignMentStatement(const node: TSyntaxNode): CGStatement;
     method PrepareExpressionStatement(const node: TSyntaxNode): CGStatement;
-    method resolveCaseLabels(const node: TSyntaxNode): List<CGExpression>;
+    method PrepareCaseLabels(const node: TSyntaxNode): List<CGExpression>;
     method PrepareStatementList(const node: TSyntaxNode): List<CGStatement>;
     method PrepareStatementBlockOrSingle(const node: TSyntaxNode): CGStatement;
     method PrepareCaseStatement(const node: TSyntaxNode): CGStatement;
@@ -43,7 +43,7 @@ begin
     exit BuildCommentFromNode('ntExpression not solved', node);
 end;
 
-method CodeBuilderMethods.resolveCaseLabels(const node: TSyntaxNode): List<CGExpression>;
+method CodeBuilderMethods.PrepareCaseLabels(const node: TSyntaxNode): List<CGExpression>;
 begin
   result := new List<CGExpression>;
   for each child in node.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntCaseLabel) do
@@ -104,7 +104,7 @@ begin
 
   for each child in node.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntCaseSelector) do
     begin
-    Var lLabels := resolveCaseLabels(child.FindNode(TSyntaxNodeType.ntCaseLabels));
+    Var lLabels := PrepareCaseLabels(child.FindNode(TSyntaxNodeType.ntCaseLabels));
     var lStatement := PrepareStatement(child.ChildNodes[1]);
     if assigned(lStatement) then
     begin
@@ -269,17 +269,28 @@ end;
 method CodeBuilderMethods.PrepareExceptionBlocksList(const node: TSyntaxNode): List<CGCatchBlockStatement>;
 begin
   result := new List<CGCatchBlockStatement>;
-  for each child in node.FindNodes(TSyntaxNodeType.ntExceptionHandler) do
+  for each child in node.FindChilds(TSyntaxNodeType.ntExceptionHandler) do
     begin
     var lVariable := child.FindNode(TSyntaxNodeType.ntVariable);
+    var lTyp := child.FindNode(TSyntaxNodeType.ntType);
 
     var lblock := if assigned(lVariable) then
     new CGCatchBlockStatement(lVariable.FindNode(TSyntaxNodeType.ntName):AttribName,
                                              PrepareTypeRef(lVariable.FindNode(TSyntaxNodeType.ntType)))
+  else
+  if assigned(lTyp) then
+    // I add a Variable should not make a problem
+    new CGCatchBlockStatement('E_Added_Variable', lTyp.AttribName.AsTypeReference)
+
   else new CGCatchBlockStatement();
 
     var lStatement := PrepareStatementList(child.FindNode(TSyntaxNodeType.ntStatements));
     lblock.Statements.Add(lStatement);
+
+    if (lStatement.Count = 0) and (assigned(lVariable) or assigned(lTyp)) then
+      begin
+       lblock.Statements.Add(new CGRawStatement($"{{$HINT 'Empty Except BLock ?'}}"));
+      end;
 
     result.Add(lblock);
   end;
@@ -326,10 +337,13 @@ begin
     begin
 
 // Check the type of the Loop is the FinallyStatement when the Count > 0
-      if  assigned(lFinally) and (lFinally.Count > 0) then
+      if  assigned(lFinally) then
       begin
         var lTemp :=  new CGTryFinallyCatchStatement(lTryStatement);
-        lTemp.FinallyStatements.Add(lFinally);
+        if  (lFinally.Count > 0) then
+        lTemp.FinallyStatements.Add(lFinally)
+        else
+          lTemp.FinallyStatements.Add(new CGRawStatement('{$HINT "Empty Finally ?"}'));
         exit lTemp;
       end
       else
@@ -341,11 +355,14 @@ begin
           exit lTemp;
         end
         else
-          if  assigned(lExceptStatements) and (lExceptStatements.Count > 0) then
+          //if  assigned(lExceptStatements) and (lExceptStatements.Count > 0) then
+            if  assigned(lExceptStatements)  then
           begin
             var lTemp :=  new CGTryFinallyCatchStatement(lTryStatement);
             var ltempBlock := new CGCatchBlockStatement();
-            ltempBlock.Statements.Add(lExceptStatements);
+            if lExceptStatements.Count > 0 then
+            ltempBlock.Statements.Add(lExceptStatements)
+          else ltempBlock.Statements.add(new CGRawStatement('{$HINT "Empty Except ?"}'));
             lTemp.CatchBlocks.Add(ltempBlock);
             exit lTemp;
           end;
@@ -391,7 +408,7 @@ begin
 
   end;
 
-  method CodeBuilderMethods.PrepareLabaledStatement(const node: TSyntaxNode): CGStatement;
+  method CodeBuilderMethods.PrepareLabeledStatement(const node: TSyntaxNode): CGStatement;
   begin
     if node.ChildCount = 2 then
     begin
@@ -402,7 +419,7 @@ begin
 
       result := new CGSimpleBlockStatement([lHint, lComment, ltemp as not nullable]);
     end
-    else exit BuildCommentFromNode('PrepareLabaledStatement Childcount wrong', node);
+    else exit BuildCommentFromNode('PrepareLabeledStatement Childcount wrong', node);
   end;
 
   method CodeBuilderMethods.PrepareStatement(const node: TSyntaxNode): CGStatement;
@@ -428,7 +445,7 @@ begin
         TSyntaxNodeType.ntTry : exit PrepareTryStatement(node);
         TSyntaxNodeType.ntExpression : exit PrepareExpressionStatement(node);
         TSyntaxNodeType.ntRaise:  exit PrepareRaiseStatement(node);
-        TSyntaxNodeType.ntLabeledStatement : exit PrepareLabaledStatement(node);
+        TSyntaxNodeType.ntLabeledStatement : exit PrepareLabeledStatement(node);
         else raise new Exception(node.Typ.ToString+  '=======Unknown type in PrepareStatement =======');
 
       end;

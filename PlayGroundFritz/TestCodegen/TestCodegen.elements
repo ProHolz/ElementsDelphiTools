@@ -78,6 +78,8 @@
     <Compile Include="TestAttributes.pas" />
     <Compile Include="TestResourceStrings.pas" />
     <Compile Include="TestInitializeFinalize.pas" />
+    <Compile Include="TestArrayConsts.pas" />
+    <Compile Include="TestTryExcept.pas" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

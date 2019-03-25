@@ -331,7 +331,10 @@ end;
 
 function TLine.canDelete: Boolean;
 begin
+  try
    canDelete := PhGui.Screen.Frage(vecLoesche);
+  except
+  end;
 end;
 
 procedure TLine.Getmax(var rx, ry, lx, ly: Double);

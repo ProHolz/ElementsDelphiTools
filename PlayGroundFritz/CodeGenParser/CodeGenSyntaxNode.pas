@@ -1,7 +1,7 @@
 ﻿namespace PlayGroundFritz;
 interface
 uses
-  PascalParser;
+  ProHolz.Ast;
    //RemObjects.CodeGen4;
 
 type
@@ -39,10 +39,6 @@ begin
  // writeLn('**** Interface  **** ' );
   if assigned(interfaceNode) then
   begin
-    //for each child in interfaceNode.FindNodes(TSyntaxNodeType.ntMethod) do
-      //writeLn(CodeBuilderMethods.BuildMethodMangledName(child));
-
-
     for each child in interfaceNode.ChildNodes.where(Item->Item.Typ = TSyntaxNodeType.ntMethod) do
       begin
       fInterfaceMethods.add(CodeBuilderMethods.BuildMethodMangledName(child), child);
@@ -100,20 +96,20 @@ end;
 method CodeBuilder.BuildUsesInterfaceClause(const node: TSyntaxNode);
 begin
   if node = nil  then exit;
-  for each child in node.FindNodes(TSyntaxNodeType.ntUnit) do
-    fUnit.Imports.Add(new CGImport(child.GetAttribute(TAttributeName.anName)));
+  for each child in node.FindChilds(TSyntaxNodeType.ntUnit) do
+    fUnit.Imports.Add(new CGImport(child.AttribName));
 end;
 
 method CodeBuilder.BuildUsesImplementationClause(const node: TSyntaxNode);
 begin
   if node = nil  then exit;
-  for each child in node.FindNodes(TSyntaxNodeType.ntUnit) do
-    fUnit.ImplementationImports.Add(new CGImport(child.GetAttribute(TAttributeName.anName)));
+  for each child in node.FindChilds(TSyntaxNodeType.ntUnit) do
+    fUnit.ImplementationImports.Add(new CGImport(child.AttribName));
 end;
 
 method CodeBuilder.BuildClassClause(const node: TSyntaxNode);
 begin
-  var lclass := new CGClassTypeDefinition(node.GetAttribute(TAttributeName.anName));
+  var lclass := new CGClassTypeDefinition(node.AttribName);
   fUnit.Types.Add(lclass);
 end;
 
@@ -141,18 +137,18 @@ method CodeBuilder.BuildConstantsClause(const node: TSyntaxNode; const ispublic:
 begin
   if ispublic then
   begin
-    for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntConstant) do
+    for each Child in node.FindChilds(TSyntaxNodeType.ntConstant) do
       fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
 
-    for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntResourceString) do
+    for each Child in node.FindChilds( TSyntaxNodeType.ntResourceString) do
       fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
 
   end
   else
    begin
-    for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntConstant) do
+    for each Child in node.FindChilds( TSyntaxNodeType.ntConstant) do
       fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
-    for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntResourceString) do
+    for each Child in node.FindChilds(TSyntaxNodeType.ntResourceString) do
       fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
    end;
 end;
@@ -265,19 +261,15 @@ require
   (rootnode <> nil) and (rootnode.Typ = TSyntaxNodeType.ntUnit);
 begin
   fUnit := new CGCodeUnit();
-  fUnit.Namespace :=  new CGNamespaceReference(rootnode.GetAttribute(TAttributeName.anName));
+  fUnit.Namespace :=  new CGNamespaceReference(rootnode.AttribName);
 // Uses Interface
-  for each ltypesec in rootnode.FindInterfaceNodes(TSyntaxNodeType.ntUses) do
+  for each ltypesec in rootnode.FindNode(TSyntaxNodeType.ntInterface).FindChilds(TSyntaxNodeType.ntUses) do
     BuildUsesInterfaceClause(ltypesec);
-
 
   FillMethods(rootnode.FindNode(TSyntaxNodeType.ntInterface), rootnode.FindNode(TSyntaxNodeType.ntImplementation));
 
-
-        // Interface
+// Interface
   var lInterface := rootnode.FindNode(TSyntaxNodeType.ntInterface);
-
-
 
   for each ltypesec in lInterface.ChildNodes do
     begin
@@ -289,7 +281,7 @@ begin
     end;
   end;
 
-  for each ltypesec in rootnode.FindImplemenationNodes(TSyntaxNodeType.ntUses) do
+  for each ltypesec in rootnode.FindNode(TSyntaxNodeType.ntImplementation).FindChilds(TSyntaxNodeType.ntUses) do
     BuildUsesImplementationClause(ltypesec);
 
          // Implementation

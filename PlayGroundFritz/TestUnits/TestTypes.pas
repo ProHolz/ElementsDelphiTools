@@ -3,6 +3,7 @@ const TestTypes = "
 unit TestTypes;
 
 interface
+
 type
  myString = String;
 // Pointer Type
@@ -26,6 +27,7 @@ const
  SimpleIntArray : Array[0..2] of Integer = (0, 1,2);
 
    AllInt : array[0..1, 3..4] of integer = ((3,4), (5,6));
+ enumArray : array[eCadPenStyle, ecadpenstyle] of integer = ((0,1,2), (0,1,2));
 
 type
   tClassCollection = class of  TPersistent;
