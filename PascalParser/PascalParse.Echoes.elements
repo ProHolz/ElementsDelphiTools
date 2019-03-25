@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProductVersion>3.5</ProductVersion>
-    <RootNamespace>PascalParser</RootNamespace>
+    <RootNamespace>ProHolz.Ast</RootNamespace>
     <ProjectGuid>{EB3FE727-6C8E-4784-9830-060E25385427}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>PascalParser</AssemblyName>

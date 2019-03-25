@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProductVersion>3.5</ProductVersion>
-    <RootNamespace>PasParse_Island</RootNamespace>
+    <RootNamespace>ProHolz.Ast_Island</RootNamespace>
     <ProjectGuid>{CEB60BEA-46F8-411E-96E8-758636139A45}</ProjectGuid>
     <OutputType>StaticLibrary</OutputType>
     <AssemblyName>PascalParse_Island</AssemblyName>
