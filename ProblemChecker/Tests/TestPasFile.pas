@@ -1,10 +1,10 @@
-﻿namespace ProblemChecker;
+﻿namespace ProHolz.SourceChecker;
 
 interface
 
 uses
   RemObjects.Elements.EUnit,
-  PascalParser;
+  ProHolz.Ast;
 
 type
   TestPasFile = public class(Test)

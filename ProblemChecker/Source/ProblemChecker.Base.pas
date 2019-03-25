@@ -1,7 +1,7 @@
-﻿namespace Problemchecker;
+﻿namespace ProHolz.SourceChecker;
 
 interface
-uses PascalParser;
+uses ProHolz.Ast;
 
 type
   TSyntaxNodeResolver = class(ISyntaxNodeSolver)

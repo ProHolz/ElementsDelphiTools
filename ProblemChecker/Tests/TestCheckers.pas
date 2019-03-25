@@ -1,10 +1,10 @@
-﻿namespace ProblemChecker;
+﻿namespace ProHolz.SourceChecker;
 
 interface
 
 uses
   RemObjects.Elements.EUnit,
-  PascalParser;
+  ProHolz.Ast;
 
 type
   TestCheckers = public class(Test, IProblem_Log)
@@ -40,7 +40,7 @@ type
 implementation
 
 uses
-  PascalParser;
+  ProHolz.Ast;
 
   method TestCheckers.SetupTest;
   begin

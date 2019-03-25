@@ -1,5 +1,5 @@
-﻿namespace ProblemChecker;
-uses PascalParser;
+﻿namespace ProHolz.SourceChecker;
+uses ProHolz.Ast;
 interface
 type
   TProblem_Dummy = class( ISingleProbSolver)
@@ -313,7 +313,7 @@ end;
 method TProblem_ResString.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
 begin
   result := false;
-  var Nodes := syntaxTree.FindNodes(SNT.ntResourceString);
+  var Nodes := syntaxTree.FindAllNodes(SNT.ntResourceString);
   result := Nodes:Count > 0
 end;
 

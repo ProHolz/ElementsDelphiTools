@@ -3,7 +3,7 @@
 interface
 
 uses
-  ProblemChecker,
+  ProHolz.SourceChecker,
   RemObjects.Elements.EUnit;
 
 implementation

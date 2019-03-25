@@ -1,4 +1,4 @@
-﻿namespace Problemchecker;
+﻿namespace ProHolz.SourceChecker;
 
    // Shortstrings check String[12] and Shortstring?
 type

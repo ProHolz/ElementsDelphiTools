@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProductVersion>3.5</ProductVersion>
-    <RootNamespace>ProblemChecker</RootNamespace>
+    <RootNamespace>ProHolz.SourceChecker</RootNamespace>
     <ProjectGuid>{5EE76ED2-852A-45DC-A600-2191560ACA8A}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AssemblyName>ProblemChecker.Tests</AssemblyName>

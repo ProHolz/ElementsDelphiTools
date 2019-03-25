@@ -1,5 +1,5 @@
-﻿namespace ProblemChecker;
-uses PascalParser;
+﻿namespace ProHolz.SourceChecker;
+uses ProHolz.Ast;
 const
   cUnitWithResDFM =
 "unit TestPublic;

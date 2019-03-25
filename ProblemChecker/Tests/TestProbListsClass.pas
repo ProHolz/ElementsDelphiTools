@@ -1,4 +1,4 @@
-﻿namespace ProblemChecker;
+﻿namespace ProHolz.SourceChecker;
 
 interface
 

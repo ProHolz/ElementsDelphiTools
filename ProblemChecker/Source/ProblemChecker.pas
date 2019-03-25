@@ -1,7 +1,7 @@
-﻿namespace ProblemChecker;
+﻿namespace ProHolz.SourceChecker;
 
 interface
-uses PascalParser;
+uses ProHolz.Ast;
 type
   // Alias shoud be in PascalParser
   SNT = TSyntaxNodeType;

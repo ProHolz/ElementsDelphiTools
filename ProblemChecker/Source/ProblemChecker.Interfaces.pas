@@ -1,5 +1,5 @@
-﻿namespace Problemchecker;
-uses PascalParser;
+﻿namespace ProHolz.SourceChecker;
+uses ProHolz.Ast;
 type
   //tcheckProblems = reference to function(const syntaxTree: TSyntaxNode): boolean;
 
