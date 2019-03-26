@@ -9,6 +9,7 @@ type
   TestClasses = public class(TestParserBase)
   private
 
+
   protected
   public
     method testSimpleclass;
@@ -19,6 +20,7 @@ type
     method testAncestor;
     method testSimpleProperty;
     method testProperty;
+    method testInheritedCall;
   end;
 
 implementation
@@ -449,6 +451,61 @@ end;
  end;
   end;
 end;
+
+method TestClasses.testInheritedCall;
+begin
+  var lunit := BuildUnit(tbUnitType.Body ,"
+type
+Tsimple = class(TBase)
+public
+procedure Test; overload;
+constructor Create(value, val : integer);
+
+
+end;
+implementation
+
+constructor Tsimple.Create(value, val : integer);
+begin
+  inherited Create(value, val);
+end;
+
+procedure Tsimple.Test;
+begin
+  inherited Test;
+end;
+
+
+");
+
+  Assert.IsNotNil(lunit);
+  Assert.AreEqual(lunit.Types.Count, 1);
+  for each matching GV : CGClassTypeDefinition in lunit.Types do
+    begin
+    Check.AreEqual(GV.Members.Count, 3);
+    for each matching m : CGMethodLikeMemberDefinition in GV.Members index i do
+      begin
+
+      case i of
+        0 : begin
+            Check.AreEqual( m.Statements.Count, 1);
+            Assert.isTrue(m.Statements[0] is CGMethodCallExpression);
+            Check.isTrue((m.Statements[0] as CGMethodCallExpression).CallSite is CGInheritedExpression);
+        end;
+        1 : begin
+            Assert.AreEqual( m.Statements.Count, 1);
+           Assert.isTrue(m.Statements[0] is CGConstructorCallStatement);
+           var ltemp := (m.Statements[0] as CGConstructorCallStatement);
+           Check.isTrue(ltemp.CallSite is CGInheritedExpression);
+           Check.AreEqual(ltemp.Parameters.Count, 2);
+
+         end;
+
+     end;
+   end;
+  end;
+end;
+
 
 
 end.
