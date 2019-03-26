@@ -231,6 +231,19 @@ begin
 
                 fUnit.Types.Add(CodeBuilderMethods.BuildRecord(lTypNode, child.AttribName, lList));
               end;
+              'object' :  begin
+                var lTypeParams := child.FindNode(TSyntaxNodeType.ntTypeParams);
+                var lname : String := '';
+                if assigned(lTypeParams) then
+                  lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
+
+                var lList := getImplementationMethodNodesFor((child.AttribName+lname).ToLower);
+                var lrec := CodeBuilderMethods.BuildRecord(lTypNode, child.AttribName, lList);
+                lrec.Comment := new CGUnsupportedStatement('***Object Type written as Record ***');
+                fUnit.Types.Add(lrec);
+              end;
+
+
               'pointer' : BuildPointerClause(child);
               'enum' : fUnit.Types.Add(CodeBuilderEnum.BuildEnum(lTypNode, child.AttribName));
               'set' : fUnit.Types.Add(CodeBuilderMethods.BuildSet(lTypNode, child.AttribName));

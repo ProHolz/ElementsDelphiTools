@@ -448,8 +448,23 @@ end;
 
 method CodeBuilderMethods.AddAncestors(const Value: CGClassOrStructTypeDefinition;  const Types : TSyntaxNode);
 begin
-  for each Node in Types.ChildNodes.FindAll(Item -> Item.Typ =  TSyntaxNodeType.ntType) do
-    Value.Ancestors.Add(PrepareTypeRef(Node));
+  // Interface
+  if Value is CGInterfaceTypeDefinition then
+  begin
+    for each Node in Types.ChildNodes.FindAll(Item -> Item.Typ =  TSyntaxNodeType.ntType)  do
+           Value.ImplementedInterfaces.Add(PrepareTypeRef(Node));
+
+  end
+  else
+  // Class
+  for each Node in Types.ChildNodes.FindAll(Item -> Item.Typ =  TSyntaxNodeType.ntType) index i do
+   begin
+    // In Delphi for a class the first is the anestor all others are interfaces
+    if i= 0 then
+    Value.Ancestors.Add(PrepareTypeRef(Node))
+    else
+      Value.ImplementedInterfaces.Add(PrepareTypeRef(Node));
+   end;
 end;
 
 
@@ -701,8 +716,6 @@ begin
   if assigned(lTypeParams) then
     lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
 
-    // Descenting from
-  AddAncestors(result, node);
   AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name+lname, methodBodys);
 end;
 
