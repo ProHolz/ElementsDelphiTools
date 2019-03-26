@@ -7,6 +7,7 @@ uses ProHolz.Ast;
 type
   CodeBuilderMethods = static partial class
   private
+    method PrepareIdentifierExpression(const node: TSyntaxNode): CGExpression;
     method PrepareFieldExpression(const node: TSyntaxNode): CGExpression;
     method PrepareGenricExpression(const node: TSyntaxNode): CGExpression;
 
@@ -93,7 +94,11 @@ begin
           end;
 
       end;
-      'string'  : exit new CGStringLiteralExpression(lValueStr);
+      'string'  :
+       begin
+
+         exit new CGStringLiteralExpression(lValueStr);
+       end;
       'nil'  : exit new CGNilExpression();
     end;
   end;
@@ -284,7 +289,21 @@ end;
 
 method CodeBuilderMethods.PrepareFieldExpression(const node : TSyntaxNode) : CGExpression;
 begin
-raise new  Exception(node.Typ.ToString+  '=======Unknown Paramtype in PrepareSingleExpressionValue =======');
+  raise new  Exception(node.Typ.ToString+  '=======Unknown Paramtype in PrepareFieldExpression =======');
+end;
+
+
+method CodeBuilderMethods.PrepareIdentifierExpression(const node : TSyntaxNode) : CGExpression;
+begin
+  case node.AttribName.ToLower of
+    'result' : exit  CGResultExpression.Result;
+    'nil' : exit  CGNilExpression.Nil;
+    'self': exit  CGSelfExpression.Self;
+
+  end;
+
+  exit new CGNamedIdentifierExpression(node.AttribName);
+
 end;
 
 
@@ -313,7 +332,7 @@ begin
       TSyntaxNodeType.ntCall : exit PrepareCallExpression(node);
       TSyntaxNodeType.ntAs :exit PrepareAsExpression(node);
       TSyntaxNodeType.ntLiteral : exit PrepareLiteralExpression(node);
-      TSyntaxNodeType.ntIdentifier : exit new CGNamedIdentifierExpression(node.AttribName);
+      TSyntaxNodeType.ntIdentifier : exit PrepareIdentifierExpression(node);//new CGNamedIdentifierExpression(node.AttribName);
       TSyntaxNodeType.ntSet : exit PrepareSetExpression(node);
       TSyntaxNodeType.ntExpressions : exit PrepareListExpression(node);
       TSyntaxNodeType.ntExpression :

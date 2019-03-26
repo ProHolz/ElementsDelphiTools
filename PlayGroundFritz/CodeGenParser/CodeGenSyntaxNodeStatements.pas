@@ -247,7 +247,7 @@ begin
     var lRepeat := PrepareSingleExpressionValue(node.FindNode(TSyntaxNodeType.ntExpression):ChildNodes[0]);
     var lStatement :=  PrepareStatement(node.FindNode(TSyntaxNodeType.ntStatements));
     if assigned(lRepeat)  and assigned(lStatement) then
-      exit new CGDoWhileLoopStatement(lRepeat, lStatement as not nullable)
+         exit new CGDoWhileLoopStatement(CGUnaryOperatorExpression.NotExpression(lRepeat), lStatement as not nullable)
     else
       exit BuildCommentFromNode('ntRepeat not solved', node);
   end

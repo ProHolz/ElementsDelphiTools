@@ -6,6 +6,7 @@ uses ProHolz.Ast;
 type
   CodeBuilderMethods = static partial class
   private
+    method isImplementsMethod(const methodnode: TSyntaxNode): CGMethodLikeMemberDefinition;
     method PrepareClassCreateMethod(const methodnode: TSyntaxNode; const name : not nullable String): CGMethodLikeMemberDefinition;
     method AddMembers(const res : CGClassOrStructTypeDefinition; const node: TSyntaxNode; const visibility :CGMemberVisibilityKind; const name: not nullable String;
     const methodBodys: Dictionary<String,TSyntaxNode>);
@@ -77,10 +78,10 @@ begin
           result.ArrayKind := CGArrayKind.Static;
         end
         else
-        if lTypeBounds.Count > 0 then
-          result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference, lTypeBounds)
-        else
-          result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference)
+          if lTypeBounds.Count > 0 then
+            result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference, lTypeBounds)
+          else
+            result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference)
 
     end
     else
@@ -343,7 +344,10 @@ begin
         lMethod := new CGMethodDefinition(lMethodName);
         CGMethodDefinition(lMethod).GenericParameters := lGenerics;
         if not String.IsNullOrEmpty(lImplementationName) then
-          lMethod.ImplementsInterfaceMember := lImplementationName;
+        begin
+
+          exit nil;
+        end;
       end;
   end;
 
@@ -404,6 +408,44 @@ begin
 end;
 
 
+method CodeBuilderMethods.isImplementsMethod(const methodnode : TSyntaxNode): CGMethodLikeMemberDefinition;
+begin
+  var lMethod : CGMethodLikeMemberDefinition;
+  var lMethodNameNode := methodnode.FindNode(TSyntaxNodeType.ntName);
+  var lMethodName := lMethodNameNode:AttribName;
+  var lImplementationName : String;
+
+  if not assigned(lMethodNameNode) then
+  begin
+    var lResClause := methodnode.FindNode(TSyntaxNodeType.ntResolutionClause);
+    if assigned(lResClause) then
+    begin
+      var lNames := lResClause.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntName).toArray;
+      if lNames.Count = 2 then
+      begin
+        lMethodNameNode := lNames[0];
+        lMethodName := lMethodNameNode:AttribName;
+        lImplementationName := lNames[1].AttribName;
+      end
+      else raise new Exception("Could not resolve ntResolutionClause");
+    end
+    else raise new Exception("Could not resolve Methodname");
+
+    lMethod := new CGMethodDefinition(lMethodName);
+
+    if not String.IsNullOrEmpty(lImplementationName) then
+    begin
+      lMethod.ImplementsInterface := lMethodName.AsTypeReference;
+      lMethod.ImplementsInterfaceMember := lImplementationName;
+      exit lMethod;
+    end;
+  end;
+  result := nil;
+end;
+
+
+
+
 method CodeBuilderMethods.AddAncestors(const Value: CGClassOrStructTypeDefinition;  const Types : TSyntaxNode);
 begin
   for each Node in Types.ChildNodes.FindAll(Item -> Item.Typ =  TSyntaxNodeType.ntType) do
@@ -420,8 +462,16 @@ begin
   If assigned(NodeValue) then
   begin
     Var StringGuid := (NodeValue as TValuedSyntaxNode).Value;
-    If StringGuid <> '' then
+    If StringGuid <> '' then begin
       result.InterfaceGuid := new Guid(StringGuid);
+      if settings.InterfaceGuids then
+      begin
+        if settings.ComInterfaces then
+          result.Attributes.Add(new CGAttribute('COM'.AsTypeReference));
+
+        result.Attributes.Add(new CGAttribute('Guid'.AsTypeReference, new CGCallParameter(StringGuid.AsLiteralExpression)));
+      end;
+    end;
   end;
 
   AddAncestors(result, node);
@@ -527,7 +577,27 @@ begin
               lClassMethod.ReturnType := name.AsTypeReference;
               res.Members.Add(lClassMethod);
             end;
-
+          end
+          // If we receaive nil it could be a
+          // Implements Method so we check it
+          else
+          begin
+            lMethod := isImplementsMethod(child);
+            if assigned(lMethod) and (not String.IsNullOrEmpty(lMethod.ImplementsInterfaceMember)) and assigned(lMethod.ImplementsInterface) then
+            begin
+                // Search for the Method in Owner
+             var lActual := res.Members.Find(Item->Item.Name.ToLower = lMethod.ImplementsInterfaceMember.ToLower);
+             if assigned(lActual) and (lActual is CGMethodLikeMemberDefinition ) then
+             begin
+               var lData :=  CGNamedTypeReference(lMethod.ImplementsInterface).Name.Split('.', true);
+               if lData.Count = 2 then
+               begin
+                 CGMethodLikeMemberDefinition(lActual).ImplementsInterface := lData[0].AsTypeReference;
+                 CGMethodLikeMemberDefinition(lActual).ImplementsInterfaceMember := lData[1];
+               end;
+               lMethod := nil;
+             end;
+           end;
           end;
         end;
 
@@ -733,8 +803,5 @@ begin
       result := new CGAttribute(lName.AsTypeReference);
   end;
 end;
-
-
-
 
 end.

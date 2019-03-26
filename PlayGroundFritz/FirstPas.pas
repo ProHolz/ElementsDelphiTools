@@ -12,17 +12,17 @@ begin
   if Environment.OS = OperatingSystem.Windows then
   File.WriteText(String.Format('d:\Test\{0}.xml', TestName),   TSyntaxTreeWriter.ToXML(Root, true));
   var lUnit := new CodeBuilder().BuildCGCodeUnitFomSyntaxNode(Root);
-  //var cg := new CGDelphiCodeGenerator();
+   var cg2 := new CGDelphiCodeGenerator();
    var cg := new CGOxygeneCodeGenerator();
-  //var cg := new CGCSharpCodeGenerator();
+ // var cg := new CGCSharpCodeGenerator();
   //var cg := new CGCPlusPlusCPPCodeGenerator();
-  //var cg := new CGSwiftCodeGenerator();
+ // var cg := new CGSwiftCodeGenerator();
   //var cg := new CGGoCodeGenerator();
 
   result := cg.GenerateUnit(lUnit);
   if Environment.OS = OperatingSystem.Windows then
   File.WriteText(String.Format('d:\Test\{0}.pas',TestName),   result);
- // File.WriteText(String.Format('d:\Test\{0}.cs',TestName),   cg2.GenerateUnit(lUnit));
+  File.WriteText(String.Format('d:\Test\{0}.Delphi.pas',TestName),   cg2.GenerateUnit(lUnit));
 
 end;
 
@@ -42,6 +42,9 @@ begin
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
+  //sb.Append(BuildInterfaceTest(TestIndentifier, 'TestIndentifier'));
+  //sb.AppendLine.Append('{Next File}').AppendLine;
+
 
   //sb.Append(BuildInterfaceTest(TestAnonymous, 'TestAnonymous'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
@@ -55,8 +58,8 @@ begin
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
-  sb.Append(BuildInterfaceTest(TestExceptions, 'TestExceptions'));
-  sb.AppendLine.Append('{Next File}').AppendLine;
+  //sb.Append(BuildInterfaceTest(TestExceptions, 'TestExceptions'));
+  //sb.AppendLine.Append('{Next File}').AppendLine;
 
   //sb.Append(BuildInterfaceTest(TestConstArray, 'TestConstArray'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
@@ -77,15 +80,15 @@ begin
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
 
-  //sb.Append(BuildInterfaceTest(TestGeneric, 'TestGeneric'));
-  //sb.AppendLine.Append('{Next File}').AppendLine;
+  sb.Append(BuildInterfaceTest(TestGeneric, 'TestGeneric'));
+  sb.AppendLine.Append('{Next File}').AppendLine;
 
 
  //sb.Append(BuildInterfaceTest(TestUnit2, 'TestUnit2'));
   //sb.AppendLine.Append('{Next File}').AppendLine;
 
- //sb.Append(BuildInterfaceTest(TestInterfaceImpl, 'TestInterfaceImpl'));
-  //sb.AppendLine.Append('{Next File}').AppendLine;
+ sb.Append(BuildInterfaceTest(TestInterfaceImpl, 'TestInterfaceImpl'));
+  sb.AppendLine.Append('{Next File}').AppendLine;
 
   //sb.Append(BuildInterfaceTest(TestAttributes, 'TestAttributes'));
    //sb.AppendLine.Append('{Next File}').AppendLine;

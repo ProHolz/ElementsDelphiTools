@@ -60,10 +60,7 @@ end;
 
    repeat
     lvalue := lvalue+2;
-    begin
-      lvalue := lvalue-1;
-     // inc(lValue);
-    end;
+
    until lvalue > 1000;
 
  end;

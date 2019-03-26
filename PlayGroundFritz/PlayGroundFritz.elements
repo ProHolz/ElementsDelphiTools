@@ -79,6 +79,7 @@
     <Compile Include="TestUnits\TestGeneric.pas" />
     <Compile Include="TestUnits\testInterfaceImpl.pas" />
     <Compile Include="TestUnits\TestAttributes.pas" />
+    <Compile Include="TestUnits\TestIdentifier.pas" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <ItemGroup>
