@@ -13,7 +13,7 @@ type
     method PrepareRaiseStatement(const node: TSyntaxNode): CGStatement;
     method PrepareExceptionBlocksList(const node: TSyntaxNode): List<CGCatchBlockStatement>;
     method PrepareTryStatement(const node: TSyntaxNode): CGStatement;
-    method PrepareInheritedStatement(const node: TSyntaxNode): CGExpression;
+    method PrepareInheritedStatement(const node: TSyntaxNode; const isConstructor : Boolean = false): CGStatement;
     method PrepareRepeatStatement(const node: TSyntaxNode): CGStatement;
     method PrepareWhileStatement(const node: TSyntaxNode): CGStatement;
     method PrepareForStatement(const node: TSyntaxNode): CGStatement;
@@ -26,7 +26,7 @@ type
     method PrepareStatementList(const node: TSyntaxNode): List<CGStatement>;
     method PrepareStatementBlockOrSingle(const node: TSyntaxNode): CGStatement;
     method PrepareCaseStatement(const node: TSyntaxNode): CGStatement;
-    method PrepareStatement(const node : TSyntaxNode) : CGStatement;
+    method PrepareStatement(const node : TSyntaxNode; const isConstructor : Boolean = false) : CGStatement;
   public
     method BuildStatements(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
 
@@ -130,9 +130,6 @@ begin
   var rhs := PrepareSingleExpressionValue(node.FindNode(TSyntaxNodeType.ntRHS).ChildNodes[0]);
   if assigned(lhs) and assigned(rhs) then
   begin
-      //if lhs is CGNamedIdentifierExpression then
-        //if (lhs as CGNamedIdentifierExpression).Name.ToLower = 'result' then
-         //exit rhs.AsReturnStatement;
     exit new CGAssignmentStatement(lhs, rhs);
   end
   else
@@ -256,13 +253,33 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareInheritedStatement(const node: TSyntaxNode): CGExpression;
+method CodeBuilderMethods.PrepareInheritedStatement(const node: TSyntaxNode; const isConstructor : boolean = false): CGStatement;
 begin
   if node.ChildCount > 0 then
   begin
     var lCall := PrepareSingleExpressionValue(node.ChildNodes[0]);
-    exit new CGInheritedExpression(lCall);
+    if lCall is CGMethodCallExpression  then
+     begin
+      if isConstructor then
+      begin
+        var lTemp := new CGConstructorCallStatement(new CGInheritedExpression(), CGMethodCallExpression(lCall).Parameters);
+        exit lTemp;
+      end
+      else
+      CGMethodCallExpression(lCall).CallSite := new CGInheritedExpression();
+      exit lCall;
+     end
+    else
+      if lCall is CGNamedIdentifierExpression  then
+        if isConstructor then
+          exit new CGConstructorCallStatement(new CGInheritedExpression())
+          else
+        exit new CGMethodCallExpression(new CGInheritedExpression(), CGNamedIdentifierExpression(lCall).Name);
+
+    raise new Exception($"Inherited Statement not solved for Line {node.Line}");
   end else
+    if isConstructor then
+      exit new CGConstructorCallStatement(new CGInheritedExpression());
     exit new CGInheritedExpression();
 end;
 
@@ -421,7 +438,7 @@ begin
   else exit BuildCommentFromNode('PrepareLabeledStatement Childcount wrong', node);
 end;
 
-method CodeBuilderMethods.PrepareStatement(const node: TSyntaxNode): CGStatement;
+method CodeBuilderMethods.PrepareStatement(const node: TSyntaxNode; const isConstructor : Boolean = false): CGStatement;
 begin
   result := nil;
   if not assigned(node) then exit nil;
@@ -438,7 +455,7 @@ begin
         TSyntaxNodeType.ntRepeat: exit PrepareRepeatStatement(node);
         TSyntaxNodeType.ntCase : exit PrepareCaseStatement(node);
         TSyntaxNodeType.ntEmptyStatement: exit new CGEmptyStatement();
-        TSyntaxNodeType.ntInherited: exit PrepareInheritedStatement(node);
+        TSyntaxNodeType.ntInherited: exit PrepareInheritedStatement(node, isConstructor);
 
         TSyntaxNodeType.ntAsmStatement :; // Do nothing
         TSyntaxNodeType.ntWith : exit PrepareWithStatement(node);
@@ -471,7 +488,7 @@ begin
   begin
     for each child in node.ChildNodes do //.Where(Item->Item.Typ = TSyntaxNodeType.ntStatement) do
       begin
-      var Statement := PrepareStatement(child);
+      var Statement := PrepareStatement(child, (lMethod is CGConstructorDefinition));
       if assigned(Statement)  then
         lMethod.Statements.Add(Statement);
     end;

@@ -342,9 +342,9 @@ begin
       TSyntaxNodeType.ntIndexed : exit  PrepareIndexedExpression(node);
       TSyntaxNodeType.ntDeref : exit  PrepareDeRefExpression(node);
 
-      TSyntaxNodeType.ntType : exit PrepareTypeExpression(node);// new CGNamedIdentifierExpression('======ntType=======');
+      TSyntaxNodeType.ntType : exit PrepareTypeExpression(node);
    //   TSyntaxNodeType.ntIn : exit  new CGNamedIdentifierExpression('======ntIn=======');
-      TSyntaxNodeType.ntInherited : exit  PrepareInheritedStatement(node);
+      TSyntaxNodeType.ntInherited : exit ( PrepareInheritedStatement(node) as CGExpression);
       TSyntaxNodeType.ntGoto: exit new CGRawExpression('{$HINT "Goto '+node.ChildNodes[0].AttribName+' not Supported"}');
 
       TSyntaxNodeType.ntRecordConstant : exit  new CGNamedIdentifierExpression('======RecordConstant=======');
