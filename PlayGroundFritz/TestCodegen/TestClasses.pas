@@ -336,20 +336,25 @@ implementation
   for each matching GV : CGClassTypeDefinition in lunit.Types do
     begin
     Check.AreEqual(GV.Members.Count, 0);
-    Check.AreEqual(GV.Ancestors.Count, 2);
+    Check.AreEqual(GV.Ancestors.Count, 1);
+    Check.AreEqual(GV.ImplementedInterfaces.Count, 1);
     for each  m  in GV.Ancestors index i do
-      begin
       case i of
         0 : begin
           Assert.IsTrue(m is CGNamedTypeReference);
           Check.AreEqual( CGNamedTypeReference(m).Name, 'TObject');
         end;
-        1 : begin
+      end;
+
+
+    for each  m  in GV.ImplementedInterfaces index i do
+      case i of
+       0 : begin
           Assert.IsTrue(m is CGNamedTypeReference);
           Check.AreEqual( CGNamedTypeReference(m).Name, 'IInterface');
         end;
       end;
-    end;
+
   end;
 end;
 

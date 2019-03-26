@@ -22,7 +22,7 @@ method TestInterfaces.TestInterface;
 begin
   var lunit := BuildUnit(tbUnitType.interface ,"
 type
-Isimple = Interface
+Isimple = Interface(IBase)
  ['{E277B1D4-88D3-4D1B-8541-39939F683D87}']
    function GetIntProp : integer;
    procedure SetIntProp(const value : Integer);
@@ -36,6 +36,7 @@ end;
   for each matching GV : CGInterfaceTypeDefinition in lunit.Types do
     begin
     Check.AreEqual(GV.Members.Count, 3);
+    Check.AreEqual(GV.ImplementedInterfaces.Count, 1);
     Check.AreEqual(GV.InterfaceGuid.ToString, 'E277B1D4-88D3-4D1B-8541-39939F683D87');
     for each  m  in GV.Members index i do
       begin
@@ -114,7 +115,7 @@ method TestInterfaces.TestImplementsMethod;
 begin
   var lunit := BuildUnit(tbUnitType.interface ,"
 type
-Tsimple = class
+Tsimple = class(TObject, IBase, ISimple)
  procedure Allocate;
  property  Simple : ISimple read getSimple implements ISimple;
  procedure IBase.TestBase = Allocate;
@@ -136,7 +137,11 @@ end;
   Assert.AreEqual(lunit.Types.Count, 1);
   for each matching GV : CGClassTypeDefinition in lunit.Types do
     begin
-    Check.AreEqual(GV.Members.Count, 2);
+     Check.AreEqual(GV.Members.Count, 2);
+     Check.AreEqual(GV.Ancestors.Count, 1);
+    Check.AreEqual(GV.ImplementedInterfaces.Count, 2);
+
+
 
     for each  m  in GV.Members index i do
       begin
