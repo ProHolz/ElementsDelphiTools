@@ -89,7 +89,8 @@
     TSyntaxNodeType.ntWrite,
     TSyntaxNodeType.ntGoto,
     TSyntaxNodeType.ntGeneric,
-    TSyntaxNodeType.ntField
+    TSyntaxNodeType.ntField,
+    TSyntaxNodeType.ntExternalName
 
     ];
 
