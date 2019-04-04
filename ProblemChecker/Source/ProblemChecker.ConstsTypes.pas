@@ -30,27 +30,29 @@ type
     eClassDeclImpl,      // Class defined in implementation
     eConstRecord,     // Const Records with initialisation, Should be extendet with checke of not Single consts aka const array of integer
     eHasResources,    // Res in File
-    eHasResourceStrings
+    eHasResourceStrings, //Resourcestrings in File
+    eVarsWithTypes   //Variables with defined Types like Var l : (e1, e2, e3);
     );
 
   const
   cEleProbsnames: array [eEleCheck] of String = ( //
     'Is DUMMY Check',
-    'has *.dfm File',
-    'has With Clauses ',
-    'has Initialization',
-    'has Finalizations',
-    'has Public Vars in Interface needs {GLOBALS ON}',
-    'has Public Methods in Interface needs {GLOBALS ON}',
-    'has Destructors',
-    'has more then 1 Constructors for one ore more classes',
-    'has more then One Class defined in Interface',
-    'has IInterface and Class that uses it in the same File ',
-    'has Variant record Type',
-    'has Enums in Interface (Check for Scoped Enums)',
-    'has Class Declaration in Implementation',
-    'has Const Records ',
-    'has Resources inside',
-    'Resource Strings in File');
+    '*.dfm File',
+    'With Clauses ',
+    'Initialization',
+    'Finalizations',
+    'Public Vars in Interface needs {GLOBALS ON}',
+    'Public Methods in Interface needs {GLOBALS ON}',
+    'Destructors',
+    'more then 1 Constructors for one ore more classes',
+    'more then One Class defined in Interface',
+    'IInterface and Class that uses it in the same File ',
+    'Variant record Type',
+    'Enums without Scope',
+    'Class Declaration in Implementation',
+    'Const Records ',
+    'Resources inside',
+    'Resource Strings in File',
+    'Variables with defined Types');
 
 end.

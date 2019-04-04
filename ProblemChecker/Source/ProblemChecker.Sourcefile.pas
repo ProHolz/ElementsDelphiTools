@@ -2,39 +2,102 @@
 
    // Shortstrings check String[12] and Shortstring?
 type
-  setEleCheck = Dictionary<eEleCheck, String>;
 
-  //const
-    //cEleAll = [low(eEleCheck).. high(eEleCheck)];
-    //cEleAllNoDfm = [ewith .. high(eEleCheck)];
+  tProblempos = record
+   private
+    Line : Integer;
+    Pos  : Integer;
+    Name : String;
+    public
+    constructor (aLine, aPos : Integer; aName : String);
+    begin
+      Line := aLine;
+      Pos := aPos;
+      Name := aName;
+    end;
 
+    method getProbEntry : String;
+    begin
+      exit $"{Name:Trim} [{Line}, {Pos}]".Trim;
+    end;
 
-  tPasSource = class
+  end;
+
+  tPropPosList = List<tProblempos>;
+  tPropsFile = Dictionary<eEleCheck, tPropPosList>;
+
+//  setEleCheck = Dictionary<eEleCheck, String>;
+
+  tPasSource = class(IProblem_Log)
+   private
+     fData : tPropsFile;
+
    public
-    constructor(); empty;
+    constructor();
+    begin
+      inherited;
+      fData := new tPropsFile();
+    end;
 
     constructor (const aFilename : String; aFilePath : String);
     begin
+      constructor ();
       FileName := aFilename:ToLower;
       FilePath := aFilePath:ToLower;
     end;
 
     method AddProblem(Prob : eEleCheck; Line : Integer; Pos : Integer);
     begin
-      var msg := String.Format('Line: {0} Pos{1} , {2} ', [Line, Pos, cEleProbsnames[Prob]]);
-      Problems.Add(Prob, msg);
+      AddProblem(Prob);
+      var ltemp := new tProblempos(Line, Pos, nil);
+      fData[Prob].Add(ltemp);
+
+
+
+      //var msg := String.Format('Line: {0} Pos{1} , {2} ', [Line, Pos, cEleProbsnames[Prob]]);
+      //Problems.Add(Prob, msg);
     end;
 
     method AddProblem(Prob : eEleCheck);
     begin
-      var msg := cEleProbsnames[Prob];
-      Problems.Add(Prob, msg);
+     // var msg := cEleProbsnames[Prob];
+      if not fData.ContainsKey(Prob) then
+        fData.Add(Prob, new tPropPosList());
     end;
+
+    method Problem_At(aCheck : eEleCheck; Line : Integer; Pos : Integer; const Name : String := '');
+    begin
+      AddProblem(aCheck);
+      var ltemp := new tProblempos(Line, Pos, Name);
+      fData[aCheck].Add(ltemp);
+    end;
+
+    method getProblemsPos(aCheck : eEleCheck) : String;
+    begin
+      result := nil;
+      if fData.ContainsKey(aCheck) then
+       begin
+         var ls := new StringBuilder;
+         ls.Append('  ');
+         ls.Append(cEleProbsnames[aCheck]);
+         ls.Append($" ({fData[aCheck].Count})");
+         var comma := '   ';
+         for each pos in fData[aCheck] do
+          begin
+             ls.Append( comma);
+             ls.Append(pos.getProbEntry);
+            comma := ' ,';
+          end;
+        exit ls.ToString;
+       end;
+
+    end;
+
 
 
     property FileName: String ;
     property FilePath: String ;
-    property Problems: setEleCheck :=  new setEleCheck(); lazy;
+    property Problems: tPropsFile read fData;
   end;
 
   tProbsList = Dictionary<String, tPasSource>;

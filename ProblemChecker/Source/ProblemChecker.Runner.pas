@@ -10,7 +10,7 @@ type
      fProjectfile : String;
      fProblems : IProblemChecker;
      fDirectives : Dictionary<String,Boolean>;
-     fNotFoundDirectives : List<String>;
+    // fNotFoundDirectives : List<String>;
 
    protected
      method UnitSyntaxEvent(Sender: Object; const fileName: String;  var syntaxTree: TSyntaxNode; var doParseUnit : Boolean; Var doAbort: Boolean);
@@ -45,18 +45,19 @@ begin
 //  eEleCheck.eWith, // with clause in source
 //  eEleCheck.eInitializations, // initialization found
 //  eEleCheck.eFinalizations, // finalization found
- // eEleCheck.ePublicVars, // There are public Global Vars in initialization
+//  eEleCheck.ePublicVars, // There are public Global Vars in initialization
 //  eEleCheck.eGlobalMethods, // Global Methods
- // eEleCheck.eDestructors, // There is a Destructor in classes
+//  eEleCheck.eDestructors, // There is a Destructor in classes
 //  eEleCheck.eMultiConstructors, // There is more then on public Constructor for a class
 //  eEleCheck.eMoreThenOneClass, // There is more then on class in the file
 //  eEleCheck.eInterfaceandImplement,   // declaration of a Interface and Implementatiion of a class that use it
-//  eEleCheck.eVariantRecord,       // Record with Variant parts
+  eEleCheck.eVariantRecord,       // Record with Variant parts
   eEleCheck.ePublicEnums,        // Enum Types shuld be check ScopedEnums, not done yet
 //  eEleCheck.eClassDeclImpl,      // Class defined in implementation
   eEleCheck.eConstRecord     // Const Records with initialisation, Should be extend]);
- // ,eEleCheck.eHasResources     // *.Res in File
- // ,eEleCheck.eHasResourceStrings
+//  ,eEleCheck.eHasResources     // *.Res in File
+//  ,eEleCheck.eHasResourceStrings
+ ,eEleCheck.eVarsWithTypes
   ]);
   fProjectfile := projectfile;
   OnGetUnitSyntax := @UnitSyntaxEvent;
@@ -64,7 +65,7 @@ begin
   OnParseCompilerDirective := @ResolveCompilerDirective;
   InitDefines;
   fDirectives := new Dictionary<String, Boolean>;
-  fNotFoundDirectives := new List<String>;
+ // NotFoundDirectives := new List<String>;
 end;
 
 method Projectrunner.initDefines;
@@ -78,8 +79,6 @@ end;
 
 method ProjectRunner.Run;
 begin
-
-
   if not String.IsNullOrEmpty(FalseDefinesfile) then
     if File.Exists(FalseDefinesfile) then
     begin
@@ -138,12 +137,10 @@ begin
       var context := File.ReadText(fileName);
      syntaxTree := TPasSyntaxTreeBuilder.RunWithString(context, false, Compiler);
      doAbort := (syntaxTree = nil);
-
     end
    else
      begin
        doParseUnit := true;
-
      end;
 end;
 

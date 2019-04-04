@@ -98,13 +98,23 @@ type
      property CheckTyp : eEleCheck read eEleCheck.eHasResourceStrings;
    end;
 
+
+  TProblem_VarTypes = class( ISingleProbSolver)
+    method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
+    property CheckTyp : eEleCheck read eEleCheck.eVarsWithTypes;
+  end;
+
 implementation
 
 
 method TProblem_With.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
 begin
   const cMethodTypes : array of SNT = [SNT.ntImplementation, SNT.ntMethod, SNT.ntStatements, SNT.ntWith];
-  Result :=   NodeSolver.getNodeArrayAll(cMethodTypes, syntaxTree):Count > 0;
+  var ltemp := NodeSolver.getNodeArrayAll(cMethodTypes, syntaxTree);
+  Result :=   ltemp:Count > 0;
+  if result then
+   for each child in ltemp do
+     ProblemLog.Problem_At(CheckTyp, child.Line, child.Col);
 end;
 
 method TProblem_Initialization.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -137,7 +147,7 @@ begin
       if node.GetAttribute(TAttributeName.anVisibility) = 'scoped' then
        continue;
       result := true;
-      ProblemLog.Problem_At(CheckTyp, node.Line, node.Col);
+      ProblemLog.Problem_At(CheckTyp, node.Line, node.Col, node.AttribName);
      end;
    end;
 end;
@@ -191,9 +201,10 @@ begin
       if  String.EqualsIgnoringCaseInvariant( lMethod.GetAttribute(TAttributeName.anKind) , 'constructor') then
       begin
         inc(lres);
-        if lres > 1 then
-          exit true;
+        ProblemLog.Problem_At(CheckTyp, lMethod.Line, lMethod.Col);
       end;
+    if lres > 1 then
+      exit true;
   end;
   exit false;
 end;
@@ -251,7 +262,12 @@ begin
      ]; //
   var lConstants := NodeSolver.getNodeArrayAll(cMethodTypes, syntaxTree);
   result := lConstants.Count > 0;
-  if result then exit(true);
+
+  if result then
+   for each child in lConstants do
+     ProblemLog.Problem_At(CheckTyp, child.Line, child.Col);
+
+//  if result then exit(true);
 
   cMethodTypes := [ //
   SNT.ntImplementation, //
@@ -262,7 +278,12 @@ begin
      SNT.ntField,
      SNT.ntExpression]; //
   lConstants := NodeSolver.getNodeArrayAll(cMethodTypes, syntaxTree);
-  result := lConstants.Count > 0;
+  result := result or (lConstants.Count > 0);
+
+  if result then
+    for each child in lConstants do
+      ProblemLog.Problem_At(CheckTyp, child.Line, child.Col);
+
 
 end;
 
@@ -271,7 +292,11 @@ begin
   result := false;
   var lRecords := NodeSolver.getPublicRecord(syntaxTree);
   for lRecord in lRecords do
-    if NodeSolver.getNodeArray(SNT.ntVariantSection, lRecord).Count > 0 then exit(true);
+    if NodeSolver.getNodeArray(SNT.ntVariantSection, lRecord).Count > 0 then
+     begin
+       result := true;
+      ProblemLog.Problem_At(CheckTyp, lRecord.Line, lRecord.Col);
+     end;
 end;
 
 method TProblem_ClassInImplementation.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -314,8 +339,36 @@ method TProblem_ResString.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSol
 begin
   result := false;
   var Nodes := syntaxTree.FindAllNodes(SNT.ntResourceString);
-  result := Nodes:Count > 0
+  result := Nodes.Count > 0;
+  if result then
+    for each child in Nodes do
+     ProblemLog.Problem_At(CheckTyp, child.Line, child.Col);
+
 end;
+
+method TProblem_VarTypes.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
+begin
+ result := false;
+  var Nodes := syntaxTree.FindAllNodes(SNT.ntVariable);
+
+  if Nodes:Count > 0 then
+  begin
+      for each child in Nodes do
+      begin
+        var lnode := child.FindNode(TSyntaxNodeType.ntType);
+        if assigned (lnode) then
+         begin
+           // Allow Array Types
+          if (lnode.AttribType <> '') and (lnode.AttribType.ToLower <> 'array') then
+                 begin
+                        ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.FindNode(TSyntaxNodeType.ntName).AttribName);
+                        result := true;
+                end;
+           end;
+         end;
+      end;
+  end;
+
 
 
 end.

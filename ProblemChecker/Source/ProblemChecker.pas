@@ -53,6 +53,7 @@ begin
       eEleCheck.eConstRecord            : fProbSolver.Add(check, new TProblem_HasConstRecords);
       eEleCheck.eHasResources           : fProbSolver.Add(check, new TProblem_RES);
       eEleCheck.eHasResourceStrings     : fProbSolver.Add(check, new TProblem_ResString);
+      eEleCheck.eVarsWithTypes          : fProbSolver.Add(check, new TProblem_VarTypes);
     end;
   end;
 
@@ -64,7 +65,7 @@ begin
   if (syntaxTree <> nil) and (syntaxTree.Typ = TSyntaxNodeType.ntUnit) then
   begin
     var lName := syntaxTree.AttribName.ToLower;
-
+    // The unit should only b parsed once
     if not fProbsList.ContainsKey(lName) then
     begin
 
@@ -72,8 +73,9 @@ begin
       factual.FileName := lName;
       for each check in fProbSolver.Values do
         begin
-        if check.CheckForProblem(syntaxTree, fResolver, self) then
+        if check.CheckForProblem(syntaxTree, fResolver, factual) then
         begin
+          // This is only needed if the check dont write anything himself in the factual
           factual.AddProblem(check.CheckTyp);
         end;
       end;
@@ -112,7 +114,10 @@ begin
     begin
     ltext.AppendLine(lact.FileName + '.pas');
     for lLoop in lact.Problems.Keys do
-      ltext.AppendLine('   ' + cEleProbsnames[lLoop]);
+     begin
+     // ltext.AppendLine('   ' + cEleProbsnames[lLoop]);
+      ltext.AppendLine(lact.getProblemsPos(lLoop));
+     end;
     ltext.AppendLine('====').AppendLine;
   end;
 
