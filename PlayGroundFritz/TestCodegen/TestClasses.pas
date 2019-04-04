@@ -175,7 +175,7 @@ begin
 type
 Tsimple = class
 public
-  constructor Create;
+  constructor Create; override;
   destructor Destroy; virtual;
 
 end;
@@ -208,6 +208,7 @@ end;
           Check.AreEqual(m.Name, '');
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
+          Check.isFalse(m.Virtuality = CGMemberVirtualityKind.Override);
         end;
         1 : begin
           Check.IsTrue(m is CGMethodDefinition);
@@ -278,7 +279,7 @@ end;
           Check.AreEqual(m.Name, '');
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
-          Check.AreEqual( m.Virtuality, CGMemberVirtualityKind.Override);
+          Check.AreEqual( m.Virtuality, CGMemberVirtualityKind.None);
         end;
 
         1 : begin

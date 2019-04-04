@@ -42,7 +42,7 @@ begin
     Check.IsNotNil(f.Initializer);
     Check.IsNotNil(f.Type);
     Check.IsTrue( f.Initializer is CGIntegerLiteralExpression);
-    Check.AreEqual((f.Initializer as CGIntegerLiteralExpression).Value, 42);
+    Check.AreEqual((f.Initializer as CGIntegerLiteralExpression).SignedValue, 42);
   end;
 
   Assert.IsTrue(lunit.Globals[1] is CGGlobalVariableDefinition);
@@ -53,7 +53,7 @@ begin
     Check.IsNotNil(f.Initializer);
     Check.IsNil(f.Type);
     Check.IsTrue( f.Initializer is CGIntegerLiteralExpression);
-    Check.AreEqual((f.Initializer as CGIntegerLiteralExpression).Value, 255);
+    Check.AreEqual((f.Initializer as CGIntegerLiteralExpression).UnsignedValue, 255);
   end;
 
   with f := (lunit.Globals[2] as CGGlobalVariableDefinition).Variable do
@@ -62,7 +62,7 @@ begin
     Check.IsNotNil(f.Initializer);
     Check.IsNil(f.Type);
     Check.IsTrue( f.Initializer is CGIntegerLiteralExpression);
-    Check.AreEqual((f.Initializer as CGIntegerLiteralExpression).Value, $FFFF);
+    Check.AreEqual((f.Initializer as CGIntegerLiteralExpression).UnsignedValue, $FFFF);
   end;
 
   with f := (lunit.Globals[3] as CGGlobalVariableDefinition).Variable do

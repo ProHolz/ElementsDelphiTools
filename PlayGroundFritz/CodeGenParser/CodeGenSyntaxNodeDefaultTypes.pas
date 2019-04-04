@@ -1,4 +1,4 @@
-﻿namespace PlayGroundFritz;
+﻿namespace ProHolz.CodeGen;
 
 interface
 type
@@ -50,7 +50,8 @@ begin
     'string' : result := CGPredefinedTypeReference.String;
     'char' : result := CGPredefinedTypeReference.UTF16Char;
     'ansichar' : result := CGPredefinedTypeReference.AnsiChar;
-
+     'pointer' : result := CGPredefinedTypeReference.Void;
+     'const'   : result := CGPredefinedTypeReference.Object; // Array of const
 
      else
        result := nil;

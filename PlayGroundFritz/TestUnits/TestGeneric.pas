@@ -1,4 +1,4 @@
-﻿namespace PlayGroundFritz;
+﻿namespace ProHolz.CodeGen;
 
 const TestGeneric = "
 unit TestGeneric;

@@ -1,4 +1,4 @@
-﻿namespace PlayGroundFritz;
+﻿namespace ProHolz.CodeGen;
 
 
 interface
@@ -8,7 +8,6 @@ type
   // This part is used for ntTypes
   CodeBuilderMethods = static partial class
   public
-
     method PrepareTypeRef(const node: TSyntaxNode): CGTypeReference;
   end;
 
@@ -18,11 +17,23 @@ method CodeBuilderMethods.PrepareTypeRef(const node: TSyntaxNode): CGTypeReferen
 require
   (node <> nil) implies (node.Typ = TSyntaxNodeType.ntType);
 begin
-  var lTemp :=
+  var lTemp : CGTypeReference;
   if CodeBuilderDefaultTypes.isDefaultType(node.AttribName) then
-  CodeBuilderDefaultTypes.GetDefaultType(node.AttribName)
+   lTemp := CodeBuilderDefaultTypes.GetDefaultType(node.AttribName)
 else
-  node.AttribName.AsTypeReference;
+  begin
+    case node.AttribName.ToLower of
+      'subrange' : begin
+          if node.ChildNodes.Count = 2 then
+           begin
+             var lstart := PrepareSingleExpressionValue(node.ChildNodes[0]);
+             var lEnd := PrepareSingleExpressionValue(node.ChildNodes[1]);
+             exit new CGSubRangeTypeReference(lstart, lEnd);
+           end;
+        end;
+    end;
+     lTemp := node.AttribName.AsTypeReference;
+  end;
 
   // if it is a named reference check further.....
   if lTemp is CGNamedTypeReference then
@@ -40,8 +51,5 @@ else
   end;
   exit lTemp;
 end;
-
-
-
 
 end.

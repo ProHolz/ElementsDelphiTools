@@ -1,4 +1,4 @@
-﻿namespace PlayGroundFritz;
+﻿namespace ProHolz.CodeGen;
 const
   TestExceptions = "
   unit TestExceptions;

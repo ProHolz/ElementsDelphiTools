@@ -1,4 +1,4 @@
-﻿namespace PlayGroundFritz;
+﻿namespace ProHolz.CodeGen;
 const TestUnit2 = "
 { -----------------------------------------------------------------------------
   Unit Name: cad.Line
@@ -190,7 +190,7 @@ begin
       end
    else
       begin
-         aCadCanvas.Pen.Color := CadColor.colarray[col];
+         aCadCanvas.Pen.Color := CadColor.colarray[col].Test;
          if aCadCanvas.CanvasType = eCanvasType.screen then
          aCadCanvas.Pen.Width := 1
          else

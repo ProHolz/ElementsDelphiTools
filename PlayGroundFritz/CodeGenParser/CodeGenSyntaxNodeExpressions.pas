@@ -1,5 +1,5 @@
-﻿namespace PlayGroundFritz;
-
+﻿namespace ProHolz.CodeGen;
+{$DEFINE USEDOT} // Will use the CGDotNameExpression only available in the ProHolz Fork
 
 interface
 uses ProHolz.Ast;
@@ -7,8 +7,10 @@ uses ProHolz.Ast;
 type
   CodeBuilderMethods = static partial class
   private
+    type
+    checkDot = enum(named, &method, &array, PointerDereference, &result);
     method PrepareIdentifierExpression(const node: TSyntaxNode): CGExpression;
-    method PrepareFieldExpression(const node: TSyntaxNode): CGExpression;
+
     method PrepareGenricExpression(const node: TSyntaxNode): CGExpression;
 
     method PrepareTypeExpression(const node: TSyntaxNode): CGExpression;
@@ -22,10 +24,10 @@ type
 
     method PrepareUnaryOp(const node: TSyntaxNode): CGExpression;
     method PrepareBinaryOp(const left: TSyntaxNode; const right: TSyntaxNode; aType: TSyntaxNodeType): CGExpression;
-    method PrepareLiteralExpression(const literalnode: TSyntaxNode): CGExpression;
-    method PrepareCallExpression(node : TSyntaxNode) : CGExpression;
-    method PrepareCallExpressions(expressions: TSyntaxNode): Array of CGExpression;
-    method PrepareExpressionValue(const valuenode: TSyntaxNode): CGExpression;
+    method PrepareLiteralExpression(const node: TSyntaxNode): CGExpression;
+    method PrepareCallExpression(const node : TSyntaxNode) : CGExpression;
+    method PrepareCallExpressions(const node: TSyntaxNode): Array of CGExpression;
+    method PrepareExpressionValue(const node: TSyntaxNode): CGExpression;
 
     method PrepareSingleExpressionValue(const node: TSyntaxNode): CGExpression;
 
@@ -65,13 +67,13 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareLiteralExpression(const literalnode: TSyntaxNode): CGExpression;
+method CodeBuilderMethods.PrepareLiteralExpression(const node: TSyntaxNode): CGExpression;
 begin
   result := nil;
-  if (literalnode is TValuedSyntaxNode)  then
+  if (node is TValuedSyntaxNode)  then
   begin
-    var lValueStr := (literalnode as TValuedSyntaxNode).Value;
-    case literalnode.AttribType.ToLower of
+    var lValueStr := (node as TValuedSyntaxNode).Value;
+    case node.AttribType.ToLower of
       'numeric' : begin
           if lValueStr.StartsWith('$') then
           begin
@@ -104,10 +106,9 @@ begin
   end;
 end;
 
-method CodeBuilderMethods.PrepareCallExpression(node: TSyntaxNode): CGExpression;
+method CodeBuilderMethods.PrepareCallExpression(const node: TSyntaxNode): CGExpression;
 begin
   result := nil;
-
   var lCall := PrepareSingleExpressionValue(node.ChildNodes[0]);
   var expressions := node.FindNode(TSyntaxNodeType.ntExpressions);
   if assigned(expressions) then
@@ -118,18 +119,15 @@ begin
   end
   else
     exit lCall;
-
 end;
 
-method CodeBuilderMethods.PrepareCallExpressions(expressions: TSyntaxNode): Array of CGExpression;
+method CodeBuilderMethods.PrepareCallExpressions(const node: TSyntaxNode): Array of CGExpression;
 begin
   result := nil;
-  if  expressions.HasChildren then
+  if  node.HasChildren then
   begin
     var lTemp := new List<CGExpression>;
-    for each expression in expressions.ChildNodes
-     //.Where(Item -> Item.Typ = TSyntaxNodeType.ntExpression)
-      do
+    for each expression in node.ChildNodes do
       if expression.HasChildren then
         lTemp.add(PrepareSingleExpressionValue(expression.ChildNodes[0]))
       else
@@ -141,41 +139,135 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareExpressionValue(const valuenode: TSyntaxNode): CGExpression;
+method CodeBuilderMethods.PrepareExpressionValue(const node: TSyntaxNode): CGExpression;
 begin
   result := nil;
-  if valuenode = nil then exit;
-
-  if valuenode.HasChildren then
-    exit  PrepareSingleExpressionValue(valuenode.ChildNodes[0]);
-
-  //var ExpressionNode := valuenode.FindNode(TSyntaxNodeType.ntExpression);
-  //if assigned(ExpressionNode) and ExpressionNode.HasChildren then
-  //begin
-    //var literalnode := ExpressionNode.ChildNodes[0];
-    //result := PrepareSingleExpressionValue(literalnode);
-  //end;
-
+  if node = nil then exit;
+  if node.HasChildren then
+    exit  PrepareSingleExpressionValue(node.ChildNodes[0]);
 end;
 
 
 
 method CodeBuilderMethods.PrepareDotValue(const node: TSyntaxNode): CGExpression;
+
+
+method ResolveNameTyp(const value : CGExpression; out Name : not nullable String; out member : checkDot) : Boolean;
 begin
+  member := checkDot.named;
+  case typeOf(value) of
+
+    typeOf(CGNamedIdentifierExpression) : Name := CGNamedIdentifierExpression(value).Name;
+    typeOf(CGPointerDereferenceExpression) : begin
+        result := ResolveNameTyp(CGPointerDereferenceExpression(value).PointerExpression, out Name, out member);
+        member := checkDot.PointerDereference;
+       end;
+
+    typeOf(CGResultExpression) : begin
+        Name := 'result';
+        member := checkDot.named;
+    end;
+
+    typeOf(CGMethodCallExpression) : begin
+        Name := CGMethodCallExpression(value).Name;
+        member := checkDot.method;
+    end;
+    typeOf(CGArrayElementAccessExpression) : begin
+        var ldummy : checkDot := checkDot.named;
+        result := ResolveNameTyp(CGArrayElementAccessExpression(value).Array, out Name, out ldummy);
+        member := checkDot.array;
+      end;
+      else
+        begin
+          assert(false, 'Could not solve DOTexpression Type Name');
+          exit false;
+        end;
+
+  end;
+  result := true;
+end;
+
+
+begin
+ {$IF USEDOT}
   if node.ChildCount=2 then
   begin
-    var lLeft := PrepareSingleExpressionValue(node.ChildNodes[0]);
-    var lRight := PrepareSingleExpressionValue(node.ChildNodes[1]);
+     var lLeft := PrepareSingleExpressionValue(node.ChildNodes[0]);
+     var lRight := PrepareSingleExpressionValue(node.ChildNodes[1]);
+     if assigned(lLeft) and assigned(lRight) then
+     begin
+       var Builder := new CGOxygeneHelperCodeGenerator();
+       var ltempDot := new CGDotNameExpression(lLeft, lRight);
+       exit Builder.DotExpressionToString(ltempDot).AsRawExpression;
+     end
+     else
+       raise new Exception("DOT Expression not solved");
+  end;
+  {$ELSE}
+  if node.ChildCount=2 then
+  begin
+    var lLeft := node.ChildNodes[0];//PrepareSingleExpressionValue(node.ChildNodes[0]);
+    var lRight := node.ChildNodes[1];
     if assigned(lLeft) and assigned(lRight) then
-     exit new CGDotNameExpression(lLeft, lRight)
+     begin
+   var lCalls := new List<CGExpression>;
+
+
+    var lLoop := lRight;
+
+    if (lLoop.Typ =  TSyntaxNodeType.ntDot) then
+    begin
+    while (lLoop.Typ =  TSyntaxNodeType.ntDot)  do
+     begin
+   //   var lCaller
+      if lLoop.ChildNodes[0].Typ <> TSyntaxNodeType.ntDot then
+      lCalls.Add(PrepareSingleExpressionValue(lLoop.ChildNodes[0]));
+      lLoop := lLoop.ChildNodes[1];
+     end;
+      lCalls.Add(PrepareSingleExpressionValue(lLoop));
+    end
+    else
+      lCalls.Add(PrepareSingleExpressionValue(lLoop));
+
+
+    if lCalls.Count > 0 then
+     begin
+       var ltemp := PrepareSingleExpressionValue(lLeft);
+       for i : Integer := 0 to lCalls.Count-1 do
+        begin
+          Var Name : not nullable String := '';
+          Var member : checkDot;
+          if ResolveNameTyp(lCalls[i], Out Name, out member) then
+
+          ltemp :=
+          case member of
+            checkDot.named : new CGPropertyAccessExpression(ltemp, Name);
+            checkDot.method : new CGMethodCallExpression(ltemp, Name, CGMethodCallExpression(ltemp).Parameters);
+            checkDot.array : new CGPropertyAccessExpression(ltemp, Name);
+            checkDot.PointerDereference : new CGPropertyAccessExpression(ltemp, Name);
+
+          end;
+
+          case  member of
+            checkDot.array :
+            ltemp := new CGArrayElementAccessExpression(ltemp, CGArrayElementAccessExpression(lCalls[i]).Parameters);
+            checkDot.PointerDereference : ltemp :=  new CGPointerDereferenceExpression(ltemp);
+           end;
+
+        end;
+        exit ltemp;
+     end
+     else
+      raise new Exception("DOT Expression not solved");
+     end
     else
     raise new Exception("DOT Expression not solved");
 
   end
   else
     raise new Exception("DOT Expression not solved");
+{$ENDIF}
 
-  //  exit  new CGNamedIdentifierExpression('======PrepareDotValue=======');
 end;
 
 
@@ -248,7 +340,7 @@ end;
 
 method CodeBuilderMethods.PrepareTypeExpression(const node : Tsyntaxnode) : CGExpression;
 begin
-  exit new CGNamedIdentifierExpression(node.AttribName);
+  exit node.AttribName.AsNamedIdentifierExpression;
 end;
 
 
@@ -287,11 +379,6 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareFieldExpression(const node : TSyntaxNode) : CGExpression;
-begin
-  raise new  Exception(node.Typ.ToString+  '=======Unknown Paramtype in PrepareFieldExpression =======');
-end;
-
 
 method CodeBuilderMethods.PrepareIdentifierExpression(const node : TSyntaxNode) : CGExpression;
 begin
@@ -299,7 +386,8 @@ begin
     'result' : exit  CGResultExpression.Result;
     'nil' : exit  CGNilExpression.Nil;
     'self': exit  CGSelfExpression.Self;
-
+    'true': exit CGBooleanLiteralExpression.True;
+    'false': exit CGBooleanLiteralExpression.False;
   end;
 
   exit new CGNamedIdentifierExpression(node.AttribName);
@@ -344,14 +432,20 @@ begin
 
       TSyntaxNodeType.ntType : exit PrepareTypeExpression(node);
    //   TSyntaxNodeType.ntIn : exit  new CGNamedIdentifierExpression('======ntIn=======');
-      TSyntaxNodeType.ntInherited : exit ( PrepareInheritedStatement(node) as CGExpression);
+      TSyntaxNodeType.ntInherited : exit ( PrepareInheritedStatement(node).First as CGExpression);
       TSyntaxNodeType.ntGoto: exit new CGRawExpression('{$HINT "Goto '+node.ChildNodes[0].AttribName+' not Supported"}');
 
       TSyntaxNodeType.ntRecordConstant : exit  new CGNamedIdentifierExpression('======RecordConstant=======');
       TSyntaxNodeType.ntAnonymousMethod : exit  PrepareAnonymousMethod(node);
       TSyntaxNodeType.ntGeneric : exit PrepareGenricExpression(node);
-      TSyntaxNodeType.ntField : exit PrepareFieldExpression(node);
+
       TSyntaxNodeType.ntElement : exit PrepareSingleExpressionValue(node.ChildNodes[0]);
+      TSyntaxNodeType.ntExternalName : begin
+          if node.ChildCount = 1 then
+            exit PrepareSingleExpressionValue(node.ChildNodes[0])
+          else
+            raise new Exception($"External Name can not be resolved in Line {node.Line}");
+        end;
 
 
       else raise new Exception(node.Typ.ToString+  '=======Unknown Paramtype in PrepareSingleExpressionValue =======');

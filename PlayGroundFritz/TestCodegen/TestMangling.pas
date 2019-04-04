@@ -4,6 +4,7 @@ interface
 
 uses
   RemObjects.Elements.EUnit,
+  ProHolz.CodeGen,
   ProHolz.Ast;
 
 type
@@ -95,7 +96,7 @@ end.
   Assert.isnotnil(fSection);
   for each m in fSection.ChildNodes.where(Item->Item.Typ = TSyntaxNodeType.ntMethod) index i do
  begin
-   var lname := PlayGroundFritz.CodeBuilderMethods.BuildMethodMangledName(m).ToLower;
+   var lname := CodeBuilderMethods.BuildMethodMangledName(m).ToLower;
    case i of
     0 : Check.AreEqual(lname, 'globproc__');
     1 : Check.AreEqual(lname, 'globfunc__integer');
@@ -108,7 +109,7 @@ end.
   Assert.isnotnil(fSection);
   for each m in fSection.ChildNodes.where(Item->Item.Typ = TSyntaxNodeType.ntMethod) index i do
     begin
-    var lname := PlayGroundFritz.CodeBuilderMethods.BuildMethodMangledName(m).ToLower;
+    var lname := CodeBuilderMethods.BuildMethodMangledName(m).ToLower;
     case i of
       0 : Check.AreEqual(lname, 'globproc__');
       1 : Check.AreEqual(lname, 'globfunc__integer');
@@ -173,7 +174,7 @@ end.
   Assert.isnotnil(fSection);
   for each m in fSection.FindAllNodes( TSyntaxNodeType.ntMethod) index i do
     begin
-    var lname := PlayGroundFritz.CodeBuilderMethods.BuildMethodMangledName(m).ToLower;
+    var lname := CodeBuilderMethods.BuildMethodMangledName(m).ToLower;
     case i of
       0 : Check.AreEqual(lname, 'globproc__');
       1 : Check.AreEqual(lname, 'globfunc__integer');
@@ -190,7 +191,7 @@ end.
   Assert.isnotnil(fSection);
   for each m in fSection.ChildNodes.where(Item->Item.Typ = TSyntaxNodeType.ntMethod) index i do
     begin
-    var lname := PlayGroundFritz.CodeBuilderMethods.BuildMethodMangledName(m).ToLower;
+    var lname := ProHolz.CodeGen.CodeBuilderMethods.BuildMethodMangledName(m).ToLower;
     case i of
       0 : Check.AreEqual(lname, 'testclass<t>.globproc__');
       1 : Check.AreEqual(lname, 'testclass<t>.globfunc__integer');

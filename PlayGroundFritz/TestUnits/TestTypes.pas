@@ -1,4 +1,4 @@
-﻿namespace PlayGroundFritz;
+﻿namespace ProHolz.CodeGen;
 const TestTypes = "
 unit TestTypes;
 
@@ -40,6 +40,9 @@ type
 resourceString
 r1 = 'Hello';
 r2 = 'Hello2';
+
+
+
 
 implementation
 

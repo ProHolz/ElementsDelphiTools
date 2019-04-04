@@ -1,20 +1,20 @@
-﻿namespace PlayGroundFritz;
-
+﻿namespace ProHolz.CodeGen;
+{$DEFINE USESET}
 interface
 uses ProHolz.Ast;
 
 type
   CodeBuilderEnum = static class
   public
-    method BuildEnum(const EnumTypeNode : TSyntaxNode; const enumName : not nullable String): CGTypeDefinition;
-    method BuildSet(const EnumTypeNode : TSyntaxNode; const enumName : not nullable String): CGTypeDefinition;
+    method BuildEnum(const node : TSyntaxNode; const enumName : not nullable String): CGTypeDefinition;
+    method BuildSet(const node : TSyntaxNode; const setName : not nullable String): CGTypeDefinition;
   end;
 implementation
 
-method CodeBuilderEnum.BuildEnum(const EnumTypeNode: TSyntaxNode; const enumName: not nullable String): CGTypeDefinition;
+method CodeBuilderEnum.BuildEnum(const node: TSyntaxNode; const enumName: not nullable String): CGTypeDefinition;
 begin
   result := new CGEnumTypeDefinition(enumName);
-  for each FieldNode in EnumTypeNode.FindChilds(TSyntaxNodeType.ntIdentifier) do
+  for each FieldNode in node.FindChilds(TSyntaxNodeType.ntIdentifier) do
     begin
     var FieldType := FieldNode.AttribName;
     result.Members.Add(new CGEnumValueDefinition(FieldType));
@@ -22,11 +22,17 @@ begin
 
 end;
 
-method CodeBuilderEnum.BuildSet(const EnumTypeNode: TSyntaxNode; const enumName: not nullable String): CGTypeDefinition;
+method CodeBuilderEnum.BuildSet(const node: TSyntaxNode; const setName: not nullable String): CGTypeDefinition;
 begin
- var ltemp := new CGEnumTypeDefinition(enumName);
-  ltemp.IsSet := true;
-  for each FieldNode in EnumTypeNode.FindChilds(TSyntaxNodeType.ntIdentifier) do
+ // var l := new CGSetTypeReference(enumName.AsTypeReference).
+  {$HINT WE NEED A SET TYPE}
+ var ltemp := new CGEnumTypeDefinition(setName);
+// ''.AsTypeReference.
+ltemp.Comment := ('Should be Set of ').AsComment;
+ {$IF USESET}
+   ltemp.IsSet := true;
+ {$ENDIF}
+  for each FieldNode in node.FindNode(TSyntaxNodeType.ntType):FindChilds(TSyntaxNodeType.ntIdentifier) do
     begin
     var FieldType := FieldNode.AttribName;
     ltemp.Members.Add(new CGEnumValueDefinition(FieldType));

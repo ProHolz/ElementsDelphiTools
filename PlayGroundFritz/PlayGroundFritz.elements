@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProductVersion>3.5</ProductVersion>
-    <RootNamespace>PlayGroundFritz</RootNamespace>
+    <RootNamespace>ProHolz.CodeGen</RootNamespace>
     <ProjectGuid>{819FA3F5-F808-43DE-B59F-E009A1E26114}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AssemblyName>PlayGroundFritz</AssemblyName>
@@ -11,6 +11,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
     <TestProject>TestCodegen</TestProject>
+    <KnownConditionalDefines>DEBUG;NEW_DEFINE;TRACE</KnownConditionalDefines>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
@@ -81,6 +82,8 @@
     <Compile Include="TestUnits\TestAttributes.pas" />
     <Compile Include="TestUnits\TestIdentifier.pas" />
     <Compile Include="TestUnits\TestWithClause.pas" />
+    <Compile Include="TestUnits\TestDllfunc.pas" />
+    <Compile Include="TestUnits\TestResourceStrings.pas" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <ItemGroup>

@@ -7,8 +7,10 @@ uses
 
 type
   TestTypes = public class(TestParserBase)
-  public
+  private
     method TestTypes;
+  public
+    method TestSets;
   end;
 
 implementation
@@ -83,6 +85,33 @@ type
     begin
     Check.AreEqual(GT.Name, cAlias[i],  $' {GT.Name} Loop [{i}]');
   end;
+
+end;
+
+method TestTypes.TestSets;
+begin
+
+  var lunit := BuildUnit(tbUnitType.interface ,"
+  const
+    MAX_SQLFIELDS = 42;
+
+type
+  TSQLFieldBits = set of 0..MAX_SQLFIELDS-1;
+   eStyleRange = sfirst..sthird;
+");
+
+  Assert.IsNotNil(lunit);
+  Assert.AreEqual(lunit.Globals.Count, 1);
+  Assert.AreEqual(lunit.Types.Count, 2);
+
+  for each  GT  in lunit.Types index i do
+    begin
+     case i of
+      0 : Check.AreEqual(GT.Name, 'TSQLFieldBits');
+      1 : Check.AreEqual(GT.Name, 'eStyleRange');
+     end;
+    end;
+
 
 end;
 

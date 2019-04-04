@@ -10,6 +10,7 @@ type
   private
   protected
   public
+
     method TestSimpleGenericClass;
     method TestComplexerGenericClass;
   end;

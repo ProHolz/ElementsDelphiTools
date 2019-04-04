@@ -1,8 +1,8 @@
-﻿namespace PlayGroundFritz;
+﻿namespace ProHolz.CodeGen;
 interface
 uses
   ProHolz.Ast;
-   //RemObjects.CodeGen4;
+
 
 type
   CodeBuilder =  class
@@ -68,7 +68,10 @@ begin
        // Remove from fimplementation
         fImplementationMethods.Remove(lname);
         BuildGlobMethodClause(implNode, true);
-      end;
+      end
+      else
+        BuildGlobMethodClause(node, true);
+
     end;
   end;
 end;
@@ -118,9 +121,22 @@ begin
   Var lType := node.FindNode(TSyntaxNodeType.ntType);
   if assigned(lType) then
   begin
-    var lRef := CodeBuilderMethods.PrepareTypeRef(lType.FindNode(TSyntaxNodeType.ntType));
+    var lRefType := lType.FindNode(TSyntaxNodeType.ntType);
+    if assigned(lRefType) then
+    begin
+    var lRef := CodeBuilderMethods.PrepareTypeRef(lRefType);
     var lclass := new CGTypeAliasDefinition(node.AttribName, new CGPointerTypeReference(lRef));
     fUnit.Types.Add(lclass);
+    end
+    else
+      begin
+     // var lt := new CGTypeOfExpression('Pointer'.AsTypeReferenceExpression);
+      var lt :=  CodeBuilderDefaultTypes.getType(lType.AttribName);
+
+
+      var lclass := new CGTypeAliasDefinition(node.AttribName,  lt {'Type of Pointer'.AsTypeReference});
+      fUnit.Types.Add(lclass);
+      end;
   end;
 
 end;
@@ -135,28 +151,41 @@ end;
 
 method CodeBuilder.BuildConstantsClause(const node: TSyntaxNode; const ispublic: Boolean);
 begin
-  if ispublic then
-  begin
     for each Child in node.FindChilds(TSyntaxNodeType.ntConstant) do
       fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
 
     for each Child in node.FindChilds( TSyntaxNodeType.ntResourceString) do
       fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
 
-  end
-  else
-   begin
-    for each Child in node.FindChilds( TSyntaxNodeType.ntConstant) do
-      fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
-    for each Child in node.FindChilds(TSyntaxNodeType.ntResourceString) do
-      fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
-   end;
 end;
 
 method CodeBuilder.BuildVariablesClause(const node: TSyntaxNode; const ispublic: Boolean);
 begin
   for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntVariable) do
+   begin
+    // Here we check of a new Type declarartion inside the var decl
+    var lnewtypeEnum : prepareNewTypeEnum;
+    if CodeBuilderMethods.isVarWithnewType(Child, out lnewtypeEnum) then
+    begin
+      // Pick up the varname and add a '_type'
+      var lname := Child.FindNode(TSyntaxNodeType.ntName).AttribName + '_type';
+      // Actual it can be a function or procedure
+
+      Var lnewType :=
+      case lnewtypeEnum of
+         prepareNewTypeEnum.block : CodeBuilderMethods.BuildBlockType(Child, lname);
+         prepareNewTypeEnum.enum : CodeBuilderEnum.BuildEnum(Child.FindNode(TSyntaxNodeType.ntType), lname);
+       end;
+
+      lnewType.Comment := 'Type automatic created'.AsBuilderComment;
+      fUnit.Types.Add(lnewType);
+      var lvar := CodeBuilderMethods.BuildVariable(Child, ispublic, lname);
+      lvar.Variable.Comment := 'Type automatic added'.AsBuilderComment;
+      fUnit.Globals.Add(lvar);
+    end
+    else
     fUnit.Globals.Add(CodeBuilderMethods.BuildVariable(Child, ispublic));
+   end;
 end;
 
 method CodeBuilder.BuildTypesClause(const node: TSyntaxNode);
@@ -239,7 +268,7 @@ begin
 
                 var lList := getImplementationMethodNodesFor((child.AttribName+lname).ToLower);
                 var lrec := CodeBuilderMethods.BuildRecord(lTypNode, child.AttribName, lList);
-                lrec.Comment := new CGUnsupportedStatement('***Object Type written as Record ***');
+                lrec.Comment := '***Object Type written as Record ***'.AsBuilderComment;
                 fUnit.Types.Add(lrec);
               end;
 
@@ -282,9 +311,9 @@ begin
   FillMethods(rootnode.FindNode(TSyntaxNodeType.ntInterface), rootnode.FindNode(TSyntaxNodeType.ntImplementation));
 
 // Interface
-  var lInterface := rootnode.FindNode(TSyntaxNodeType.ntInterface);
+//  var lInterface := rootnode.FindNode(TSyntaxNodeType.ntInterface);
 
-  for each ltypesec in lInterface.ChildNodes do
+  for each ltypesec in rootnode.FindNode(TSyntaxNodeType.ntInterface).ChildNodes do
     begin
     case ltypesec.Typ of
       TSyntaxNodeType.ntTypeSection : BuildTypesClause(ltypesec);
@@ -294,12 +323,13 @@ begin
     end;
   end;
 
+      // Implementation
   for each ltypesec in rootnode.FindNode(TSyntaxNodeType.ntImplementation).FindChilds(TSyntaxNodeType.ntUses) do
     BuildUsesImplementationClause(ltypesec);
 
-         // Implementation
-     lInterface := rootnode.FindNode(TSyntaxNodeType.ntImplementation);
-     for each ltypesec in lInterface.ChildNodes do
+
+
+  for each ltypesec in rootnode.FindNode(TSyntaxNodeType.ntImplementation).ChildNodes do
        begin
        case ltypesec.Typ of
          TSyntaxNodeType.ntTypeSection : BuildTypesClause(ltypesec);
@@ -309,14 +339,14 @@ begin
        end;
      end;
 
-  lInterface := rootnode.FindNode(TSyntaxNodeType.ntInitialization):FindNode(TSyntaxNodeType.ntStatements);
-  if lInterface:HasChildren then
-   BuildGlobMethodWithStatements(lInterface, 'Initialize_', fUnit.Namespace.Name);
+  var lInitalizationStatement := rootnode.FindNode(TSyntaxNodeType.ntInitialization):FindNode(TSyntaxNodeType.ntStatements);
+  if lInitalizationStatement:HasChildren then
+    BuildGlobMethodWithStatements(lInitalizationStatement, 'Initialize_', fUnit.Namespace.Name);
 
 
-  lInterface := rootnode.FindNode(TSyntaxNodeType.ntFinalization):FindNode(TSyntaxNodeType.ntStatements);
-  if lInterface:HasChildren then
-    BuildGlobMethodWithStatements(lInterface, 'Finalize_', fUnit.Namespace.Name);
+  lInitalizationStatement := rootnode.FindNode(TSyntaxNodeType.ntFinalization):FindNode(TSyntaxNodeType.ntStatements);
+  if lInitalizationStatement:HasChildren then
+    BuildGlobMethodWithStatements(lInitalizationStatement, 'Finalize_', fUnit.Namespace.Name);
 
      result := fUnit;
    end;
@@ -351,7 +381,7 @@ begin
   lmethod.Visibility := CGMemberVisibilityKind.Public;
   lmethod.Statements.add(new CGRawStatement('{$HINT "Replaces Initialization/Finalization"}'));
   CodeBuilderMethods.BuildStatements(node, lmethod);
-
+  lmethod.Comment := (methodname + ' added as method').AsBuilderComment;
   fUnit.Globals.Add(lmethod.AsGlobal);
 
 end;

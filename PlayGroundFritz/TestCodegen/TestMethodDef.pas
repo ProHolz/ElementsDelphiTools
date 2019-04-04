@@ -39,14 +39,14 @@ begin
      begin
      end;
 
-     function funcSimpleP1(const value : boolean; out test : integer) : boolean;
+     function funcSimpleP2(const value : boolean; out test : integer) : boolean;
      begin
      end;
 
  ");
 
   Assert.IsNotNil(lunit);
-  Assert.AreEqual(lunit.Globals.Count, 4);
+  Check.AreEqual(lunit.Globals.Count, 4);
   for each matching GV : CGGlobalFunctionDefinition in lunit.Globals index i do
     begin
     var func := GV.Function;

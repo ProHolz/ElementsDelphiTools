@@ -5,7 +5,7 @@ interface
 uses
   RemObjects.Elements.EUnit,
   ProHolz.Ast,
-  PlayGroundFritz;
+  ProHolz.CodeGen;
 
 
 
@@ -77,7 +77,9 @@ case utype  of
   else  BuildBaseUnitAll(value);
  end;
  var root := GetRootNode(source);
+// CodeBuilderMethods.FileData := source.Split(Environment.LineBreak);
  result := new CodeBuilder().BuildCGCodeUnitFomSyntaxNode(root);
+ // CodeBuilderMethods.FileData := nil;
 end;
 
 method TestParserBase.GetRootNode(const value: String): TSyntaxNode;

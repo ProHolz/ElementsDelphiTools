@@ -1,18 +1,23 @@
-﻿namespace PlayGroundFritz;
+﻿namespace ProHolz.CodeGen;
 const TestSetAndEnums = "
 unit TestSetAndEnums;
 
 interface
+// enum in var
+var fIsObjArray: (oaUnknown, oaTrue, oaFalse);
 
 
 type
- // TSQLFieldBits = set of 0..MAX_SQLFIELDS-1;
+  TSQLFieldBits = set of 0..MAX_SQLFIELDS-1;
   simple = (sfirst, ssecond, sthird);
   simpleset = set of simple;
   withType = set of (wtFirst, wtSecond, wtThird);
 
 // Alias
   simpleAlias = simple;
+
+
+ eStyleRange = sfirst..sthird;
 
 
  TSimpleByteArray = Array[simple] of byte;

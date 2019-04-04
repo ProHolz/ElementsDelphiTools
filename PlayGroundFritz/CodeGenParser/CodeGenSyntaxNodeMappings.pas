@@ -1,14 +1,14 @@
-﻿namespace PlayGroundFritz;
+﻿namespace ProHolz.CodeGen;
 uses
   ProHolz.Ast;
 
 type
   CodeBuilderMethods = static partial class
   private
-    method mapSyntaxnodeToOperatorKind(const NodeTyp : TSyntaxNodeType) : CGBinaryOperatorKind;
+    method mapSyntaxnodeToOperatorKind(const node : TSyntaxNodeType) : CGBinaryOperatorKind;
     begin
       result :=
-      case NodeTyp   of
+      case node   of
       //case Concat // string concat, can be different than +
 
         TSyntaxNodeType.ntAdd : CGBinaryOperatorKind.Addition;
@@ -58,9 +58,9 @@ type
         end;
     end;
 
-method mapCallingConvention(const Value: String): CGCallingConventionKind;
+method mapCallingConvention(const value: String): CGCallingConventionKind;
 begin
-  case Value.ToLower of
+  case value.ToLower of
     'stdcall' : exit CGCallingConventionKind.StdCall;
     'cdecl' : exit CGCallingConventionKind.CDecl;
     'pascal': exit CGCallingConventionKind.Pascal;
@@ -70,9 +70,9 @@ begin
   end;
 end;
 
-method mapBinding(const Value: String): CGMemberVirtualityKind;
+method mapBinding(const value: String): CGMemberVirtualityKind;
 begin
-  case Value.ToLower of
+  case value.ToLower of
     'abstract' : exit CGMemberVirtualityKind.Abstract;
     'virtual' : exit CGMemberVirtualityKind.Virtual;
     'override' : exit CGMemberVirtualityKind.Override;
@@ -82,9 +82,9 @@ begin
 end;
 
 
-method mapVisibility(Value: TSyntaxNodeType): CGMemberVisibilityKind;
+method mapVisibility(value: TSyntaxNodeType): CGMemberVisibilityKind;
 begin
-  case Value of
+  case value of
     TSyntaxNodeType.ntPrivate : exit CGMemberVisibilityKind.Private;
     TSyntaxNodeType.ntStrictPrivate : exit CGMemberVisibilityKind.Private;
     TSyntaxNodeType.ntProtected : exit CGMemberVisibilityKind.Protected;

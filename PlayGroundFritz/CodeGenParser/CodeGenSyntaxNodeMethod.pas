@@ -1,4 +1,4 @@
-﻿namespace PlayGroundFritz;
+﻿namespace ProHolz.CodeGen;
 
 interface
 uses ProHolz.Ast;
@@ -10,7 +10,7 @@ type
   private
     method GetReturnType(const node: TSyntaxNode) : CGTypeReference;
     method BuildLocalMethod(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
-    method PrepareLocalVarOrConstant(const constnode: TSyntaxNode; const isConst: Boolean): CGVariableDeclarationStatement;
+    method PrepareLocalVarOrConstant(const node: TSyntaxNode; const isConst: Boolean): CGVariableDeclarationStatement;
     method BuildVariablesMethod(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
     method BuildConstantsMethodClause(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
     method BuildTypesMethodClause(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
@@ -18,10 +18,10 @@ type
   end;
 implementation
 
-method CodeBuilderMethods.PrepareLocalVarOrConstant(const constnode: TSyntaxnode; const isConst : Boolean) : CGVariableDeclarationStatement;
+method CodeBuilderMethods.PrepareLocalVarOrConstant(const node: TSyntaxnode; const isConst : Boolean) : CGVariableDeclarationStatement;
 begin
-  Var constName := constnode.FindNode(TSyntaxNodeType.ntName).AttribName;
-  Var typeNode := constnode.FindNode(TSyntaxNodeType.ntType);
+  Var constName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
+  Var typeNode := node.FindNode(TSyntaxNodeType.ntType);
 
   Var typeName := typeNode:AttribName;
   Var typeType := typeNode:AttribType;
@@ -31,7 +31,7 @@ begin
     case typeType.ToLower of
     // Special Handling of Array Constants
       'array' : begin
-                  var larray := PrepareArrayVarOrConstant(constnode, isConst, false);
+                  var larray := PrepareArrayVarOrConstant(node, isConst, false);
                   //CGTypeDefinition
 
                    exit  new CGVariableDeclarationStatement(constName, larray.Type );
@@ -45,9 +45,8 @@ begin
 
     end;
 
-  var valuenode := constnode.FindNode(TSyntaxNodeType.ntValue);
-  //if valuenode <> nil then
-    //linit := PrepareExpressionValue(valuenode);
+  var valuenode := node.FindNode(TSyntaxNodeType.ntValue);
+
 
    if assigned(typeNode) then
    result :=  new CGVariableDeclarationStatement(constName, PrepareTypeRef(typeNode), PrepareExpressionValue(valuenode))

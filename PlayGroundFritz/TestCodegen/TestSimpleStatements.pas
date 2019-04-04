@@ -8,11 +8,13 @@ uses
 type
   TestSimpleStatements = public class(TestParserBase)
   private
+
   public
     method TestSimpleAssign;
     method TestFor;
 
     method testBreakContinue;
+    method testDotAssign;
   end;
 
 implementation
@@ -191,6 +193,50 @@ end;
         end;
       end;
     end;
+  end;
+end;
+
+
+method TestSimpleStatements.testDotAssign;
+begin
+  var lunit := BuildUnit(tbUnitType.implementation ,"
+
+procedure TestLoops;
+var i : integer;
+begin
+  test := Ctest.data[1];
+  Named1.Named2.Named3(value);
+ // MethodCall().ArrayCall[col].NamedCall;
+end;
+
+
+");
+
+  Assert.IsNotNil(lunit);
+  Assert.AreEqual(lunit.Globals.Count, 1);
+
+
+  for each matching GV : CGGlobalFunctionDefinition in lunit.Globals  do
+    begin
+    var func := GV.Function;
+    Check.AreEqual(func.Statements.Count, 2);
+    for each s  in  func.Statements index i do
+      begin
+      case i of
+        0 : begin
+          Assert.IsTrue(s is CGAssignmentStatement);
+          var f := s as CGAssignmentStatement;
+          Check.IsFalse(f.Value is CGArrayElementAccessExpression, $"Type {f.Value.ToString} ");
+          Check.IsTrue(f.Value is CGRawExpression, $"Type {f.Value.ToString} ");
+    end;
+        1 : begin
+          Assert.IsTrue(s is CGMethodCallExpression);
+          Check.IsFalse(CGMethodCallExpression(s).CallSite is CGPropertyAccessExpression, $"Type: {CGMethodCallExpression(s).CallSite.ToString} ");
+
+     end;
+
+  end;
+  end;
   end;
 end;
 
