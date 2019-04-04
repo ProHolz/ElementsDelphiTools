@@ -264,10 +264,18 @@ begin
 
 
   class method TProjectIndexer.SafeOpenFileContext(const fileName: not nullable String; out fileContext: not nullable String; out errorMsg: string): boolean;
-
   begin
     try
-      fileContext := File.ReadText(fileName) as not nullable;
+      var data := File.ReadBytes(fileName);
+      // If we have a Utf8-Bom use the dfeault encoding else the
+      // windows Encoding.....
+      if (data.Count > 3) and
+
+         ((data[0] = $EF) and (data[1] = $BB) and (data[2] = $BF)) then
+         fileContext := Encoding.UTF8.GetString(data) as not nullable
+         else
+          fileContext := Encoding.GetEncoding('windows-1252').GetString(data) as not nullable;
+
       Result := true;
     except
       on E: Exception do
