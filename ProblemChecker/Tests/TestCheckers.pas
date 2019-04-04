@@ -34,13 +34,22 @@ type
     method TestWithUse;
     method TestDFM;
     method TestResource;
-
+    method TestVarTypes;
   end;
 
 implementation
 
 uses
   ProHolz.Ast;
+
+
+  method TestCheckers.Problem_At(Check: eEleCheck; Line: Integer; Pos: Integer; const Name : String = '');
+  begin
+    inc(FGlobProbs);
+    writeLn($" Typ: {Check.ToString}  Line {Line}/{Pos} {Name}");
+  end;
+
+
 
   method TestCheckers.SetupTest;
   begin
@@ -158,10 +167,6 @@ begin
   Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
 end;
 
-method TestCheckers.Problem_At(Check: eEleCheck; Line: Integer; Pos: Integer; const Name : String = '');
-begin
-  inc(FGlobProbs);
-end;
 
 method TestCheckers.TestDFM;
 begin
@@ -175,6 +180,15 @@ begin
   var toCheck := TPasSyntaxTreeBuilder.RunWithString(cUnitWithResDFM, false);
   var lchecker := new TProblem_RES() as ISingleProbSolver;
    Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
+end;
+
+method TestCheckers.TestVarTypes;
+begin
+  var toCheck := TPasSyntaxTreeBuilder.RunWithString(cTestVarTypes, false);
+  var lchecker := new TProblem_VarTypes() as ISingleProbSolver;
+   Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
+   Check.AreEqual(FGlobProbs, 3);
+
 end;
 
 

@@ -183,6 +183,21 @@ end.
 ";
 
 
+cTestVarTypes = "
+unit Test;
+interface
+var
+ Simple : Integer;
+ SimpleSet :  (e1, e2, e3);
+ ByteArray : Array[0..0] of byte;
+
+ pprocVar  : Procedure(a : Integer);
+ pprocFunc  : function(a : Integer) : boolean;
+
+ implementation
+end.
+";
+
 
 method WriteoutConstxml;
 begin
