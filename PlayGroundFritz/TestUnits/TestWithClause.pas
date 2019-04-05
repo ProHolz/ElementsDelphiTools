@@ -14,6 +14,16 @@ implementation
 
      end;
 
+
+
+   with value do
+     begin
+       test := test+1;
+       andOneMore;
+     end;
+
+
+
  end;
 
 

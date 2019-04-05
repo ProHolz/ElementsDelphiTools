@@ -22,6 +22,10 @@ type
 
  eStyleset = set of eCadPenStyle;
 
+
+ Range = 0..20;
+ RangeSet = set of Range;
+
 const
  DefaultStyle : eStyleSet = [lpsDash, lpsSolid];
  SimpleIntArray : Array[0..2] of Integer = (0, 1,2);

@@ -135,7 +135,7 @@ var i : integer;
 begin
   for I in cintArray do
    begin
-    Start();
+    Start(a,b);
     Start2();
    end;
 
