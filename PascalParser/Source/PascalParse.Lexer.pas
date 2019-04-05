@@ -4084,6 +4084,12 @@ begin
     case FLexer.TokenID of
       TptTokenKind.ptAsciiChar, TptTokenKind.ptIntegerConst:
       begin
+          InitAhead;
+          AheadParse.NextToken;
+          AheadParse.SimpleExpression;
+          if AheadParse.TokenID = TptTokenKind.ptDotDot then
+            SubrangeType
+          else
         OrdinalType;
       end;
       TptTokenKind.ptFloat:
@@ -4311,6 +4317,13 @@ begin
     case TokenID of
       TptTokenKind.ptAsciiChar, TptTokenKind.ptFloat, TptTokenKind.ptIntegerConst, TptTokenKind.ptMinus, TptTokenKind.ptNil, TptTokenKind.ptPlus, TptTokenKind.ptStringConst, TptTokenKind.ptConst:
       begin
+
+        InitAhead;
+        AheadParse.NextToken;
+        AheadParse.SimpleExpression;
+          if AheadParse.TokenID = TptTokenKind.ptDotDot then
+            SubrangeType
+          else
         SimpleType;
     end;
       TptTokenKind.ptRoundOpen:
