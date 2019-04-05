@@ -9,6 +9,7 @@ type
 
   CodeBuilderMethods = static partial class
   private
+
     method PrepareDllCallAttribute(const node: TSyntaxNode): CGAttribute;
     method PrepareCallingConventionAttribute(const value: CGCallingConventionKind): CGAttribute;
     method isImplementsMethod(const node: TSyntaxNode): CGMethodLikeMemberDefinition;
@@ -20,7 +21,7 @@ type
 
     method AddAncestors(const Value : CGClassOrStructTypeDefinition; const Types : TSyntaxNode);
 
-    method PrepareArrayType(const node: TSyntaxNode; const className: not nullable String): CGTypeReference;
+    method PrepareArrayType(const node: TSyntaxNode): CGTypeReference;
     method PrepareProperty(prop: TSyntaxNode): CGPropertyDefinition;
     method PrepareVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean; const newtypename : String = nil): CGGlobalVariableDefinition;
 
@@ -53,43 +54,29 @@ type
 
 implementation
 
-method CodeBuilderMethods.PrepareArrayType(const node: TSyntaxNode; const className: not nullable String): CGTypeReference;
+method CodeBuilderMethods.PrepareArrayType(const node: TSyntaxNode): CGTypeReference;
 begin
   var typeNode := node.FindNode(TSyntaxNodeType.ntType);
   if assigned(typeNode) then
   begin
-
     var lBounds := resolveBounds(node);
     if lBounds <> nil then
     begin
       var lArrayBounds := new List<CGArrayBounds>;
-      var lTypeBounds := new List<CGTypeReference>;
       for each lbound in lBounds do
-        begin
         if lbound is CGArrayBounds then
-          lArrayBounds.Add(lbound as CGArrayBounds)
-        else
-          if lbound is CGTypeReference then
-            lTypeBounds.Add(lbound as CGTypeReference)
-      end;
+          lArrayBounds.Add(lbound as CGArrayBounds);
 
-      if (lArrayBounds.Count > 0) and (lTypeBounds.Count > 0) then
-      begin
-        result := new CGArrayTypeReference((typeNode.AttribName).AsTypeReference, $"***Combined__TYPES Line: {typeNode.Line} ".AsTypeReference);
-      //  result.Comment :=  $" UnknownArray Type on Line {node.Line}".AsComment;
-      end
-      else
+
+        Var lTempType := PrepareTypeRef(typeNode);
         if lArrayBounds.Count > 0 then
         begin
-          result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference, lArrayBounds);
+          result := new CGArrayTypeReference(lTempType, lArrayBounds);
+
           CGArrayTypeReference( result).ArrayKind := CGArrayKind.Static;
         end
         else
-          if lTypeBounds.Count > 0 then
-            result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference, lTypeBounds)
-          else
-            result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference)
-
+          result := new CGArrayTypeReference(lTempType);
     end
     else
       result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference);
@@ -183,12 +170,12 @@ begin
     typename := typeNode:AttribName;
     if String.IsNullOrEmpty(typename) then
       typename := typeNode:AttribType;
-end;
+  end;
 
   var   lGlobalSet := if String.IsNullOrEmpty(typename) then  new CGFieldDefinition(constName)
 else if assigned(newtypename) then
   new CGFieldDefinition(constName, newtypename.AsTypeReference)
-  else
+else
   new CGFieldDefinition(constName, PrepareTypeRef( typeNode));
 
   var valuenode := node.FindNode(TSyntaxNodeType.ntValue);
@@ -250,7 +237,7 @@ begin
             ArrayTyp := paramTypenode.FindNode(TSyntaxNodeType.ntType):AttribKind;
           var lrefTyp :=
           // if CodeBuilderDefaultTypes.isDefaultType(ArrayTyp) then
-             CodeBuilderDefaultTypes.GetType(ArrayTyp);
+          CodeBuilderDefaultTypes.GetType(ArrayTyp);
 
 
 
@@ -343,10 +330,10 @@ begin
         //var lData := new CGCallParameter(Lexpressions.ToList);
       //end;
 
-      var lexttype := PrepareSingleExpressionValue(lextnode);
-      var lentry := new CGCallParameter(lexttype, 'EntryPoint') as not nullable;
-      exit new CGAttribute('DllImport'.AsTypeReference, ltype.AsCallParameter, lentry);
-    end;
+    var lexttype := PrepareSingleExpressionValue(lextnode);
+    var lentry := new CGCallParameter(lexttype, 'EntryPoint') as not nullable;
+    exit new CGAttribute('DllImport'.AsTypeReference, ltype.AsCallParameter, lentry);
+  end;
 
   exit new CGAttribute('DllImport'.AsTypeReference, ltype.AsCallParameter);
 end;
@@ -422,15 +409,15 @@ begin
     lMethod.Virtuality := CGMemberVirtualityKind.Abstract
   else
     if not (lMethod is CGConstructorDefinition) then
-    lMethod.Virtuality := mapBinding(methodnode.GetAttribute(TAttributeName.anMethodBinding));
+      lMethod.Virtuality := mapBinding(methodnode.GetAttribute(TAttributeName.anMethodBinding));
      // Class Method?
   if methodnode.GetAttribute(TAttributeName.anClass).ToLower = 'true' then
     lMethod.Static := true;
 
 // Reintroduce?
   if not (lMethod is CGConstructorDefinition) then
-  if methodnode.getAttribute(TAttributeName.anReintroduce).ToLower = 'true' then
-    lMethod.Reintroduced := true;
+    if methodnode.getAttribute(TAttributeName.anReintroduce).ToLower = 'true' then
+      lMethod.Reintroduced := true;
 
 
 
@@ -629,7 +616,7 @@ begin
           var lCgType : CGTypeReference;
           case lFieldType.AttribType.ToLower of
             'array' : begin
-              lCgType := PrepareArrayType(lFieldType, lFieldName);
+              lCgType := PrepareArrayType(lFieldType);
             end;
             else
               lCgType := PrepareTypeRef(lFieldType);
@@ -769,12 +756,12 @@ begin
   {$HINT "ADD SUPPORT FOR OTHER SET TYPES"}
 
   if node.ChildNodes.Count = 2 then
-   begin
+  begin
     var lstart := PrepareSingleExpressionValue(node.ChildNodes[0]);
-    var lEnd := PrepareSingleExpressionValue(node.ChildNodes[1]);
-  //  exit new CGSubRangeTypeReference(lstart, lEnd);
-    exit new CGTypeAliasDefinition(className, new CGSubRangeTypeReference(lstart, lEnd));
-   end;
+   var lEnd := PrepareSingleExpressionValue(node.ChildNodes[1]);
+
+    exit new CGTypeAliasDefinition(className, new CGRangeTypeReference(lstart, lEnd));
+  end;
 
 
   var lres := new CGTypeAliasDefinition(className, ('****UnknownSET').AsTypeReference);
@@ -837,7 +824,7 @@ end;
 
 method CodeBuilderMethods.BuildArray(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
 begin
-  var lArray := PrepareArrayType(node, className);
+  var lArray := PrepareArrayType(node);
   if assigned(lArray) then
     exit new CGTypeAliasDefinition(className, lArray)
   else raise new Exception("Array Type Alias not solved");
@@ -914,11 +901,11 @@ begin
     'function','procedure' : begin
         preparetyp := prepareNewTypeEnum.block;
         exit true;
-      end;
+    end;
     'enum' : begin
-    preparetyp := prepareNewTypeEnum.enum;
-    exit true;
-  end;
+      preparetyp := prepareNewTypeEnum.enum;
+      exit true;
+    end;
   end;
   exit false;
 end;

@@ -196,9 +196,7 @@ begin
      var lRight := PrepareSingleExpressionValue(node.ChildNodes[1]);
      if assigned(lLeft) and assigned(lRight) then
      begin
-       var Builder := new CGOxygeneHelperCodeGenerator();
-       var ltempDot := new CGDotNameExpression(lLeft, lRight);
-       exit Builder.DotExpressionToString(ltempDot).AsRawExpression;
+       exit  new CGDotNameExpression(lLeft, lRight);
      end
      else
        raise new Exception("DOT Expression not solved");

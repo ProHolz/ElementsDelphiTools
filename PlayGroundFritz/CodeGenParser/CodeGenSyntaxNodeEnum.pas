@@ -1,5 +1,5 @@
 ﻿namespace ProHolz.CodeGen;
-{$DEFINE USESET}
+{ $DEFINE USESET}
 interface
 uses ProHolz.Ast;
 
@@ -19,25 +19,16 @@ begin
     var FieldType := FieldNode.AttribName;
     result.Members.Add(new CGEnumValueDefinition(FieldType));
   end;
-
 end;
 
 method CodeBuilderEnum.BuildSet(const node: TSyntaxNode; const setName: not nullable String): CGTypeDefinition;
 begin
- // var l := new CGSetTypeReference(enumName.AsTypeReference).
-  {$HINT WE NEED A SET TYPE}
- var ltemp := new CGEnumTypeDefinition(setName);
-// ''.AsTypeReference.
-ltemp.Comment := ('Should be Set of ').AsComment;
- {$IF USESET}
-   ltemp.IsSet := true;
- {$ENDIF}
+ result := new CGSetTypeDefinition(setName);
   for each FieldNode in node.FindNode(TSyntaxNodeType.ntType):FindChilds(TSyntaxNodeType.ntIdentifier) do
     begin
     var FieldType := FieldNode.AttribName;
-    ltemp.Members.Add(new CGEnumValueDefinition(FieldType));
+    result.Members.Add(new CGEnumValueDefinition(FieldType));
   end;
- result := ltemp;
 end;
 
 end.

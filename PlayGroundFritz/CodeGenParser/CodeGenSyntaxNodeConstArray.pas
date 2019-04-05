@@ -26,7 +26,7 @@ begin
   var constName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
   var typeNode := node.FindNode(TSyntaxNodeType.ntType);
 
-  var lArray := PrepareArrayType(typeNode, constName);
+  var lArray := PrepareArrayType(typeNode);
 
 
   result := new CGFieldDefinition(constName, lArray);
@@ -98,20 +98,16 @@ begin
         var resDimensions := PrepareCallExpressions(lDimension);
         if length(resDimensions) = 2 then
         begin
-          if (resDimensions[0] is CGIntegerLiteralExpression) and (resDimensions[1] is CGIntegerLiteralExpression) then
-          begin
-            var lmin : Integer  := CGIntegerLiteralExpression(resDimensions[0]).SignedValue;
-            var lmax : Integer := CGIntegerLiteralExpression(resDimensions[1]).SignedValue;
-            var temp := new CGArrayBounds(lmin) &end(lmax);
 
+            var temp := new CGArrayBounds(resDimensions[0]) &end(resDimensions[1]);
             result.Add(temp);//,  end_:= lmax));
-          end;
+
         end
         else
           if length(resDimensions) = 1 then
           begin
-            if resDimensions[0] is CGNamedIdentifierExpression then
-              result.Add((resDimensions[0] as CGNamedIdentifierExpression).Name.AsTypeReference);
+            var temp := new CGArrayBounds(resDimensions[0]);
+              result.Add(temp);
           end;
       end;
     end;

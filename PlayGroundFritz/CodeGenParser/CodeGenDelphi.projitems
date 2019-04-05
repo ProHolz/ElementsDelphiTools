@@ -22,9 +22,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeStatements.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeTypes.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeSettings.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenExtensionHelper.swift" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeFile.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenFromDelphi.swift" />
-    <None Include="$(MSBuildThisFileDirectory)..\..\Syn\Syn.elements" />
   </ItemGroup>
 </Project>

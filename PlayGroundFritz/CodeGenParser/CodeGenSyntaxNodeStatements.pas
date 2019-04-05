@@ -464,14 +464,8 @@ begin
 
     if assigned(lExpressions) and assigned(lStatement) then
     begin
-     var Builder := new CGOxygeneHelperCodeGenerator();
-     var ltempWith := new CGWithStatement(lEx);
-     Var s := Builder.WithStatementToString(ltempWith);
-     var lSource := s.AsRawExpression;
-     var lHint := "{$HINT 'With expression must be solved'} //".AsRawExpression;
-     var lres := new CGStatementList(lHint);
-     lres.Add(lSource);
-     lres.Add(new CGBeginEndBlockStatement(lStatement.First));
+     var ltempWith := new CGWithStatement(lEx, lStatement.First);
+     var lres := new CGStatementList(ltempWith);
      exit lres;
 
     end

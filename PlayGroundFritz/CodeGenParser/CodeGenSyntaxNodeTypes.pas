@@ -14,10 +14,8 @@ type
 implementation
 
 method CodeBuilderMethods.PrepareTypeRef(const node: TSyntaxNode): CGTypeReference;
-require
-  (node <> nil) implies (node.Typ = TSyntaxNodeType.ntType);
+var lTemp : CGTypeReference;
 begin
-  var lTemp : CGTypeReference;
   if CodeBuilderDefaultTypes.isDefaultType(node.AttribName) then
    lTemp := CodeBuilderDefaultTypes.GetDefaultType(node.AttribName)
 else
@@ -28,10 +26,21 @@ else
            begin
              var lstart := PrepareSingleExpressionValue(node.ChildNodes[0]);
              var lEnd := PrepareSingleExpressionValue(node.ChildNodes[1]);
-             exit new CGSubRangeTypeReference(lstart, lEnd);
+             exit new CGRangeTypeReference(lstart, lEnd);
            end;
         end;
     end;
+
+
+    case node.AttribType.ToLower of
+      'array' : begin
+          var la := PrepareArrayType(node);
+          exit la;
+
+      end;
+     end;
+
+
      lTemp := node.AttribName.AsTypeReference;
   end;
 
