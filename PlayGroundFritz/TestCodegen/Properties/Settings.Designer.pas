@@ -1,4 +1,4 @@
-namespace TestCodegen;
+﻿namespace TestCodegen;
 
 interface
 

@@ -87,5 +87,5 @@
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <Import Project="..\..\PascalParser\Source\PascalParse.Shared.projitems" Label="Shared" />
   <Import Project="..\CodeGenParser\CodeGenDelphi.projitems" Label="Shared" />
-  <Import Project="..\..\..\CodeGen4\Codegen4.Shared.projitems" Label="Shared" />
+  <Import Project="..\..\CodeGenerator\Codegenerator.Shared.projitems" Label="Shared" />
 </Project>

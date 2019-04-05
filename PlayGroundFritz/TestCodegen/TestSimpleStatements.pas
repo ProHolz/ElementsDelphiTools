@@ -72,16 +72,16 @@ end;
         end;
         3 :  begin
           Check.AreEqual((se.Value as CGBinaryOperatorExpression).Operator, CGBinaryOperatorKind.Multiplication);
-          end;
+        end;
         4 :  begin
           Check.AreEqual((se.Value as CGBinaryOperatorExpression).Operator, CGBinaryOperatorKind.Division);
-         end;
+        end;
         5 :  begin
           Check.AreEqual((se.Value as CGBinaryOperatorExpression).Operator, CGBinaryOperatorKind.Modulus);
         end;
         6 :  begin
           Check.AreEqual((se.Value as CGBinaryOperatorExpression).Operator, CGBinaryOperatorKind.Shl);
-         end;
+        end;
         7 :  begin
           Check.AreEqual((se.Value as CGBinaryOperatorExpression).Operator, CGBinaryOperatorKind.Shr);
         end;
@@ -90,14 +90,14 @@ end;
         end;
         9 :  begin
           Check.AreEqual((se.Value as CGBinaryOperatorExpression).Operator, CGBinaryOperatorKind.LogicalAnd);
-         end;
+        end;
         10 :  begin
           Check.AreEqual((se.Value as CGBinaryOperatorExpression).Operator, CGBinaryOperatorKind.LogicalOr);
-         end;
+        end;
         11 :  begin
           Check.AreEqual((se.Value as CGBinaryOperatorExpression).Operator, CGBinaryOperatorKind.LegacyPascalDivision);
         end;
-       end;
+      end;
 
     end;
   end;
@@ -127,22 +127,22 @@ end;
     Check.AreEqual(func.Statements.Count, 4);
     for each s  in  func.Statements index i do
       begin
-        case i of
-          0 : begin
-              Check.IsTrue(s is CGForToLoopStatement);
-            end;
-          1 : begin
-              Check.IsTrue(s is CGForEachLoopStatement);
-          end;
-          2 : begin
-              Check.IsTrue(s is CGWhileDoLoopStatement);
-           end;
-          3 : begin
-              Check.IsTrue(s is CGDoWhileLoopStatement);
-           end;
+      case i of
+        0 : begin
+          Check.IsTrue(s is CGForToLoopStatement);
+        end;
+        1 : begin
+          Check.IsTrue(s is CGForEachLoopStatement);
+        end;
+        2 : begin
+          Check.IsTrue(s is CGWhileDoLoopStatement);
+        end;
+        3 : begin
+          Check.IsTrue(s is CGDoWhileLoopStatement);
         end;
       end;
     end;
+  end;
 end;
 
 
@@ -174,25 +174,25 @@ end;
       begin
       case i of
         0 : begin
-              Assert.IsTrue(s is CGForToLoopStatement);
+          Assert.IsTrue(s is CGForToLoopStatement);
           var f := s as CGForToLoopStatement;
-           Assert.IsTrue(f.NestedStatement is CGIfThenElseStatement);
-          var n := f.NestedStatement as CGIfThenElseStatement;
-          Check.IsTrue(n.ElseStatement is CGContinueStatement);
-          Check.IsTrue(n.IfStatement is CGBreakStatement);
+      Assert.IsTrue(f.NestedStatement is CGIfThenElseStatement);
+      var n := f.NestedStatement as CGIfThenElseStatement;
+      Check.IsTrue(n.ElseStatement is CGContinueStatement);
+      Check.IsTrue(n.IfStatement is CGBreakStatement);
 
-        end;
+    end;
         1 : begin
           Check.IsTrue(s is CGForEachLoopStatement);
         end;
         2 : begin
           Check.IsTrue(s is CGWhileDoLoopStatement);
         end;
-        3 : begin
-          Check.IsTrue(s is CGDoWhileLoopStatement);
-        end;
-      end;
+    3 : begin
+      Check.IsTrue(s is CGDoWhileLoopStatement);
     end;
+  end;
+  end;
   end;
 end;
 
@@ -206,7 +206,7 @@ var i : integer;
 begin
   test := Ctest.data[1];
   Named1.Named2.Named3(value);
- // MethodCall().ArrayCall[col].NamedCall;
+  MethodCall().ArrayCall[col].NamedCall;
 end;
 
 
@@ -219,7 +219,7 @@ end;
   for each matching GV : CGGlobalFunctionDefinition in lunit.Globals  do
     begin
     var func := GV.Function;
-    Check.AreEqual(func.Statements.Count, 2);
+    Check.AreEqual(func.Statements.Count, 3);
     for each s  in  func.Statements index i do
       begin
       case i of
@@ -227,16 +227,20 @@ end;
           Assert.IsTrue(s is CGAssignmentStatement);
           var f := s as CGAssignmentStatement;
           Check.IsFalse(f.Value is CGArrayElementAccessExpression, $"Type {f.Value.ToString} ");
-          Check.IsTrue(f.Value is CGRawExpression, $"Type {f.Value.ToString} ");
-    end;
+          Check.IsTrue(f.Value is CGDotNameExpression, $"Type {f.Value.ToString} ");
+        end;
         1 : begin
           Assert.IsTrue(s is CGMethodCallExpression);
           Check.IsFalse(CGMethodCallExpression(s).CallSite is CGPropertyAccessExpression, $"Type: {CGMethodCallExpression(s).CallSite.ToString} ");
 
-     end;
+        end;
+        2 : begin
+          Assert.IsTrue(s is CGDotNameExpression);
+        //  Check.IsFalse(CGMethodCallExpression(s).CallSite is CGPropertyAccessExpression, $"Type: {CGMethodCallExpression(s).CallSite.ToString} ");
 
   end;
-  end;
+      end;
+    end;
   end;
 end;
 
