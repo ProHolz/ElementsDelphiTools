@@ -781,3 +781,15 @@ public class CGArrayElementAccessExpression: CGExpression {
 		init(array, parameters.ToList())
 	}
 }
+
+
+public class CGDotNameExpression: CGExpression {
+	public var LeftValue: CGExpression
+	public var RightValue: CGExpression
+	public var NilSafe: Boolean = false // true to use colon or elvis operator
+
+	public init(_ leftValue: CGExpression, _ rightValue: CGExpression) {
+		LeftValue = leftValue
+		RightValue = rightValue
+	}
+}

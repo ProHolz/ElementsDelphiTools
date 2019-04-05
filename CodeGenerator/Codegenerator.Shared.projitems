@@ -43,15 +43,6 @@
     <None Include="$(MSBuildThisFileDirectory)LICENSE.md" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Code Definition">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Generation">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Generation — C-Style Languages">
-      <Virtual>True</Virtual>
-    </Folder>
     <Folder Include="Code Generation — Pascal">
       <Virtual>True</Virtual>
     </Folder>
@@ -59,33 +50,6 @@
       <Virtual>True</Virtual>
     </Folder>
     <Folder Include="Code Generation">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Generation — C-Style Languages">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Generation — Pascal">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Definition">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Generation">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Generation — C-Style Languages">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Generation — Pascal">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Definition">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Generation">
-      <Virtual>True</Virtual>
-    </Folder>
-    <Folder Include="Code Generation — Pascal">
       <Virtual>True</Virtual>
     </Folder>
   </ItemGroup>

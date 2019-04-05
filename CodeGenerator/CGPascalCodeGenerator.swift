@@ -489,6 +489,27 @@ public __abstract class CGPascalCodeGenerator : CGCodeGenerator {
 		generateStatementTerminator()
 	}
 
+	override func generateWithStatement(_ statement: CGWithStatement) {
+		AppendLine("{$HINT 'With expression must be solved'}")
+
+		Append("with ")
+
+		for i in 0 ..< statement.WithVars.Count {
+			if let withvar = statement.WithVars[i] {
+
+				generateExpression(withvar)
+				if i < statement.WithVars.Count-1{
+					Append(", ")
+				}
+			}
+		}
+
+		Append(" do  ")
+		generateStatement(statement.NestedStatement)
+	   // generateStatementTerminator()
+	}
+
+
 	//
 	// Expressions
 	//
@@ -1866,22 +1887,18 @@ public __abstract class CGPascalCodeGenerator : CGCodeGenerator {
 		if let bounds = array.Bounds, bounds.Count > 0 {
 			Append("[")
 			helpGenerateCommaSeparatedList(bounds) { bound in
-				self.Append(bound.Start.ToString())
-				self.Append("..")
+				self.generateExpression(bound.Start)
+
+
 				if let end = bound.End {
-					self.Append(end.ToString())
+					self.Append("..")
+					self.generateExpression(end)
+
 				}
 			}
 			Append("]")
 		}
-		else
-			if let boundsTypes = array.BoundsTypes, boundsTypes.Count > 0 {
-				Append("[")
-				helpGenerateCommaSeparatedList(boundsTypes) { boundsType in
-					self.generateTypeReference(boundsType, ignoreNullability: true)
-				}
-				Append("]")
-		}
+
 		Append(" of ")
 		generateTypeReference(array.`Type`)
 	}

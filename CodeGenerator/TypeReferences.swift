@@ -446,7 +446,7 @@ public enum CGArrayKind {
 public class CGArrayTypeReference : CGTypeReference {
 	public var `Type`: CGTypeReference
 	public var Bounds: List<CGArrayBounds>?
-	public var BoundsTypes: List<CGTypeReference>?
+
 	public var ArrayKind: CGArrayKind = .Dynamic
 
 	public init(_ type: CGTypeReference, _ bounds: List<CGArrayBounds>? = nil) {
@@ -463,17 +463,9 @@ public class CGArrayTypeReference : CGTypeReference {
 		Bounds = bounds.ToList()
 	}
 
-	public init(_ type: CGTypeReference, _ boundsTypes: List<CGTypeReference>) {
-		`Type` = type
-		DefaultNullability = .NullableNotUnwrapped
-		BoundsTypes = boundsTypes
-	}
 
-	public init(_ type: CGTypeReference, _ boundsTypes: CGTypeReference...) {
-		`Type` = type
-		DefaultNullability = .NullableNotUnwrapped
-		BoundsTypes = boundsTypes.ToList()
-	}
+
+
 
 	override func copyWithNullability(_ nullability: CGTypeNullabilityKind) -> CGTypeReference {
 		let result = CGArrayTypeReference(`Type`, Bounds)
@@ -491,12 +483,10 @@ public class CGArrayTypeReference : CGTypeReference {
 }
 
 public class CGArrayBounds : CGEntity {
-	public var Start: Int32 = 0
-	public var End: Int32?
+	public var Start: CGExpression
+	public var End: CGExpression?
 
-	public init() {
-	}
-	public init(_ start: Int32, end: Int32) {
+	public init(_ start: CGExpression, end: CGExpression? = nil) {
 		Start = start
 		End = end
 	}

@@ -526,6 +526,9 @@
 			generateGotoStatement(expression)
 		} else if let expression = statement as? CGLabelStatement {
 			generateLabelStatement(expression)
+		} else if let expression = statement as? CGWithStatement {
+			generateWithStatement(expression)
+
 		} else if let expression = statement as? CGExpression { // should be last but one
 			generateExpressionStatement(expression)
 		}
@@ -723,6 +726,24 @@
 		generateStatementTerminator()
 	}
 
+	internal func generateWithStatement(_ statement: CGWithStatement) {
+	   // descendant must override this or generateImports()
+		assert(false, "generateGotoStatement not implemented")
+	}
+
+	internal func generateDotNameStatement(_ statement: CGDotNameExpression) {
+	  // descendant must override this or generateImports()
+		generateDotNameExpression(statement);
+		generateStatementTerminator()
+	}
+	internal func generateMethodCallStatement(_ statement: CGMethodCallExpression) {
+		generateExpression(statement)
+		generateStatementTerminator()
+
+	}
+
+
+
 	//
 	// Expressions
 	//
@@ -826,6 +847,8 @@
 			generateTupleExpression(expression)
 		} else if let expression = expression as? CGTypeReferenceExpression {
 			generateTypeReferenceExpression(expression)
+		} else if let expression = expression as? CGDotNameExpression {
+			generateDotNameExpression(expression)
 		}
 
 		else {
@@ -1107,6 +1130,12 @@
 	internal func valueForLanguageAgnosticLiteralExpression(_ expression: CGLanguageAgnosticLiteralExpression) -> String {
 		// descendant may override if they aren't happy with the default
 		return expression.StringRepresentation()
+	}
+
+	internal func generateDotNameExpression(_ expression: CGDotNameExpression) {
+		generateExpression(expression.LeftValue)
+		Append(".")
+		generateExpression(expression.RightValue)
 	}
 
 	//

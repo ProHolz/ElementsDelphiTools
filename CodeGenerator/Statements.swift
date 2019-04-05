@@ -365,3 +365,12 @@ public class CGGotoStatement: CGStatement {
 		Target = target
 	}
 }
+
+public class CGWithStatement: CGNestingStatement {
+	public var WithVars: List<CGExpression>
+
+	public init(_ withvars: List<CGExpression>, _ statement: CGStatement) {
+		super.init(statement)
+		WithVars = withvars
+	}
+}
