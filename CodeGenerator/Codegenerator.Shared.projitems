@@ -41,9 +41,6 @@
       <VirtualFolder>Code Generation</VirtualFolder>
     </Compile>
     <None Include="$(MSBuildThisFileDirectory)LICENSE.md" />
-    <Compile Include="$(MSBuildThisFileDirectory)CGVisualBasicNetCodeGenerator.swift">
-      <VirtualFolder>Code Generation</VirtualFolder>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Code Definition">
