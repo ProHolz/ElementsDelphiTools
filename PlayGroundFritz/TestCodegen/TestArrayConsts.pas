@@ -10,13 +10,16 @@ type
   private
 
 
+
   protected
   public
     method TestSimple;
     method TestDynamic;
     method TestArrayType;
     method TestArrayOfArray;
-
+    method TestArray;
+    method SeconsTest;
+    method RangeTest;
   end;
 
 implementation
@@ -201,5 +204,171 @@ var
     end;
   end;
 end;
+
+method TestArrayConsts.TestArray;
+begin
+  var lunit := BuildUnit(tbUnitType.Body ,"
+
+type
+  TSQLDBFieldTypeArray = array[0..MAX_SQLFIELDS] of TSQLDBFieldType;
+ oneLevelArray = array[0..99] of Integer;
+ TwoLevelArray = packed array[0..99] of array[1..2]  of INT64;
+ ThreeLevelArray = packed array[0..99] of array[1..2] of Array[0..2] of AnsiChar;
+TPtrUIntArray = array[0..MaxInt div SizeOf(PtrUInt)-1] of PtrUInt;
+
+implementation
+
+procedure TestArray(const cintArray : intArray = []);
+var i : integer;
+begin
+  for I in cintArray do
+   begin
+    Start();
+    Start2();
+   end;
+
+end;
+
+
+");
+
+  Assert.IsNotNil(lunit);
+
+  //Var lOut := new CGOxygeneCodeGenerator();
+  //writeLn(lOut.GenerateUnit(lunit));
+
+  Assert.AreEqual(lunit.Types.Count, 5);
+
+
+  for each matching GT: CGTypeAliasDefinition  in lunit.Types index i do
+    begin
+    case i of
+      1 :  begin
+        Check.AreEqual(GT.Name, 'oneLevelArray');
+        Assert.IsTrue(GT.ActualType is CGArrayTypeReference);
+        var lBounds := GT.ActualType as CGArrayTypeReference;
+        Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
+        Assert.IsTrue(lBounds.Type is CGPredefinedTypeReference);
+        var ltemp := lBounds.Type as CGPredefinedTypeReference;
+        Check.IsTrue(  ltemp.Kind = CGPredefinedTypeKind.Int32);
+
+
+      end;
+
+      2 :  begin
+        Check.AreEqual(GT.Name, 'TwoLevelArray');
+        Assert.IsTrue(GT.ActualType is CGArrayTypeReference);
+        var lBounds := GT.ActualType as CGArrayTypeReference;
+        Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
+        Check.IsTrue(lBounds.Type is CGArrayTypeReference);
+
+        lBounds := lBounds.Type as CGArrayTypeReference;
+        Check.IsTrue(lBounds.Type is CGPredefinedTypeReference);
+
+
+      end;
+
+
+      3 :  begin
+        Check.AreEqual(GT.Name, 'ThreeLevelArray');
+        Assert.IsTrue(GT.ActualType is CGArrayTypeReference);
+        var lBounds := GT.ActualType as CGArrayTypeReference;
+        Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
+        Check.IsTrue(lBounds.Type is CGArrayTypeReference);
+
+        lBounds := lBounds.Type as CGArrayTypeReference;
+        Check.IsTrue(lBounds.Type is CGArrayTypeReference);
+        lBounds := lBounds.Type as CGArrayTypeReference;
+        Check.IsTrue(lBounds.Type is CGPredefinedTypeReference);
+      end;
+
+      0 :  begin
+        Check.AreEqual(GT.Name, 'TSQLDBFieldTypeArray');
+        Assert.IsTrue(GT.ActualType is CGArrayTypeReference);
+        var lBounds := GT.ActualType as CGArrayTypeReference;
+        Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
+        Check.IsTrue(lBounds.Type is CGNamedTypeReference);
+
+
+      end;
+
+
+    end;
+  end;
+
+end;
+
+method TestArrayConsts.SeconsTest;
+begin
+  var lunit := BuildUnit(tbUnitType.interface ,"
+
+type
+ oneLevelSet = set of Byte; // alias to set of byte
+ twoLevelSet = set of (one, two , three); // New set type
+ Range = 0..20;
+
+RangeSet = set of Range;
+RangeArray = Array[Range] of Integer;
+
+");
+
+  Assert.IsNotNil(lunit);
+
+  Assert.AreEqual(lunit.Types.Count, 5);
+
+
+  for each matching GT: CGTypeDefinition  in lunit.Types index i do
+    begin
+    case i of
+      0 :  begin
+        Check.AreEqual(GT.Name, 'oneLevelSet');
+        Assert.IsTrue(GT is CGTypeAliasDefinition);
+        Check.IsTrue(CGTypeAliasDefinition(GT).ActualType is CGSetTypeReference);
+      end;
+
+      1 :  begin
+        Check.AreEqual(GT.Name, 'twoLevelSet');
+        Assert.IsTrue(GT is CGSetTypeDefinition);
+      end;
+
+
+      2 :  begin
+        Check.AreEqual(GT.Name, 'Range');
+        Assert.IsTrue(GT is CGTypeAliasDefinition);
+      end;
+    end;
+  end;
+
+
+end;
+
+method TestArrayConsts.RangeTest;
+begin
+  var lunit := BuildUnit(tbUnitType.interface ,"
+
+type
+ Range = 0..20;
+
+");
+
+  Assert.IsNotNil(lunit);
+
+  Assert.AreEqual(lunit.Types.Count, 1);
+
+
+  for each matching GT: CGTypeDefinition  in lunit.Types index i do
+    begin
+    case i of
+
+      0 :  begin
+        Check.AreEqual(GT.Name, 'Range');
+        Assert.IsTrue(GT is CGTypeAliasDefinition);
+      end;
+    end;
+  end;
+
+
+end;
+
 
 end.

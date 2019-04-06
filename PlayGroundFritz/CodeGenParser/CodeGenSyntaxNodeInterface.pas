@@ -9,6 +9,7 @@ type
 
   CodeBuilderMethods = static partial class
   private
+    method PrepareInitializer(aType: CGTypeReference; node: TSyntaxNode): CGExpression;
 
     method PrepareDllCallAttribute(const node: TSyntaxNode): CGAttribute;
     method PrepareCallingConventionAttribute(const value: CGCallingConventionKind): CGAttribute;
@@ -134,6 +135,29 @@ begin
 
 end;
 
+method CodeBuilderMethods.PrepareInitializer(aType : CGTypeReference; node : TSyntaxNode) : CGExpression;
+begin
+  var lres := new CGNewInstanceExpression(aType);
+  var lFields := new List<CGPropertyInitializer>;
+
+  if node.Typ = TSyntaxNodeType.ntRecordConstant then
+  begin
+    for each child in node.FindChilds(TSyntaxNodeType.ntField) do
+      lFields.Add(PrepareFieldExpression(child));
+  end
+  else
+  begin
+  for each rec in node.FindChilds(TSyntaxNodeType.ntRecordConstant) do
+  for each child in rec.FindChilds(TSyntaxNodeType.ntField) do
+    lFields.Add(PrepareFieldExpression(child));
+  end;
+if lFields.Count > 0 then
+ lres.PropertyInitializers := lFields;
+
+  result := lres;
+
+end;
+
 method CodeBuilderMethods.PrepareVarOrConstant(const node: TSyntaxnode; const isConst : Boolean; const ispublic : Boolean; const newtypename : string = nil) : CGGlobalVariableDefinition;
 begin
   Var constName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
@@ -178,11 +202,25 @@ else if assigned(newtypename) then
 else
   new CGFieldDefinition(constName, PrepareTypeRef( typeNode));
 
+  lGlobalSet.Constant := isConst;
+
   var valuenode := node.FindNode(TSyntaxNodeType.ntValue);
   if assigned(valuenode) then
+   begin
+     // If there ar ntRecordConstants inside we will solve these
+     var rec := valuenode.FindAllNodes(TSyntaxNodeType.ntRecordConstant);
+     if rec.Length > 0 then
+     begin
+       lGlobalSet.Initializer := PrepareInitializer(lGlobalSet.Type,  valuenode);
+       //lGlobalSet.Constant := false;
+       //lGlobalSet.ReadOnly := true;
+       //lGlobalSet.l
+     end
+    else
     lGlobalSet.Initializer := PrepareExpressionValue(valuenode);
+   end;
 
-  lGlobalSet.Constant := isConst;
+
 
   if ispublic then
     lGlobalSet.Visibility := CGMemberVisibilityKind.Public;
@@ -753,7 +791,7 @@ begin
 
   end; // Case
 
-  {$HINT "ADD SUPPORT FOR OTHER SET TYPES"}
+  {..$HINT "ADD SUPPORT FOR OTHER SET TYPES"}
 
   if node.ChildNodes.Count = 2 then
   begin

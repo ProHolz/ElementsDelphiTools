@@ -10,7 +10,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
-    <TestProject>TestCodegen</TestProject>
+    <TestProject>TestSingle</TestProject>
     <KnownConditionalDefines>DEBUG;NEW_DEFINE;TRACE</KnownConditionalDefines>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -90,6 +90,6 @@
     <Folder Include="TestUnits" />
   </ItemGroup>
   <Import Project="..\PascalParser\Source\PascalParse.Shared.projitems" Label="Shared" />
-  <Import Project="..\..\CodeGen4\Codegen4.Shared.projitems" Label="Shared" />
   <Import Project="CodeGenParser\CodeGenDelphi.projitems" Label="Shared" />
+  <Import Project="..\CodeGenerator\Codegenerator.Shared.projitems" Label="Shared" />
 </Project>

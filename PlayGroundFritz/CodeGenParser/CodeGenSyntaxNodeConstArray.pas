@@ -9,7 +9,7 @@ type
   CodeBuilderMethods = static partial class
   private
     method resolveBounds(const node: TSyntaxNode): List<CGEntity>;
-    method PrepareConstArrayExpression(const node: TSyntaxNode): CGExpression;
+    method PrepareConstArrayExpression(const aType : CGTypeReference; const node: TSyntaxNode): CGExpression;
 
   public
 
@@ -33,7 +33,7 @@ begin
 
   var valuenode := node.FindNode(TSyntaxNodeType.ntValue);
   if valuenode <> nil then
-    result.Initializer := PrepareConstArrayExpression(valuenode.ChildNodes[0]);
+    result.Initializer := PrepareConstArrayExpression(CGArrayTypeReference( lArray).Type, valuenode.ChildNodes[0]);
 
   result.Constant := isConst;
 
@@ -43,7 +43,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareConstArrayExpression(const node: TSyntaxNode): CGExpression;
+method CodeBuilderMethods.PrepareConstArrayExpression(const aType : CGTypeReference; const node: TSyntaxNode): CGExpression;
 begin
   result := nil;
   if node = nil then exit;
@@ -56,7 +56,7 @@ begin
       TSyntaxNodeType.ntExpression :
       begin
         if node.ChildCount = 1 then
-          result := PrepareConstArrayExpression(node.ChildNodes[0])
+          result := PrepareConstArrayExpression(aType, node.ChildNodes[0])
         else
           raise new Exception(node.Typ.ToString+  '=======  More than one Child =======');
       end;
@@ -65,7 +65,14 @@ begin
       begin
         var lSet := new CGArrayLiteralExpression();
         for each child in  node.ChildNodes do
-          lSet.Elements.Add(PrepareSingleExpressionValue(child));
+          begin
+            if child.Typ = TSyntaxNodeType.ntRecordConstant then
+            begin
+              lSet.Elements.Add(PrepareInitializer(aType, child));
+            end
+            else
+            lSet.Elements.Add(PrepareSingleExpressionValue(child));
+          end;
         result := lSet;
 
       end;
@@ -119,6 +126,7 @@ method CodeBuilderMethods.PrepareSetVarOrConstant(const node: TSyntaxNode; const
 begin
   var constName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
   var typeNode := node.FindNode(TSyntaxNodeType.ntType):FindNode(TSyntaxNodeType.ntType);
+  var typename := typeNode.AttribName;
 
    //PrepareArrayType(typeNode, constName);
   var lArray  := new CGSetTypeReference(typeNode.AttribName.AsTypeReference);
@@ -127,7 +135,7 @@ begin
 
    var valuenode := node.FindNode(TSyntaxNodeType.ntValue);
    if valuenode <> nil then
-     result.Initializer := PrepareConstArrayExpression(valuenode.ChildNodes[0]);
+     result.Initializer := PrepareConstArrayExpression(typename.AsTypeReference, valuenode.ChildNodes[0]);
 
    result.Constant := isConst;
 

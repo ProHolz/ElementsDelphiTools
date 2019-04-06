@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # RemObjects Water
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "CodeGenDelphi", "CodeGenParser\CodeGenDelphi.elements", "{C41BD60E-51BF-4806-8063-0F6F68F78A5A}"
 EndProject
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "CodegGen4 (Shared)", "..\..\CodeGen4\Codegen4.Shared.elements", "{615FC69D-8D8A-4996-9D58-B042CD883941}"
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "CodegGen4 (Shared)", "..\CodeGenerator\Codegenerator.Shared.elements", "{615FC69D-8D8A-4996-9D58-B042CD883951}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Shared", "..\PascalParser\Source\PascalParse.Shared.elements", "{597FB294-A480-4BC1-9C5B-768828A1D2E5}"
 EndProject
@@ -13,12 +13,16 @@ Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "TestCodegen", "TestCodegen\
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "testElementsSyntax", "..\testElementsSyntax\testElementsSyntax.elements", "{288EC4CB-6922-4E1F-BD6C-6856F14D978E}"
 EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "TestSingle", "TestCodegen\TestSingle.elements", "{063ADF6F-BBE2-41B5-83EA-5E91DB0CED5F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AnyCPU = Debug|AnyCPU
 		Release|AnyCPU = Release|AnyCPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{615FC69D-8D8A-4996-9D58-B042CD883941}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{615FC69D-8D8A-4996-9D58-B042CD883941}.Release|AnyCPU.Build.0 = Release|AnyCPU
 		{819FA3F5-F808-43DE-B59F-E009A1E26114}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
 		{819FA3F5-F808-43DE-B59F-E009A1E26114}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{819FA3F5-F808-43DE-B59F-E009A1E26114}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
@@ -31,6 +35,10 @@ Global
 		{288EC4CB-6922-4E1F-BD6C-6856F14D978E}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{288EC4CB-6922-4E1F-BD6C-6856F14D978E}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
 		{288EC4CB-6922-4E1F-BD6C-6856F14D978E}.Release|AnyCPU.Build.0 = Release|AnyCPU
+		{063ADF6F-BBE2-41B5-83EA-5E91DB0CED5F}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{063ADF6F-BBE2-41B5-83EA-5E91DB0CED5F}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{063ADF6F-BBE2-41B5-83EA-5E91DB0CED5F}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{063ADF6F-BBE2-41B5-83EA-5E91DB0CED5F}.Release|AnyCPU.Build.0 = Release|AnyCPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

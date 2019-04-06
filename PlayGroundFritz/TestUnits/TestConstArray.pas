@@ -65,6 +65,23 @@ const
 
 
 
+type
+  tUtf8Rec = record
+  offset, minimum: cardinal;
+end;
+
+const
+  UTF8_EXTRA: array[0..6] of tUtf8Rec
+ = ( // http://floodyberry.wordpress.com/2007/04/14/utf-8-conversion-tricks
+(offset: $00000000;  minimum: $00010000),
+(offset: $00003080;  minimum: $00000080),
+(offset: $000e2080;  minimum: $00000800),
+(offset: $03c82080;  minimum: $00010000),
+(offset: $fa082080;  minimum: $00200000),
+(offset: $82082080;  minimum: $04000000),
+(offset: $00000000;  minimum: $04000000));
+
+
 implementation
 const
 SimpleIntArray2 : Array[0..2] of Integer = (1 shl 2 -1, 1,2);

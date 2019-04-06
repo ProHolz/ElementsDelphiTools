@@ -1,5 +1,4 @@
 ﻿namespace ProHolz.CodeGen;
-{$DEFINE USEDOT} // Will use the CGDotNameExpression only available in the ProHolz Fork
 
 interface
 uses ProHolz.Ast;
@@ -7,9 +6,13 @@ uses ProHolz.Ast;
 type
   CodeBuilderMethods = static partial class
   private
+    method PrepareFieldExpression(const node: TSyntaxNode): CGPropertyInitializer;
+
     type
     checkDot = enum(named, &method, &array, PointerDereference, &result);
+
     method PrepareIdentifierExpression(const node: TSyntaxNode): CGExpression;
+    method PrepareRecordConstantExpression(const node: TSyntaxNode): CGExpression;
 
     method PrepareGenricExpression(const node: TSyntaxNode): CGExpression;
 
@@ -189,7 +192,6 @@ end;
 
 
 begin
- {$IF USEDOT}
   if node.ChildCount=2 then
   begin
      var lLeft := PrepareSingleExpressionValue(node.ChildNodes[0]);
@@ -201,71 +203,6 @@ begin
      else
        raise new Exception("DOT Expression not solved");
   end;
-  {$ELSE}
-  if node.ChildCount=2 then
-  begin
-    var lLeft := node.ChildNodes[0];//PrepareSingleExpressionValue(node.ChildNodes[0]);
-    var lRight := node.ChildNodes[1];
-    if assigned(lLeft) and assigned(lRight) then
-     begin
-   var lCalls := new List<CGExpression>;
-
-
-    var lLoop := lRight;
-
-    if (lLoop.Typ =  TSyntaxNodeType.ntDot) then
-    begin
-    while (lLoop.Typ =  TSyntaxNodeType.ntDot)  do
-     begin
-   //   var lCaller
-      if lLoop.ChildNodes[0].Typ <> TSyntaxNodeType.ntDot then
-      lCalls.Add(PrepareSingleExpressionValue(lLoop.ChildNodes[0]));
-      lLoop := lLoop.ChildNodes[1];
-     end;
-      lCalls.Add(PrepareSingleExpressionValue(lLoop));
-    end
-    else
-      lCalls.Add(PrepareSingleExpressionValue(lLoop));
-
-
-    if lCalls.Count > 0 then
-     begin
-       var ltemp := PrepareSingleExpressionValue(lLeft);
-       for i : Integer := 0 to lCalls.Count-1 do
-        begin
-          Var Name : not nullable String := '';
-          Var member : checkDot;
-          if ResolveNameTyp(lCalls[i], Out Name, out member) then
-
-          ltemp :=
-          case member of
-            checkDot.named : new CGPropertyAccessExpression(ltemp, Name);
-            checkDot.method : new CGMethodCallExpression(ltemp, Name, CGMethodCallExpression(ltemp).Parameters);
-            checkDot.array : new CGPropertyAccessExpression(ltemp, Name);
-            checkDot.PointerDereference : new CGPropertyAccessExpression(ltemp, Name);
-
-          end;
-
-          case  member of
-            checkDot.array :
-            ltemp := new CGArrayElementAccessExpression(ltemp, CGArrayElementAccessExpression(lCalls[i]).Parameters);
-            checkDot.PointerDereference : ltemp :=  new CGPointerDereferenceExpression(ltemp);
-           end;
-
-        end;
-        exit ltemp;
-     end
-     else
-      raise new Exception("DOT Expression not solved");
-     end
-    else
-    raise new Exception("DOT Expression not solved");
-
-  end
-  else
-    raise new Exception("DOT Expression not solved");
-{$ENDIF}
-
 end;
 
 
@@ -392,6 +329,28 @@ begin
 
 end;
 
+method CodeBuilderMethods.PrepareFieldExpression(const node : TSyntaxNode) : CGPropertyInitializer;
+begin
+  Var lFieldName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
+  Var lFieldExp :=  PrepareSingleExpressionValue(node.FindNode(TSyntaxNodeType.ntExpression));
+
+  exit new CGPropertyInitializer(lFieldName, lFieldExp);
+
+end;
+
+method CodeBuilderMethods.PrepareRecordConstantExpression(const node : TSyntaxNode) : CGExpression;
+begin
+  var lFields := new List<CGPropertyInitializer>;
+  for each child in node.FindChilds(TSyntaxNodeType.ntField) do
+   lFields.Add(PrepareFieldExpression(child));
+
+   var ltemp := new  CGNewInstanceExpression(CGPredefinedTypeReference.Dynamic);
+   ltemp.PropertyInitializers := lFields;
+
+
+  exit  ltemp;
+ end;
+
 
 method CodeBuilderMethods.PrepareSingleExpressionValue(const node: TSyntaxNode): CGExpression;
 begin
@@ -433,10 +392,10 @@ begin
       TSyntaxNodeType.ntInherited : exit ( PrepareInheritedStatement(node).First as CGExpression);
       TSyntaxNodeType.ntGoto: exit new CGRawExpression('{$HINT "Goto '+node.ChildNodes[0].AttribName+' not Supported"}');
 
-      TSyntaxNodeType.ntRecordConstant : exit  new CGNamedIdentifierExpression('======RecordConstant=======');
+      TSyntaxNodeType.ntRecordConstant : exit  PrepareRecordConstantExpression(node);
       TSyntaxNodeType.ntAnonymousMethod : exit  PrepareAnonymousMethod(node);
       TSyntaxNodeType.ntGeneric : exit PrepareGenricExpression(node);
-
+    //  TSyntaxNodeType.ntField : exit PrepareFieldExpression(node);
       TSyntaxNodeType.ntElement : exit PrepareSingleExpressionValue(node.ChildNodes[0]);
       TSyntaxNodeType.ntExternalName : begin
           if node.ChildCount = 1 then
@@ -453,8 +412,6 @@ begin
   else raise new Exception(node.Typ.ToString+  '=======Paramtype not in Expressions Enum =======');
 
 end;
-
-
 
 
 end.

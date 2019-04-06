@@ -22,22 +22,8 @@ begin
   result := cg.GenerateUnit(lUnit);
   if Environment.OS = OperatingSystem.Windows then
   begin
-    {$DEFINE USEUTF8}
-    {$IF USEUTF8}
-    File.WriteText(String.Format('d:\Test\{0}.pas',TestName), result);
-
-   {$ELSE}
-    //var cp1252 := Encoding.GetEncoding('windows-1252');
-    var cp1252 := System.Text.Encoding.GetEncoding('windows-1252');
-    var a := cp1252.GetBytes(result);// includeBOM(true);
-
-    var lPreamble := new Binary(cp1252.GetPreamble());
-    lPreamble.Write(a);
-    a  := lPreamble.ToArray();
-
-    File.WriteBytes(String.Format('d:\Test\{0}.pas',TestName),   a);
-   {$ENDIF}
-
+    var a := Encoding.UTF8.GetBytes(result) includeBOM(true);
+    File.WriteBytes(String.Format('d:\Test\{0}.pas', TestName), a);
   end;
 
 end;
@@ -48,19 +34,23 @@ begin
   Var sb := new StringBuilder();
   if full then
   begin
+ // Var s := "D:\sourceProHolz\Abbund170\Synopse\SynCommons.pas";
+  //  Var s :=  "D:\sourceProHolz\Abbund170\DachHolz\TypConst.pas";
+  //  Var s := "D:\sourceProHolz\Abbund170\Synopse\SynLz.pas";
+ // Var s := "D:\sourceProHolz\Abbund170\Cairo\Cairo.Dll.pas";
+    Var s := "D:\sourceProHolz\Abbund170\Cairo\Cairo.Types.pas";
+  //  Var s := "D:\sourceProHolz\Abbund170\Cairo\Cairo.Freetype.pas";
 
-    //var cp1252 := Encoding.GetEncoding('windows-1252');
-    //var data := File.ReadBytes("D:\sourceProHolz\Abbund170\DachHolz\TypConst.pas");
-
-
- // Var s := File.ReadText("D:\sourceProHolz\Abbund170\Synopse\SynCommons.pas");
-    Var s :=  File.ReadText( "D:\sourceProHolz\Abbund170\DachHolz\TypConst.pas");
- //   Var s := File.ReadText("D:\sourceProHolz\Abbund170\Synopse\SynLz.pas");
-  //Var s := File.ReadText("D:\sourceProHolz\Abbund170\Cairo\Cairo.Dll.pas");
-  //  Var s := File.ReadText("D:\sourceProHolz\Abbund170\Cairo\Cairo.Types.pas");
-  //  Var s := File.ReadText("D:\sourceProHolz\Abbund170\Cairo\Cairo.Freetype.pas");
-    sb.Append(BuildInterfaceTest(s, 'TypConst'));
-  sb.AppendLine.Append('{Next File}').AppendLine;
+    var Source : not nullable String;
+    var Error : not nullable String;
+    if TProjectIndexer.SafeOpenFileContext(s, out Source, out Error) then
+    begin
+      var fname := Path.GetFileNameWithoutExtension(s);
+      sb.Append(BuildInterfaceTest(Source, fname));
+      sb.AppendLine.Append('{Next File}').AppendLine;
+    end
+    else
+      sb.Appendline(Error);
   end;
 
   sb.Append(BuildInterfaceTest(TestMethodimplementation, 'TestMethodimplementation'));
