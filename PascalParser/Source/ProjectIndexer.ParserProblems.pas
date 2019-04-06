@@ -10,12 +10,12 @@ type
 
     end;
 
-    class  method Create(aProblemType: TParseProblemType; aFilename : String; aDescription : String) : TParseProblemInfo;
+    constructor (aProblemType: TParseProblemType; aFilename : String; aDescription : String);
     begin
-      result := new TParseProblemInfo();
-      result.ProblemType := aProblemType;
-      result.FileName := aFilename;
-      result.Description := aDescription;
+      constructor ();
+      ProblemType := aProblemType;
+      FileName := aFilename;
+      Description := aDescription;
     end;
 
     property  ProblemType: TParseProblemType read private write;
@@ -31,9 +31,9 @@ type
       inherited constructor();
     end;
 
-    method LogProblem(problemType: TParseProblemType; const fileName, description: String);
+    method LogProblem(problemType: TParseProblemType; fileName: String; description : String);
     begin
-      Add(TParseProblemInfo.Create(problemType, fileName, description));
+      Add(new TParseProblemInfo(problemType, fileName, description));
     end;
 
   end;

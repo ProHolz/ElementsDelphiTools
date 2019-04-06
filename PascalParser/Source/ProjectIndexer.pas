@@ -5,7 +5,7 @@ type
  TProjectIndexer = public class
   public
     FAborting       : Boolean;
-    FDefinesList    : StringList;
+    FDefinesList    : StringList;   // For all Directives not resolved
     FIncludeCache   : TIncludeCache;
     FIncludeFiles   : TIncludeFiles;
     FNotFoundUnits  : StringList;

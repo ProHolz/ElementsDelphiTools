@@ -9,6 +9,12 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
+    <Architecture>x86_64</Architecture>
+    <AllowLegacyCreate>True</AllowLegacyCreate>
+    <AllowLegacyOutParams>True</AllowLegacyOutParams>
+    <AllowLegacyWith>True</AllowLegacyWith>
+    <DelphiCompatibility>True</DelphiCompatibility>
+    <DelphiDivide>True</DelphiDivide>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
