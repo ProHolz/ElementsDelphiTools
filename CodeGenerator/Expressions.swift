@@ -444,12 +444,20 @@ public class CGIntegerLiteralExpression: CGLanguageAgnosticLiteralExpression {
 
 	internal func StringRepresentation(base: Int32) -> String {
 		if let SignedValue = SignedValue {
+			if SignedValue == 0 {
+				return "0" }
 			return Convert.ToString(SignedValue, base)
 		} else if let UnsignedValue = UnsignedValue {
+			if UnsignedValue == 0 {
+				return "0"
+			}
+
 			return Convert.ToString(UnsignedValue, base)
 		} else {
-			return Convert.ToString(0, base)
+			return "0"
 		}
+
+
 	}
 }
 
@@ -768,6 +776,8 @@ public class CGPropertyInitializer: CGEntity {
 		Name = name
 	}
 }
+
+
 
 public class CGArrayElementAccessExpression: CGExpression {
 	public var Array: CGExpression
