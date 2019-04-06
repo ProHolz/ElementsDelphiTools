@@ -1,0 +1,189 @@
+<?xml version="1.0"?>
+<UNIT line="2" col="1" anName="Test">
+  <INTERFACE begin_line="3" begin_col="1" end_line="40" end_col="2">
+    <TYPESECTION line="4" col="1">
+      <TYPEDECL begin_line="5" begin_col="3" end_line="20" end_col="6" anName="TSQLVar">
+        <TYPE line="5" col="13" anType="record">
+          <VARIANTSECTION line="6" col="5">
+            <VARIANTTAG line="6" col="10" anName="VType" anType="STQLDBFieldType"/>
+            <RECORDVARIANT line="7" col="5">
+              <CASELABELS line="7" col="5">
+                <CASELABEL line="7" col="5">
+                  <EXPRESSION line="7" col="5">
+                    <IDENTIFIER line="7" col="5" anName="ftInt64"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="8" col="7">
+                <NAME line="8" col="7" anName="VInt64"/>
+                <TYPE line="8" col="15" anName="Int64"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="9" col="5">
+              <CASELABELS line="9" col="5">
+                <CASELABEL line="9" col="5">
+                  <EXPRESSION line="9" col="5">
+                    <IDENTIFIER line="9" col="5" anName="ftDouble"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="10" col="7">
+                <NAME line="10" col="7" anName="VDouble"/>
+                <TYPE line="10" col="16" anName="double"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="11" col="5">
+              <CASELABELS line="11" col="5">
+                <CASELABEL line="11" col="5">
+                  <EXPRESSION line="11" col="5">
+                    <IDENTIFIER line="11" col="5" anName="ftDate"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="12" col="7">
+                <NAME line="12" col="7" anName="VDateTime"/>
+                <TYPE line="12" col="18" anName="TDateTime"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="13" col="5">
+              <CASELABELS line="13" col="5">
+                <CASELABEL line="13" col="5">
+                  <EXPRESSION line="13" col="5">
+                    <IDENTIFIER line="13" col="5" anName="ftCurrency"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="14" col="7">
+                <NAME line="14" col="7" anName="VCurrency"/>
+                <TYPE line="14" col="18" anName="Currency"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="15" col="5">
+              <CASELABELS line="15" col="5">
+                <CASELABEL line="15" col="5">
+                  <EXPRESSION line="15" col="5">
+                    <IDENTIFIER line="15" col="5" anName="ftUTF8"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="16" col="7">
+                <NAME line="16" col="7" anName="VText"/>
+                <TYPE line="16" col="14" anName="PUTF8Char"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="17" col="5">
+              <CASELABELS line="17" col="5">
+                <CASELABEL line="17" col="5">
+                  <EXPRESSION line="17" col="5">
+                    <IDENTIFIER line="17" col="5" anName="ftBlob"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="18" col="7">
+                <NAME line="18" col="7" anName="VBlob"/>
+                <TYPE line="18" col="14" anName="pointer"/>
+              </FIELD>
+              <FIELD line="19" col="7">
+                <NAME line="19" col="7" anName="VBlobLen"/>
+                <TYPE line="18" col="14" anName="pointer"/>
+              </FIELD>
+            </RECORDVARIANT>
+          </VARIANTSECTION>
+        </TYPE>
+      </TYPEDECL>
+      <TYPEDECL begin_line="22" begin_col="2" end_line="38" end_col="6" anName="TSQLVarVType">
+        <TYPE line="22" col="17" anType="record">
+          <FIELD line="23" col="3">
+            <NAME line="23" col="3" anName="VSingle"/>
+            <TYPE line="23" col="13" anName="TSQLDBFieldType"/>
+          </FIELD>
+          <VARIANTSECTION line="24" col="4">
+            <VARIANTTAG line="24" col="9" anType="TSQLDBFieldType"/>
+            <RECORDVARIANT line="25" col="5">
+              <CASELABELS line="25" col="5">
+                <CASELABEL line="25" col="5">
+                  <EXPRESSION line="25" col="5">
+                    <IDENTIFIER line="25" col="5" anName="ftInt64"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="26" col="7">
+                <NAME line="26" col="7" anName="VInt64"/>
+                <TYPE line="26" col="15" anName="Int64"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="27" col="5">
+              <CASELABELS line="27" col="5">
+                <CASELABEL line="27" col="5">
+                  <EXPRESSION line="27" col="5">
+                    <IDENTIFIER line="27" col="5" anName="ftDouble"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="28" col="7">
+                <NAME line="28" col="7" anName="VDouble"/>
+                <TYPE line="28" col="16" anName="double"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="29" col="5">
+              <CASELABELS line="29" col="5">
+                <CASELABEL line="29" col="5">
+                  <EXPRESSION line="29" col="5">
+                    <IDENTIFIER line="29" col="5" anName="ftDate"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="30" col="7">
+                <NAME line="30" col="7" anName="VDateTime"/>
+                <TYPE line="30" col="18" anName="TDateTime"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="31" col="5">
+              <CASELABELS line="31" col="5">
+                <CASELABEL line="31" col="5">
+                  <EXPRESSION line="31" col="5">
+                    <IDENTIFIER line="31" col="5" anName="ftCurrency"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="32" col="7">
+                <NAME line="32" col="7" anName="VCurrency"/>
+                <TYPE line="32" col="18" anName="Currency"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="33" col="5">
+              <CASELABELS line="33" col="5">
+                <CASELABEL line="33" col="5">
+                  <EXPRESSION line="33" col="5">
+                    <IDENTIFIER line="33" col="5" anName="ftUTF8"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="34" col="7">
+                <NAME line="34" col="7" anName="VText"/>
+                <TYPE line="34" col="14" anName="PUTF8Char"/>
+              </FIELD>
+            </RECORDVARIANT>
+            <RECORDVARIANT line="35" col="5">
+              <CASELABELS line="35" col="5">
+                <CASELABEL line="35" col="5">
+                  <EXPRESSION line="35" col="5">
+                    <IDENTIFIER line="35" col="5" anName="ftBlob"/>
+                  </EXPRESSION>
+                </CASELABEL>
+              </CASELABELS>
+              <FIELD line="36" col="7">
+                <NAME line="36" col="7" anName="VBlob"/>
+                <TYPE line="36" col="14" anName="pointer"/>
+              </FIELD>
+              <FIELD line="37" col="7">
+                <NAME line="37" col="7" anName="VBlobLen"/>
+                <TYPE line="36" col="14" anName="pointer"/>
+              </FIELD>
+            </RECORDVARIANT>
+          </VARIANTSECTION>
+        </TYPE>
+      </TYPEDECL>
+    </TYPESECTION>
+  </INTERFACE>
+</UNIT>

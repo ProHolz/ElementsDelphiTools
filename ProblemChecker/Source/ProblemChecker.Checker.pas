@@ -22,8 +22,8 @@ type
 
   TProblem_MoreThanOneClass = class( ISingleProbSolver)
     method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
-      property CheckTyp : eEleCheck read eEleCheck.eMoreThenOneClass;
-    end;
+    property CheckTyp : eEleCheck read eEleCheck.eMoreThenOneClass;
+  end;
 
   TProblem_Enums = class( ISingleProbSolver)
     method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -78,14 +78,14 @@ type
 
   TProblem_With = class( ISingleProbSolver)
     method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
-   property CheckTyp : eEleCheck read eEleCheck.eWith;
- end;
+    property CheckTyp : eEleCheck read eEleCheck.eWith;
+  end;
 
 
   TProblem_DFM = class( ISingleProbSolver)
     method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
-   property CheckTyp : eEleCheck read eEleCheck.eDfm;
- end;
+    property CheckTyp : eEleCheck read eEleCheck.eDfm;
+  end;
 
   TProblem_RES = class( ISingleProbSolver)
     method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -95,8 +95,8 @@ type
 
   TProblem_ResString = class( ISingleProbSolver)
     method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
-     property CheckTyp : eEleCheck read eEleCheck.eHasResourceStrings;
-   end;
+    property CheckTyp : eEleCheck read eEleCheck.eHasResourceStrings;
+  end;
 
 
   TProblem_VarTypes = class( ISingleProbSolver)
@@ -113,8 +113,8 @@ begin
   var ltemp := NodeSolver.getNodeArrayAll(cMethodTypes, syntaxTree);
   Result :=   ltemp:Count > 0;
   if result then
-   for each child in ltemp do
-     ProblemLog.Problem_At(CheckTyp, child.Line, child.Col);
+    for each child in ltemp do
+      ProblemLog.Problem_At(CheckTyp, child.Line, child.Col);
 end;
 
 method TProblem_Initialization.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -140,16 +140,16 @@ begin
    // Todo add Check for ScopedEnums
   result := Lenums.Count > 0;
   if result then
-   begin
+  begin
     result := false;
-    for node in Lenums do
+   for node in Lenums do
      begin
       if node.GetAttribute(TAttributeName.anVisibility) = 'scoped' then
-       continue;
+        continue;
       result := true;
-      ProblemLog.Problem_At(CheckTyp, node.Line, node.Col, node.AttribName);
-     end;
-   end;
+      ProblemLog.Problem_At(CheckTyp, node.Line, node.Col, node.ParentNode.AttribName);
+    end;
+  end;
 end;
 
 method TProblem_GlobVars.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -169,7 +169,7 @@ begin
   result := Nodes:Count > 0;
   if result then
     for Node in Nodes do
-    ProblemLog.Problem_At(CheckTyp, Node.Line, Node.Col);
+      ProblemLog.Problem_At(CheckTyp, Node.Line, Node.Col);
 end;
 
 method TProblem_Destructors.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -182,11 +182,11 @@ begin
     var lMethods := NodeSolver.getNodeArrayAll([SNT.ntPublic, SNT.ntMethod], node);
     for lmethod in lMethods do
       if  String.EqualsIgnoringCaseInvariant(lmethod.GetAttribute(TAttributeName.anKind) , 'destructor') then
-        begin
-         result := true;
-         ProblemLog.Problem_At(CheckTyp, lmethod.Line, lmethod.Col);
-        end;
-    end;
+      begin
+        result := true;
+        ProblemLog.Problem_At(CheckTyp, lmethod.Line, lmethod.Col);
+      end;
+  end;
 end;
 
 method TProblem_MultiContructors.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -222,6 +222,7 @@ end;
 
 method TProblem_InterFaceAndImplement.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
 begin
+  result := false;
   var lInterfaces := NodeSolver.getPublicTypes(syntaxTree, 'interface');
   if lInterfaces.Count = 0 then exit  false;
   var lClasses := NodeSolver.getPublicClass(syntaxTree);
@@ -232,16 +233,17 @@ begin
     begin  // Yes there are Interfaces so we will check
   // We now know the name in lInterface to check
   // Pick up the Typ Nodes from Classes so
-  for lClass in lClasses do
-    begin
-    var lTypes := NodeSolver.getNodeArray(SNT.ntType, lClass);
-    for lType in lTypes do
-      if  String.EqualsIgnoringCaseInvariant( lType.GetAttribute(TAttributeName.anName) ,  lInterface.ParentNode.GetAttribute(TAttributeName.anName) )then
-        exit true;
-
+    for lClass in lClasses do
+      begin
+      var lTypes := NodeSolver.getNodeArray(SNT.ntType, lClass);
+      for lType in lTypes do
+        if  String.EqualsIgnoringCaseInvariant( lType.AttribName ,  lInterface.ParentNode.AttribName )then
+        begin
+          ProblemLog.Problem_At(CheckTyp, lType.Line, lType.Col, lType.AttribName);
+          result := true;
+        end;
+    end;
   end;
-end;
-  exit false;
 end;
 
 
@@ -257,15 +259,13 @@ begin
      SNT.ntConstant,
      SNT.ntValue
      ,SNT.ntRecordConstant
-     ,SNT.ntField
-     ,SNT.ntExpression
      ]; //
   var lConstants := NodeSolver.getNodeArrayAll(cMethodTypes, syntaxTree);
   result := lConstants.Count > 0;
 
   if result then
-   for each child in lConstants do
-     ProblemLog.Problem_At(CheckTyp, child.Line, child.Col);
+    for each child in lConstants do
+      ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.ParentNode.ParentNode.FindNode(TSyntaxNodeType.ntName):AttribName);
 
 //  if result then exit(true);
 
@@ -274,16 +274,14 @@ begin
      SNT.ntConstants,
      SNT.ntConstant,
      SNT.ntValue,
-     SNT.ntRecordConstant,
-     SNT.ntField,
-     SNT.ntExpression]; //
+     SNT.ntRecordConstant]; //,
+
   lConstants := NodeSolver.getNodeArrayAll(cMethodTypes, syntaxTree);
   result := result or (lConstants.Count > 0);
 
   if result then
     for each child in lConstants do
-      ProblemLog.Problem_At(CheckTyp, child.Line, child.Col);
-
+      ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.ParentNode.ParentNode.FindNode(TSyntaxNodeType.ntName):AttribName);
 
 end;
 
@@ -293,15 +291,20 @@ begin
   var lRecords := NodeSolver.getPublicRecord(syntaxTree);
   for lRecord in lRecords do
     if NodeSolver.getNodeArray(SNT.ntVariantSection, lRecord).Count > 0 then
-     begin
-       result := true;
-      ProblemLog.Problem_At(CheckTyp, lRecord.Line, lRecord.Col);
-     end;
+    begin
+      result := true;
+      ProblemLog.Problem_At(CheckTyp, lRecord.Line, lRecord.Col, lRecord.ParentNode.AttribName);
+   end;
 end;
 
 method TProblem_ClassInImplementation.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
 begin
-  result := NodeSolver.getImplClass(syntaxTree).Count > 0;
+  var lClasses := NodeSolver.getImplClass(syntaxTree);
+  result := lClasses.Count > 0;
+  if result  then
+    for each child in lClasses do
+      ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.ParentNode.AttribName);
+
 end;
 
 method TProblem_DFM.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
@@ -311,9 +314,9 @@ begin
   if Nodes.Count > 0 then
   begin
     for each node in Nodes do
-     begin
+      begin
       if node.AttribType = 'R' then
-       if node.AttribKind.Trim.ToUpper.EndsWith('.DFM') then exit (true);
+        if node.AttribKind.Trim.ToUpper.EndsWith('.DFM') then exit (true);
      end;
   end;
 
@@ -329,7 +332,7 @@ begin
     for each node in Nodes do
       begin
       if node.AttribType = 'R' then
-      if node.AttribKind.Trim.ToUpper.EndsWith('.RES') then exit (true);
+        if node.AttribKind.Trim.ToUpper.EndsWith('.RES') then exit (true);
     end;
   end;
 
@@ -342,32 +345,32 @@ begin
   result := Nodes.Count > 0;
   if result then
     for each child in Nodes do
-     ProblemLog.Problem_At(CheckTyp, child.Line, child.Col);
+      ProblemLog.Problem_At(CheckTyp, child.Line, child.Col);
 
 end;
 
 method TProblem_VarTypes.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
 begin
- result := false;
+  result := false;
   var Nodes := syntaxTree.FindAllNodes(SNT.ntVariable);
 
-  if Nodes:Count > 0 then
-  begin
-      for each child in Nodes do
-      begin
-        var lnode := child.FindNode(TSyntaxNodeType.ntType);
-        if assigned (lnode) then
-         begin
+   if Nodes:Count > 0 then
+   begin
+     for each child in Nodes do
+       begin
+       var lnode := child.FindNode(TSyntaxNodeType.ntType);
+       if assigned (lnode) then
+       begin
            // Allow Array Types
-          if (lnode.AttribType <> '') and (lnode.AttribType.ToLower <> 'array') then
-                 begin
-                        ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.FindNode(TSyntaxNodeType.ntName).AttribName);
-                        result := true;
-                end;
-           end;
-         end;
+        if (lnode.AttribType <> '') and (lnode.AttribType.ToLower <> 'array') then
+        begin
+          ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.FindNode(TSyntaxNodeType.ntName).AttribName);
+          result := true;
+        end;
       end;
-  end;
+       end;
+   end;
+end;
 
 
 

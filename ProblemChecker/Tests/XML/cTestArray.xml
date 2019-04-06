@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<UNIT line="2" col="1" anName="Test">
+  <INTERFACE begin_line="3" begin_col="1" end_line="9" end_col="2">
+    <CONSTANTS line="4" col="1" anKind="const">
+      <CONSTANT line="5" col="1">
+        <NAME line="5" col="1" anName="SimpleIntArray"/>
+        <TYPE line="5" col="18" anType="Array">
+          <BOUNDS line="5" col="23">
+            <DIMENSION line="5" col="24">
+              <EXPRESSION line="5" col="24">
+                <LITERAL line="5" col="24" value="0" anType="Numeric"/>
+              </EXPRESSION>
+              <EXPRESSION line="5" col="27">
+                <LITERAL line="5" col="27" value="2" anType="Numeric"/>
+              </EXPRESSION>
+            </DIMENSION>
+          </BOUNDS>
+          <TYPE line="5" col="33" anName="Integer"/>
+        </TYPE>
+        <VALUE line="5" col="43">
+          <EXPRESSIONS line="5" col="43">
+            <EXPRESSION line="5" col="44">
+              <LITERAL line="5" col="44" value="0" anType="Numeric"/>
+            </EXPRESSION>
+            <EXPRESSION line="5" col="47">
+              <LITERAL line="5" col="47" value="1" anType="Numeric"/>
+            </EXPRESSION>
+            <EXPRESSION line="5" col="49">
+              <LITERAL line="5" col="49" value="2" anType="Numeric"/>
+            </EXPRESSION>
+          </EXPRESSIONS>
+        </VALUE>
+      </CONSTANT>
+      <CONSTANT line="7" col="1">
+        <NAME line="7" col="1" anName="SimpleIntArray2"/>
+        <TYPE line="7" col="19" anType="Array">
+          <BOUNDS line="7" col="24">
+            <DIMENSION line="7" col="25">
+              <EXPRESSION line="7" col="25">
+                <LITERAL line="7" col="25" value="0" anType="Numeric"/>
+              </EXPRESSION>
+              <EXPRESSION line="7" col="28">
+                <LITERAL line="7" col="28" value="2" anType="Numeric"/>
+              </EXPRESSION>
+            </DIMENSION>
+          </BOUNDS>
+          <TYPE line="7" col="34" anName="Integer"/>
+        </TYPE>
+        <VALUE line="7" col="44">
+          <EXPRESSION line="7" col="44">
+            <EXPRESSIONS line="7" col="45">
+              <EXPRESSION line="7" col="45">
+                <SUB line="7" col="53">
+                  <SHL line="7" col="47">
+                    <LITERAL line="7" col="45" value="1" anType="Numeric"/>
+                    <LITERAL line="7" col="51" value="2" anType="Numeric"/>
+                  </SHL>
+                  <LITERAL line="7" col="54" value="1" anType="Numeric"/>
+                </SUB>
+              </EXPRESSION>
+              <EXPRESSION line="7" col="57">
+                <LITERAL line="7" col="57" value="1" anType="Numeric"/>
+              </EXPRESSION>
+              <EXPRESSION line="7" col="59">
+                <LITERAL line="7" col="59" value="2" anType="Numeric"/>
+              </EXPRESSION>
+            </EXPRESSIONS>
+          </EXPRESSION>
+        </VALUE>
+      </CONSTANT>
+    </CONSTANTS>
+  </INTERFACE>
+</UNIT>

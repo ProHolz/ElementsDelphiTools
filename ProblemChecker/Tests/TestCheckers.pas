@@ -56,10 +56,10 @@ uses
     FSolver := new TSyntaxNodeResolver();
   end;
 
-method TestCheckers.Setup;
-begin
+  method TestCheckers.Setup;
+  begin
  // Check.IsTrue(false);
- FGlobProbs := 0;
+  FGlobProbs := 0;
 end;
 
 method TestCheckers.prepareUnitWithType: TSyntaxNode;
@@ -100,7 +100,7 @@ method TestCheckers.TestEnums;
 begin
   var lchecker := new TProblem_Enums() as ISingleProbSolver;
   Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
- Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
 end;
 
 method TestCheckers.TestPublicGlobVars;
@@ -114,7 +114,7 @@ method TestCheckers.TestPublicGlobMethods;
 begin
   var lchecker := new TProblem_GlobMethods() as ISingleProbSolver;
   Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
- Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+  Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
 end;
 
 method TestCheckers.TestMultiConstructors;
@@ -125,14 +125,14 @@ begin
   Check.AreEqual(lClassCount, 2);
 
   Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
- Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+  Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
 end;
 
 method TestCheckers.TestMultiDestructors;
 begin
   var lchecker := new TProblem_Destructors() as ISingleProbSolver;
   Check.IsTrue( lchecker.CheckForProblem(prepareUnitWithType, FSolver, self));
- Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
+  Check.IsFalse( lchecker.CheckForProblem(prepareUnitWithInitFinal, FSolver, self));
   Check.AreEqual(FGlobProbs, 1);
 end;
 
@@ -179,15 +179,15 @@ method TestCheckers.TestResource;
 begin
   var toCheck := TPasSyntaxTreeBuilder.RunWithString(cUnitWithResDFM, false);
   var lchecker := new TProblem_RES() as ISingleProbSolver;
-   Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
+  Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
 end;
 
 method TestCheckers.TestVarTypes;
 begin
   var toCheck := TPasSyntaxTreeBuilder.RunWithString(cTestVarTypes, false);
   var lchecker := new TProblem_VarTypes() as ISingleProbSolver;
-   Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
-   Check.AreEqual(FGlobProbs, 3);
+  Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
+  Check.AreEqual(FGlobProbs, 3);
 
 end;
 

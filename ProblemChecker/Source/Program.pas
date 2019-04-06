@@ -16,25 +16,33 @@ type
       //DelphiCompiler.dcRio;
 
       var projectname :=
-    //  "D:\Komps_Xe7\dwscript\Packages\DXE7\dwsLibRuntime.dpk";
-
-   //   "X:\Projekte\SynEdit\Packages\XE7\SynEdit_R.dpk";
-     // "X:\Projekte\SynEdit\Source\SynEditMiscClasses.pas";
-   //   "X:\Projekte\Rtl_Delphi_Elements\rtl\BuildWinRTL.dpk";
-     // "C:\Program Files (x86)\Embarcadero\Studio\20.0\source\rtl\BuildWinRTL.dpk"; // Rio
-
-      //"X:\Projekte\Rtl_Delphi_Elements\System.Classes.pas"; // Rio
-
-     // "X:\Projekte\pascalscript\Source\PascalScript_Core_D21.dpk");
-      "D:\sourceProHolz\Abbund170\ABBUNDXE7.dpr";
-   //   "X:\Projekte\Rtl_Delphi_Elements\rtl\common\System.ObjAuto.pas";
+      "X:\Projekte\Rtl_Delphi_Elements\rtl\BuildWinRTL.dpk";
 
       var projectProblems :=  Path.ChangeExtension(projectname, '.txt');
       var project := new ProjectRunner(actualCompiler, projectname);
 
-      project.NotFoundDirectives := 'D:\Test\Defines.txt';
-      project.FalseDefinesfile := 'D:\Test\falseDefines.txt';
-      project.TrueDefinesfile := 'D:\Test\trueDefines.txt';
+      project.NotFoundDirectives := 'D:\Test\Defines.txt';  // Here the directives not solved are wriiten
+      project.FalseDefinesfile := 'D:\Test\falseDefines.txt'; // Directives where the result is false
+      project.TrueDefinesfile := 'D:\Test\trueDefines.txt'; // Directives where the result is true
+
+
+      project.AddCheck(eEleCheck.eDfm); // There is a *.dfm
+      project.AddCheck(eEleCheck.eWith); // with clause in source
+      project.AddCheck(eEleCheck.eInitializations); // initialization found
+      project.AddCheck(eEleCheck.eFinalizations); // finalization found
+      project.AddCheck(eEleCheck.ePublicVars); // There are public Global Vars in initialization
+      project.AddCheck(eEleCheck.eGlobalMethods); // Global Methods
+      project.AddCheck(eEleCheck.eDestructors); // There is a Destructor in classes
+      project.AddCheck(eEleCheck.eMultiConstructors); // There is more then on public Constructor for a class
+      project.AddCheck(eEleCheck.eMoreThenOneClass); // There is more then on class in the file
+      project.AddCheck(eEleCheck.eInterfaceandImplement);   // declaration of a Interface and Implementatiion of a class that use it
+      project.AddCheck(eEleCheck.eVariantRecord);       // Record with Variant parts
+      project.AddCheck(eEleCheck.ePublicEnums);        // Enum Types without ScopedEnums
+      project.AddCheck(eEleCheck.eClassDeclImpl);      // Class defined in implementation
+      project.AddCheck(eEleCheck.eConstRecord);     // Const Records with initialisation);
+      project.AddCheck(eEleCheck.eHasResources);     // *.Res in File
+      project.AddCheck(eEleCheck.eHasResourceStrings);  // Resourcestrings in File
+      project.AddCheck(eEleCheck.eVarsWithTypes);  // Var declaration with new type
 
 
       project.Run;
@@ -43,25 +51,21 @@ type
         writeLn('Problems:');
         writeLn('===============');
 
-        for problem : TParseProblemInfo in project.Problems
-      //.Where((item)->(item.ProblemType <> TProblemType.ptCantFindFile))  do
-        do
+        for problem : TParseProblemInfo in project.Problems do
         begin
           writeLn(problem.FileName);
-
-         writeLn(String.Format('{1} {0}', [problem.Description,  problem.ProblemType.ToString]));
-        //writeLn(String.Format('{0}', [problem.Description]));
-      end;
-      writeLn;
-      if System.Diagnostics.Debugger.IsAttached then
+          writeLn(String.Format('{1} {0}', [problem.Description,  problem.ProblemType.ToString]));
+        end;
+        writeLn;
+        if System.Diagnostics.Debugger.IsAttached then
         begin
           writeLn('Debugger is running');
         end
         else
-          begin
-            writeLn('Press Enter to continue');
-            readLn;
-          end;
+        begin
+          writeLn('Press Enter to continue');
+          readLn;
+        end;
 
       end;
 
@@ -69,21 +73,21 @@ type
       if  showNotfound and ( project.NotFoundUnits.Count > 0 ) then
       begin
         writeLn('Not Found: '+project.NotFoundUnits.Count.ToString);
-      writeLn('===============');
-      for notfound in project.NotFoundUnits do
-        writeLn(notfound);
+        writeLn('===============');
+        for notfound in project.NotFoundUnits do
+          writeLn(notfound);
 
-      writeLn;
+        writeLn;
         if System.Diagnostics.Debugger.IsAttached then
         begin
-        writeLn('Debugger is running');
-      end
-      else
-      begin
-        writeLn('Press Enter to continue');
-        readLn;
+          writeLn('Debugger is running');
+        end
+        else
+        begin
+          writeLn('Press Enter to continue');
+          readLn;
+        end;
       end;
-     end;
 
       if project.ParsedUnits.Count > 0 then
       begin
@@ -97,8 +101,6 @@ type
           writeLn(found.Path);
         end;
       end;
-
-
       File.WriteText(projectProblems, project.GetAllProblemsText);
 
     end;

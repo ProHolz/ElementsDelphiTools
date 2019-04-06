@@ -10,7 +10,9 @@ type
      fProjectfile : String;
      fProblems : IProblemChecker;
      fDirectives : Dictionary<String,Boolean>;
-    // fNotFoundDirectives : List<String>;
+     fCheckProblems : List<eEleCheck>;
+
+
 
    protected
      method UnitSyntaxEvent(Sender: Object; const fileName: String;  var syntaxTree: TSyntaxNode; var doParseUnit : Boolean; Var doAbort: Boolean);
@@ -21,7 +23,7 @@ type
      method InitDefines;
    public
    constructor (const aCompiler : DelphiCompiler; const projectfile : String);
-
+    method AddCheck(const value : eEleCheck);
     method Run;
 
     method GetAllProblemsText : String;
@@ -40,32 +42,15 @@ implementation
 constructor ProjectRunner(const aCompiler : DelphiCompiler; const projectfile: String);
 begin
   inherited constructor(aCompiler);
-  fProblems := new TProblemChecker([
-//  eEleCheck.eDfm, // There is a *.dfm
-//  eEleCheck.eWith, // with clause in source
-//  eEleCheck.eInitializations, // initialization found
-//  eEleCheck.eFinalizations, // finalization found
-//  eEleCheck.ePublicVars, // There are public Global Vars in initialization
-//  eEleCheck.eGlobalMethods, // Global Methods
-//  eEleCheck.eDestructors, // There is a Destructor in classes
-//  eEleCheck.eMultiConstructors, // There is more then on public Constructor for a class
-//  eEleCheck.eMoreThenOneClass, // There is more then on class in the file
-//  eEleCheck.eInterfaceandImplement,   // declaration of a Interface and Implementatiion of a class that use it
-  eEleCheck.eVariantRecord,       // Record with Variant parts
-  eEleCheck.ePublicEnums,        // Enum Types shuld be check ScopedEnums, not done yet
-//  eEleCheck.eClassDeclImpl,      // Class defined in implementation
-  eEleCheck.eConstRecord     // Const Records with initialisation, Should be extend]);
-//  ,eEleCheck.eHasResources     // *.Res in File
-//  ,eEleCheck.eHasResourceStrings
- ,eEleCheck.eVarsWithTypes
-  ]);
+  fCheckProblems := new List<eEleCheck>;
+
   fProjectfile := projectfile;
   OnGetUnitSyntax := @UnitSyntaxEvent;
   OnUnitParsed := @UnitParsedEvent;
   OnParseCompilerDirective := @ResolveCompilerDirective;
   InitDefines;
   fDirectives := new Dictionary<String, Boolean>;
- // NotFoundDirectives := new List<String>;
+
 end;
 
 method Projectrunner.initDefines;
@@ -79,6 +64,8 @@ end;
 
 method ProjectRunner.Run;
 begin
+
+ // Load the Defines with false result
   if not String.IsNullOrEmpty(FalseDefinesfile) then
     if File.Exists(FalseDefinesfile) then
     begin
@@ -88,7 +75,7 @@ begin
           fDirectives.Add(define.trim.ToUpper, false);
     end;
 
-
+ // Load the Defines with true result
   if not String.IsNullOrEmpty(TrueDefinesfile) then
     if File.Exists(TrueDefinesfile) then
     begin
@@ -99,7 +86,7 @@ begin
     end;
 
 
-
+ // Load the Defines for Project
   if not String.IsNullOrEmpty(Definesfile) then
    if File.Exists(Definesfile) then
      begin
@@ -114,6 +101,9 @@ begin
     begin
       var lSearchPaths := File.ReadLines(SearchPathsFile);
     end;
+
+  fProblems := new TProblemChecker(fCheckProblems);
+
   Parse(fProjectfile);
 
   if FDefinesList.Count > 0 then
@@ -153,6 +143,16 @@ end;
 method ProjectRunner.GetAllProblemsText: String;
 begin
  result := fProblems.GetProblemsText;
+  if FDefinesList.Count > 0 then
+   begin
+     var sl := new StringBuilder(result);
+     sl.AppendLine("Defines not resolved:");
+     for each s in FDefinesList do
+      sl.AppendLine(s);
+     sl.AppendLine("========");
+
+     result := sl.ToString;
+   end;
 end;
 
 method ProjectRunner.ResolveCompilerDirective(Sender: Object; const directive: String; out res : boolean): Boolean;
@@ -172,6 +172,11 @@ begin
     end;
   res := true;
   exit true;
+end;
+
+method ProjectRunner.AddCheck(const value: eEleCheck);
+begin
+ fCheckProblems.Add(value);
 end;
 
 end.

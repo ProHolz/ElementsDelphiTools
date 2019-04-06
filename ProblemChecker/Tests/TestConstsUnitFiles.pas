@@ -78,7 +78,7 @@ interface
    Itest = interface
    end;
 
-    testclass2 = class(ITest)
+    testclass2 = class(testclass, ITest)
     public
     constructor one;
     constructor two;
