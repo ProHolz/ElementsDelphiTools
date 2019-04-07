@@ -7,23 +7,29 @@ type
 
     class method Main(args: array of String): Int32;
     begin
-      var showNotfound : Boolean := true;
+      var showNotfound : Boolean := false;
       // add your own code here
       writeLn('The magic happens here.');
 
-      const actualCompiler =
-      DelphiCompiler.dcXe7;
-      //DelphiCompiler.dcRio;
+      const actualCompiler =  DelphiCompiler.dcXe7;
+
 
       var projectname :=
       "X:\Projekte\Rtl_Delphi_Elements\rtl\BuildWinRTL.dpk";
 
-      var projectProblems :=  Path.ChangeExtension(projectname, '.txt');
+
+      var projectProblems :=  Path.ChangeExtension(projectname, '.Problems.txt');
+      var projectPath := Path.GetWindowsParentDirectory(projectname);
+      var projectShortName := Path.GetFileNameWithoutExtension(projectname);
       var project := new ProjectRunner(actualCompiler, projectname);
 
-      project.NotFoundDirectives := 'D:\Test\Defines.txt';  // Here the directives not solved are wriiten
-      project.FalseDefinesfile := 'D:\Test\falseDefines.txt'; // Directives where the result is false
-      project.TrueDefinesfile := 'D:\Test\trueDefines.txt'; // Directives where the result is true
+
+      project.SearchPathsFile := Path.Combine(projectPath, projectShortName+'.SearchPath.txt');
+      project.Definesfile := Path.Combine(projectPath, projectShortName+'.Defines.txt');
+
+      project.NotFoundDirectivesFile := Path.Combine(projectPath, projectShortName+'.notFoundDefines.txt');  // Here the directives not solved are wriiten
+      project.FalseDefinesfile := Path.Combine(projectPath, projectShortName+'.falseDefines.txt'); // Directives where the result is false
+      project.TrueDefinesfile := Path.Combine(projectPath, projectShortName+'.trueDefines.txt'); // Directives where the result is true
 
 
       project.AddCheck(eEleCheck.eDfm); // There is a *.dfm
@@ -44,6 +50,7 @@ type
       project.AddCheck(eEleCheck.eHasResourceStrings);  // Resourcestrings in File
       project.AddCheck(eEleCheck.eVarsWithTypes);  // Var declaration with new type
       project.AddCheck(eEleCheck.eTypesInMethods);  // Type declaration in Methods
+      project.AddCheck(eEleCheck.eAsm);  // Asm Statements in Methods
 
 
       project.Run;

@@ -32,7 +32,8 @@ type
     eHasResources,    // Res in File
     eHasResourceStrings, //Resourcestrings in File
     eVarsWithTypes,   //Variables with defined Types like Var l : (e1, e2, e3);
-    eTypesInMethods   // Type declaration in Methods
+    eTypesInMethods,   // Type declaration in Methods
+    eAsm               // Assembler is used somewhere
     );
 
   const
@@ -45,8 +46,8 @@ type
     'Public Vars in Interface needs {GLOBALS ON}',
     'Public Methods in Interface needs {GLOBALS ON}',
     'Destructors',
-    'more then 1 Constructors for one ore more classes',
-    'more then One Class defined in Interface',
+    'Multible Constructors',
+    'Multible Classes defined in Interface',
     'IInterface and Class that uses it in the same File ',
     'Variant record Type',
     'Enums without Scope',
@@ -55,6 +56,7 @@ type
     'Resources inside',
     'Resource Strings in File',
     'Variables with defined Types',
-    'Type declaration in Method');
+    'Type declaration in Method',
+    'Assembler is used');
 
 end.

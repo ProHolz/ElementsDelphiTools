@@ -37,6 +37,8 @@ type
     method TestResource;
     method TestVarTypes;
     method TestTypesMethods;
+    method TestASM;
+
   end;
 
 implementation
@@ -202,6 +204,16 @@ begin
 
   // There are 3 possible Problems in the Source
   Check.AreEqual(FGlobProbs, 3);
+end;
+
+method TestCheckers.TestASM;
+begin
+  var toCheck := TPasSyntaxTreeBuilder.RunWithString(cTestASMMethods, false);
+  var lchecker := new TProblem_Asm() as ISingleProbSolver;
+  Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
+
+  // There are 1 possible Problems in the Source
+  Check.AreEqual(FGlobProbs, 1);
 end;
 
 end.

@@ -1,5 +1,4 @@
 ﻿Tests to add:
-Types in Methods; // Not allowed
 Record Consts in Methods // Not allowed
 Empty Exception Handlers
 Empty finally Handlers

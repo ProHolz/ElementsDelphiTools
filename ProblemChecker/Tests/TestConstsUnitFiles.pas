@@ -238,6 +238,20 @@ interface
 end.
 ";
 
+cTestASMMethods = "
+unit Test;
+interface
+
+ implementation
+
+ function ReturnAddress: Pointer;
+asm
+  mov eax,[ebp+4]
+end;
+
+end.
+";
+
 
 
 

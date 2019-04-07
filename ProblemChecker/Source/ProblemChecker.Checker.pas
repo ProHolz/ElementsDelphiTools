@@ -109,6 +109,12 @@ type
    property CheckTyp : eEleCheck read eEleCheck.eTypesInMethods;
  end;
 
+
+  TProblem_Asm = class( ISingleProbSolver)
+    method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
+   property CheckTyp : eEleCheck read eEleCheck.eAsm;
+ end;
+
 implementation
 
 
@@ -189,13 +195,14 @@ begin
       if  String.EqualsIgnoringCaseInvariant(lmethod.GetAttribute(TAttributeName.anKind) , 'destructor') then
       begin
         result := true;
-        ProblemLog.Problem_At(CheckTyp, lmethod.Line, lmethod.Col);
+        ProblemLog.Problem_At(CheckTyp, lmethod.Line, lmethod.Col, $" {node.ParentNode.AttribName}.{lmethod.AttribName}");
       end;
   end;
 end;
 
 method TProblem_MultiContructors.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
 begin
+  result := false;
   const cMethodTypes = [SNT.ntPublic, SNT.ntMethod];
   var lClasses := NodeSolver.getPublicClass(syntaxTree);
   for lClass in lClasses do
@@ -206,22 +213,22 @@ begin
       if  String.EqualsIgnoringCaseInvariant( lMethod.GetAttribute(TAttributeName.anKind) , 'constructor') then
       begin
         inc(lres);
-        ProblemLog.Problem_At(CheckTyp, lMethod.Line, lMethod.Col);
+        if lres > 1 then
+        begin
+           ProblemLog.Problem_At(CheckTyp, lMethod.Line, lMethod.Col,  $" {lClass.ParentNode.AttribName}.{lMethod.AttribName}" );
+          result := true;
+        end;
       end;
-    if lres > 1 then
-      exit true;
   end;
-  exit false;
 end;
 
 method TProblem_MoreThanOneClass.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
 begin
-
-  var Nodes := NodeSolver.getPublicClass(syntaxTree);
-  result := Nodes.Count > 0;
+ var Nodes := NodeSolver.getPublicClass(syntaxTree);
+  result := Nodes.Count > 1;
   if result then
     for  each node in Nodes do
-      ProblemLog.Problem_At(CheckTyp, node.Line, node.Col);
+      ProblemLog.Problem_At(CheckTyp, node.Line, node.Col, node.ParentNode.AttribName);
 end;
 
 
@@ -234,7 +241,7 @@ begin
   lClasses.Add(NodeSolver.getImplClass(syntaxTree).ToArray);
   if lClasses.Count = 0 then  exit false;
 
-  for lInterface in lInterfaces do
+  lOuterLoop:  for lInterface in lInterfaces do
     begin  // Yes there are Interfaces so we will check
   // We now know the name in lInterface to check
   // Pick up the Typ Nodes from Classes so
@@ -244,8 +251,9 @@ begin
       for lType in lTypes do
         if  String.EqualsIgnoringCaseInvariant( lType.AttribName ,  lInterface.ParentNode.AttribName )then
         begin
-          ProblemLog.Problem_At(CheckTyp, lType.Line, lType.Col, lType.AttribName);
+          ProblemLog.Problem_At(CheckTyp, lType.Line, lType.Col, $" {lClass.ParentNode.AttribName}({lType.AttribName})");
           result := true;
+          continue lOuterloop;
         end;
     end;
   end;
@@ -427,6 +435,28 @@ begin
          ProblemLog.Problem_At(CheckTyp, ltype.Line, ltype.Col, ltype.AttribName);
        end;
     end;
+end;
+
+method TProblem_Asm.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
+begin
+  result := false;
+  var Nodes :=  NodeSolver.getNodeArrayAll([TSyntaxNodeType.ntImplementation, TSyntaxNodeType.ntMethod], syntaxTree);
+  lOuter: for each child in Nodes do
+    begin
+    var lAsm := child.FindAllNodes(TSyntaxNodeType.ntAsmStatement);
+    for each ltype in lAsm do
+      begin
+
+       {$IF LOG}
+       writeLn(TSyntaxTreeWriter.ToXML(ltype, true));
+       writeLn('==========================');
+       writeLn;
+        {$ENDIF}
+      result := true;
+      ProblemLog.Problem_At(CheckTyp, ltype.Line, ltype.Col, child.Findnode(TSyntaxNodeType.ntName):AttribName);
+      continue louter;
+    end;
+  end;
 end;
 
 
