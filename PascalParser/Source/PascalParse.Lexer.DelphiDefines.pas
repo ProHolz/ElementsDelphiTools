@@ -15,8 +15,8 @@
                  'WIN32',
                  'XE7',
                  'CPUX86',
-                 'X86ASM',
-                 'PUREPASCAL'];
+                 'X86ASM'
+                 ];
     end;
 
 
@@ -72,8 +72,8 @@
                   'UNICODE',
                   'WIN32',
                   'RIO',
-                 'CPUX86',
-                 'PUREPASCAL'];
+                 'CPUX86'
+                 ];
 
      end;
 

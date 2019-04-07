@@ -3,9 +3,11 @@ interface
 
 type
  TProjectIndexer = public class
+  private
+   FDefinesList    : StringList;   // For all Directives not resolved
   public
     FAborting       : Boolean;
-    FDefinesList    : StringList;   // For all Directives not resolved
+
     FIncludeCache   : TIncludeCache;
     FIncludeFiles   : TIncludeFiles;
     FNotFoundUnits  : StringList;
@@ -48,7 +50,9 @@ type
     property IncludeFiles: TIncludeFiles read FIncludeFiles;
     property Problems: TParseProblems read FProblems;
     property NotFoundUnits: StringList read FNotFoundUnits;
-    property SearchPath: StringList read FSearchPathRel write FSearchPathRel;
+   // property SearchPathRel: StringList read FSearchPathRel write FSearchPathRel;
+    property SearchPaths: Searchpaths read FSearchPaths write FSearchPaths;
+
     property OnGetUnitSyntax: TGetUnitSyntaxEvent read FOnGetUnitSyntax write FOnGetUnitSyntax;
     property OnUnitParsed: TUnitParsedEvent read FOnUnitParsed write FOnUnitParsed;
     property OnParseCompilerDirective : TParseCompilerDirectiveEvent read FonParseCompilerDirective write FonParseCompilerDirective;
@@ -71,7 +75,7 @@ begin
       begin
         var unitPath := childNode.GetAttribute(TAttributeName.anPath);
         if unitPath <> '' then begin
-          if Searchpaths.IsRelativeWinPath(unitPath) then
+          if SearchPaths.IsRelativeWinPath(unitPath) then
             unitPath :=  Path.GetFullPath(Path.Combine( filePath , unitPath));
           FUnitPaths.Add(unitName + '.pas', unitPath.ToLower);
         end;
@@ -182,19 +186,15 @@ begin
   FProjectFolder :=   Path.GetParentDirectory(fileName);
   FIncludeCache := new TIncludeCache;
   FUnitPaths := new TUnitPathsCache();
-  FSearchPaths.Clear;
   FSearchPaths.BasePath := FProjectFolder;
- // PrepareDefines;
-  PrepareSearchPath;
+
   FNotFoundUnits.RemoveAll;
   FProblems.RemoveAll;
-  //var filePath := FProjectFolder;
   var projectName := Path.GetFileName(fileName);
   FUnitPaths.Add(projectName, fileName);
   // Do the work
   ParseUnit(projectName, fileName, true);
   // Fill Results
-
   FParsedUnitsInfo.Initialize(FParsedUnits, FUnitPaths);
         //FIncludeFiles.Initialize(FIncludeCache);
 
