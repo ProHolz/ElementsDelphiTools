@@ -112,3 +112,7 @@ obj
 /PascalParser/Demo/ProjectIndexer
 /PascalParser/Demo/Parser
 Bin
+CodeGen
+Test
+/testElementsSyntax
+/ProblemChecker/MyProjects.txt
