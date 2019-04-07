@@ -43,6 +43,7 @@ type
       project.AddCheck(eEleCheck.eHasResources);     // *.Res in File
       project.AddCheck(eEleCheck.eHasResourceStrings);  // Resourcestrings in File
       project.AddCheck(eEleCheck.eVarsWithTypes);  // Var declaration with new type
+      project.AddCheck(eEleCheck.eTypesInMethods);  // Type declaration in Methods
 
 
       project.Run;

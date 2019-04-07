@@ -187,20 +187,64 @@ cTestVarTypes = "
 unit Test;
 interface
 var
- Simple : Integer;
- SimpleSet :  (e1, e2, e3);
- ByteArray : Array[0..0] of byte;
+ ArrayCheck2Level : Array[0..2] of Array[1..2] of TestRecord; // NO Problem
+ ArrayCheck3Level : Array[0..2] of Array[1..2] of Array[1..2] of TestRecord; // NO Problem
+ ArrayProblemCheck : Array[0..2] of record x,y,z:  double; end; //Problem
+ ArrayCheck : Array[0..2] of TestRecord; // NO Problem
+ Simple : Integer; // No Problem
+ SimpleSet :  (e1, e2, e3);  // Problem
+ ByteArray : Array[0..0] of byte; // No Problem
 
- pprocVar  : Procedure(a : Integer);
- pprocFunc  : function(a : Integer) : boolean;
+ pprocVar  : Procedure(a : Integer); // Problem
+ pprocFunc  : function(a : Integer) : boolean; // Problem
+
+
 
  implementation
 end.
 ";
 
+cTestTypeMethods = "
+unit Test;
+interface
+
+ implementation
+
+ procedure TestMethod;
+ var a : Integer;
+
+ type
+   TestRec = record a : integer; end; // Problem1
+   const c = 5;
+   type
+   TestRec2 = record a : integer; end; // Problem2
+    begin
+   end;
+
+ procedure TestOuter;
+
+ Procedure TestOuter1;
+   procedure TestLocal;
+    type
+      TestRecLocal = record a : integer; end; // Problem3
+     begin
+     end;
+
+ begin
+ end;
+
+ begin
+ end;
+end.
+";
+
+
+
 
 method WriteoutConstxml;
 begin
+ if Environment.OS = OperatingSystem.Windows then
+  begin
   var temp := TPasSyntaxTreeBuilder.RunWithString(cUnitWithResDFM, false);
   File.WriteText('X:\Elements\ElementsDelphiTools\ProblemChecker\Tests\XML\cUnitWithResDFM.xml' , TSyntaxTreeWriter.ToXML(temp, true));
 
@@ -220,7 +264,7 @@ begin
 
   temp := TPasSyntaxTreeBuilder.RunWithString(cTestArray, true);
   File.WriteText('X:\Elements\ElementsDelphiTools\ProblemChecker\Tests\XML\cTestArray.xml' , TSyntaxTreeWriter.ToXML(temp, true));
-
+end;
 
 
 end;

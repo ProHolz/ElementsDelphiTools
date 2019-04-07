@@ -9,6 +9,7 @@ uses
 type
   TestCheckers = public class(Test, IProblem_Log)
   private
+
     method prepareUnitWithType: TSyntaxNode;
     method prepareUnitWithInitFinal: TSyntaxNode;
     method Problem_At(Check : eEleCheck; Line : Integer; Pos : Integer; const Name : String = '');
@@ -35,6 +36,7 @@ type
     method TestDFM;
     method TestResource;
     method TestVarTypes;
+    method TestTypesMethods;
   end;
 
 implementation
@@ -187,10 +189,19 @@ begin
   var toCheck := TPasSyntaxTreeBuilder.RunWithString(cTestVarTypes, false);
   var lchecker := new TProblem_VarTypes() as ISingleProbSolver;
   Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
-  Check.AreEqual(FGlobProbs, 3);
 
+  // There ar 4 possible Problems in the Source
+  Check.AreEqual(FGlobProbs, 4);
 end;
 
+method TestCheckers.TestTypesMethods;
+begin
+  var toCheck := TPasSyntaxTreeBuilder.RunWithString(cTestTypeMethods, false);
+  var lchecker := new TProblem_TypesInMethods() as ISingleProbSolver;
+  Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
 
+  // There are 3 possible Problems in the Source
+  Check.AreEqual(FGlobProbs, 3);
+end;
 
 end.

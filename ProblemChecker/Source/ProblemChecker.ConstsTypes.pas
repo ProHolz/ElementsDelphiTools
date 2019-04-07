@@ -31,7 +31,8 @@ type
     eConstRecord,     // Const Records with initialisation, Should be extendet with checke of not Single consts aka const array of integer
     eHasResources,    // Res in File
     eHasResourceStrings, //Resourcestrings in File
-    eVarsWithTypes   //Variables with defined Types like Var l : (e1, e2, e3);
+    eVarsWithTypes,   //Variables with defined Types like Var l : (e1, e2, e3);
+    eTypesInMethods   // Type declaration in Methods
     );
 
   const
@@ -53,6 +54,7 @@ type
     'Const Records ',
     'Resources inside',
     'Resource Strings in File',
-    'Variables with defined Types');
+    'Variables with defined Types',
+    'Type declaration in Method');
 
 end.

@@ -54,6 +54,7 @@ begin
       eEleCheck.eHasResources           : fProbSolver.Add(check, new TProblem_RES);
       eEleCheck.eHasResourceStrings     : fProbSolver.Add(check, new TProblem_ResString);
       eEleCheck.eVarsWithTypes          : fProbSolver.Add(check, new TProblem_VarTypes);
+      eEleCheck.eTypesInMethods          : fProbSolver.Add(check, new TProblem_TypesInMethods);
     end;
   end;
 

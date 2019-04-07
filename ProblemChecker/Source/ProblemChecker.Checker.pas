@@ -104,6 +104,11 @@ type
     property CheckTyp : eEleCheck read eEleCheck.eVarsWithTypes;
   end;
 
+  TProblem_TypesInMethods = class( ISingleProbSolver)
+    method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
+   property CheckTyp : eEleCheck read eEleCheck.eTypesInMethods;
+ end;
+
 implementation
 
 
@@ -142,8 +147,8 @@ begin
   if result then
   begin
     result := false;
-   for node in Lenums do
-     begin
+    for node in Lenums do
+      begin
       if node.GetAttribute(TAttributeName.anVisibility) = 'scoped' then
         continue;
       result := true;
@@ -294,7 +299,7 @@ begin
     begin
       result := true;
       ProblemLog.Problem_At(CheckTyp, lRecord.Line, lRecord.Col, lRecord.ParentNode.AttribName);
-   end;
+    end;
 end;
 
 method TProblem_ClassInImplementation.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean;
@@ -317,7 +322,7 @@ begin
       begin
       if node.AttribType = 'R' then
         if node.AttribKind.Trim.ToUpper.EndsWith('.DFM') then exit (true);
-     end;
+    end;
   end;
 
 end;
@@ -354,22 +359,74 @@ begin
   result := false;
   var Nodes := syntaxTree.FindAllNodes(SNT.ntVariable);
 
-   if Nodes:Count > 0 then
-   begin
-     for each child in Nodes do
-       begin
-       var lnode := child.FindNode(TSyntaxNodeType.ntType);
-       if assigned (lnode) then
-       begin
+  if Nodes:Count > 0 then
+  begin
+    for each child in Nodes do
+      begin
+      var lnode := child.FindNode(TSyntaxNodeType.ntType);
+      if assigned (lnode) and lnode.HasChildren then
+      begin
            // Allow Array Types
-        if (lnode.AttribType <> '') and (lnode.AttribType.ToLower <> 'array') then
+        if (lnode.AttribType <> '') {and (lnode.AttribType.ToLower <> 'array')} then
         begin
-          ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.FindNode(TSyntaxNodeType.ntName).AttribName);
-          result := true;
+
+          case lnode.AttribType.ToLower of
+            'array' : begin
+
+              // here we  check for the finalType of a Array
+              loop  begin
+                var lnodetemp := lnode.FindNode(TSyntaxNodeType.ntType);
+                if not assigned(lnodetemp) then break;
+                lnode := lnodetemp;
+                if not lnode.AttribType.ToLower.Equals('array') then
+                  break;
+              end;
+              if lnode.HasChildren then
+              begin
+                var varname := child.FindNode(TSyntaxNodeType.ntName):AttribName;
+                 {$IF LOG}
+                writeLn;
+                writeLn($" ***** {varname} *****");
+                writeLn(TSyntaxTreeWriter.ToXML(lnode, true));
+                writeLn;
+                writeLn($" ===== End ***** {varname} *****");
+                writeLn;
+                {$ENDIF}
+                ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, varname);
+                result := true;
+
+
+              end;
+            end;
+            else
+              begin
+                {$IF LOG}
+                writeLn(TSyntaxTreeWriter.ToXML(lnode, true));
+                writeLn('==========================');
+                writeLn;
+                {$ENDIF}
+                ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.FindNode(TSyntaxNodeType.ntName).AttribName);
+                result := true;
+              end;
+          end;
         end;
       end;
+    end;
+  end;
+end;
+
+method TProblem_TypesInMethods.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
+begin
+  result := false;
+  var Nodes :=  NodeSolver.getNodeArrayAll([TSyntaxNodeType.ntImplementation, TSyntaxNodeType.ntMethod], syntaxTree);
+  for each child in Nodes do
+    begin
+     for each ltype in child.FindAllNodes(TSyntaxNodeType.ntTypeDecl) do
+       begin
+         result := true;
+         ProblemLog.Problem_At(CheckTyp, ltype.Line, ltype.Col, ltype.AttribName);
        end;
-   end;
+    end;
 end;
 
 
