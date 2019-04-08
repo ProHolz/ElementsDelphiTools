@@ -98,7 +98,7 @@ begin
             if lnode.HasChildren then
               begin
                 var varname : String;
-                {$IF NOT LOG}
+                {$IF LOG}
                 writeLn;
                 writeLn($" ***** {varname} *****");
                 writeLn(TSyntaxTreeWriter.ToXML(lnode, true));
@@ -110,7 +110,8 @@ begin
                 for each field in lnode.ChildNodes do
                  begin
                   var lType := field.FindNode(TSyntaxNodeType.ntType);
-                  if (lType:AttribType <> '') then
+                  if assigned(lType) then
+                  if (lType.AttribType <> '') then
                   if isProblemType(field, lType, out varname) then
                   begin
                     ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
