@@ -9,8 +9,12 @@ type
   public
     property InterfaceGuids : Boolean  := true;
     property ComInterfaces : Boolean  := true;
-    property PublicEnums : Boolean := false;
-    property PublicClasses : Boolean := false;
+    property PublicEnums : Boolean := true;
+    property PublicClasses : Boolean := true;
+    property PublicInterfaces : Boolean := true;
+    property PublicRecords : Boolean := true;
+    property PublicBlocks : Boolean := true;
+
  end;
 
   CodeBuilderMethods = static partial class

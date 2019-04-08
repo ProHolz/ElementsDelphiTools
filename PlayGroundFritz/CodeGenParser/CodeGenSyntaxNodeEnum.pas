@@ -19,6 +19,10 @@ begin
     var FieldType := FieldNode.AttribName;
     result.Members.Add(new CGEnumValueDefinition(FieldType));
   end;
+
+  if CodeBuilderMethods.settings.PublicEnums then
+   result.Visibility := CGTypeVisibilityKind.Public;
+
 end;
 
 method CodeBuilderEnum.BuildSet(const node: TSyntaxNode; const setName: not nullable String): CGTypeDefinition;
@@ -29,6 +33,10 @@ begin
     var FieldType := FieldNode.AttribName;
     result.Members.Add(new CGEnumValueDefinition(FieldType));
   end;
+
+  if CodeBuilderMethods.settings.PublicEnums then
+    result.Visibility := CGTypeVisibilityKind.Public;
+
 end;
 
 end.

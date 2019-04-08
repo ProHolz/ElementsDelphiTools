@@ -34,7 +34,7 @@ type
   public
     method BuildInterface(const node : TSyntaxNode; const name : not nullable String): CGInterfaceTypeDefinition;
     method BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassTypeDefinition;
-    method BuildRecord(const node : TSyntaxNode; const name : not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGStructTypeDefinition;
+    method BuildRecord(const node : TSyntaxNode; const name : not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassOrStructTypeDefinition;
     method BuildGlobMethod(const methodnode : TSyntaxNode; const ispublic : Boolean) : CGGlobalFunctionDefinition;
 
     method BuildSet(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
@@ -342,7 +342,7 @@ method CodeBuilderMethods.PrepareCallingConventionAttribute(const value : CGCall
 begin
   result :=
   case value of
-    CGCallingConventionKind.CDecl : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.CDecl'.AsNamedIdentifierExpression.AsCallParameter);
+    CGCallingConventionKind.CDecl : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.Cdecl'.AsNamedIdentifierExpression.AsCallParameter);
     CGCallingConventionKind.StdCall : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.StdCall'.AsNamedIdentifierExpression.AsCallParameter);
     CGCallingConventionKind.SafeCall : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.SafeCall'.AsNamedIdentifierExpression.AsCallParameter);
   end;
@@ -506,6 +506,7 @@ begin
   begin
     lMethod.Comment := "destructor changed to method".AsBuilderComment;
     lMethod.Statements.Insert(0, new CGRawStatement('{$HINT "destructor changed to method"}'));
+    lMethod.Virtuality := CGMemberVirtualityKind.None;
    // lMethod.Comment.Lines.Add('destructor changed');
   end;
 
@@ -597,6 +598,9 @@ begin
 
   AddAncestors(result, node);
   AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name, nil);
+  if settings.PublicInterfaces then
+    result.Visibility := CGTypeVisibilityKind.Public;
+
 
 end;
 
@@ -775,6 +779,9 @@ begin
   AddAncestors(result, node);
   AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name+lname, methodBodys);
 
+  if settings.PublicClasses then
+    result.Visibility := CGTypeVisibilityKind.Public;
+
 end;
 
 method CodeBuilderMethods.BuildSet(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
@@ -805,6 +812,10 @@ begin
   var lres := new CGTypeAliasDefinition(className, ('****UnknownSET').AsTypeReference);
   lres.Comment :=  $" UnknownSet on Line {node.ParentNode.Line}".AsComment;
 
+  if settings.PublicEnums then
+    lres.Visibility := CGTypeVisibilityKind.Public;
+
+
   exit lres;
 
   //raise new Exception("Could not create set or enum");
@@ -821,8 +832,20 @@ begin
   else exit nil;
 end;
 
-method CodeBuilderMethods.BuildRecord(const node: TSyntaxNode; const name: not nullable String;const methodBodys : Dictionary<String,TSyntaxNode>) : CGStructTypeDefinition;
+method CodeBuilderMethods.BuildRecord(const node: TSyntaxNode; const name: not nullable String;const methodBodys : Dictionary<String,TSyntaxNode>) : CGClassOrStructTypeDefinition;
 begin
+
+  writeLn(TSyntaxTreeWriter.ToXML(node, true ) );
+
+  var Helper := node.FindNode(TSyntaxNodeType.ntHelper);
+
+  if assigned(Helper) then
+   begin
+    result :=  new CGExtensionTypeDefinition(name);
+     AddAncestors( result, Helper);
+
+   end
+   else
   result :=  new CGStructTypeDefinition(name);
   var lGenerics := PrepareGenericParameterDefinition(node.ParentNode).ToArray;
   result.GenericParameters.Add(lGenerics);
@@ -833,6 +856,11 @@ begin
     lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
 
   AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name+lname, methodBodys);
+
+  if settings.PublicRecords then
+    result.Visibility := CGTypeVisibilityKind.Public;
+
+
 end;
 
 method CodeBuilderMethods.BuildVariable(const node: TSyntaxnode; const ispublic : Boolean; const newtypename : string = nil) : CGGlobalVariableDefinition;
@@ -905,7 +933,8 @@ begin
 
     if String.IsNullOrEmpty(typenode.AttribKind) then
       ltemp.IsPlainFunctionPointer := true;
-
+   if settings.PublicBlocks then
+     ltemp.Visibility := CGTypeVisibilityKind.Public;
 
     exit ltemp;
   end

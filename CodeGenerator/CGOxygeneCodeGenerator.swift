@@ -613,7 +613,7 @@ public class CGOxygeneCodeGenerator : CGPascalCodeGenerator {
 			case .UTF32Char: Append("UInt32") // tood?
 			case .Dynamic: Append("dynamic")
 			case .InstanceType: Append("InstanceType")
-			case .Void: Append("^VOID")
+			case .Void: Append("^Void")
 			case .Object: Append("Object")
 			case .Class: generateIdentifier("Class") // todo: make platform-specific
 		}

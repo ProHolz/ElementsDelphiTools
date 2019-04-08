@@ -84,6 +84,8 @@
     <Compile Include="TestUnits\TestWithClause.pas" />
     <Compile Include="TestUnits\TestDllfunc.pas" />
     <Compile Include="TestUnits\TestResourceStrings.pas" />
+    <None Include="Todo.txt" />
+    <Compile Include="TestUnits\TestRecordhelper.pas" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <ItemGroup>
