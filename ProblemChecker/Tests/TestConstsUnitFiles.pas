@@ -252,7 +252,23 @@ end;
 end.
 ";
 
+cTestTypeinType = "
+unit Test;
+interface
+ type
+   Trec = record
+    a : Integer; // OK
+    b : record c : Integer; end; // Fail
+    d : array of Integer; // OK
+    e : array[0..1] of record f: Integer; end;// fail
+    g : array[0..1] of array[2..5] of record h: Integer; end;// fail
 
+   end;
+
+implementation
+
+end.
+";
 
 
 method WriteoutConstxml;

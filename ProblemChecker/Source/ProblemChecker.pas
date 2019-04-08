@@ -56,6 +56,7 @@ begin
       eEleCheck.eVarsWithTypes          : fProbSolver.Add(check, new TProblem_VarTypes);
       eEleCheck.eTypesInMethods         : fProbSolver.Add(check, new TProblem_TypesInMethods);
       eEleCheck.eAsm                    : fProbSolver.Add(check, new TProblem_Asm);
+      eEleCheck.eTypeinType             : fProbSolver.Add(check, new TProblem_TypeInTypes);
     end;
   end;
 

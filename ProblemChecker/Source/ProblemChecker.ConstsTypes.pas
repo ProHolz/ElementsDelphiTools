@@ -33,7 +33,8 @@ type
     eHasResourceStrings, //Resourcestrings in File
     eVarsWithTypes,   //Variables with defined Types like Var l : (e1, e2, e3);
     eTypesInMethods,   // Type declaration in Methods
-    eAsm               // Assembler is used somewhere
+    eAsm,               // Assembler is used somewhere
+    eTypeinType        // Like eVarsWithTypes but for records
     );
 
   const
@@ -57,6 +58,7 @@ type
     'Resource Strings in File',
     'Variables with defined Types',
     'Type declaration in Method',
-    'Assembler is used');
+    'Assembler is used',
+    'Record with new types Inside');
 
 end.

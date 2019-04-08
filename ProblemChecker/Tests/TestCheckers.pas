@@ -10,6 +10,7 @@ type
   TestCheckers = public class(Test, IProblem_Log)
   private
 
+
     method prepareUnitWithType: TSyntaxNode;
     method prepareUnitWithInitFinal: TSyntaxNode;
     method Problem_At(Check : eEleCheck; Line : Integer; Pos : Integer; const Name : String = '');
@@ -38,6 +39,7 @@ type
     method TestVarTypes;
     method TestTypesMethods;
     method TestASM;
+    method TestTypeTypes;
 
   end;
 
@@ -215,5 +217,16 @@ begin
   // There are 1 possible Problems in the Source
   Check.AreEqual(FGlobProbs, 1);
 end;
+
+method TestCheckers.TestTypeTypes;
+begin
+  var toCheck := TPasSyntaxTreeBuilder.RunWithString(cTestTypeinType, false);
+  var lchecker := new TProblem_TypeInTypes() as ISingleProbSolver;
+  Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
+
+  // There ar 4 possible Problems in the Source
+  Check.AreEqual(FGlobProbs, 3);
+end;
+
 
 end.
