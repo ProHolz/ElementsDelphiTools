@@ -6,12 +6,11 @@ type
 
   // This part is used for Array Constants like
   // SimpleIntArray2 : Array[0..2] of Integer = (1 shl 2 -1, 1,2);
-  CodeBuilderMethods = static partial class
+  CodeBuilder =  partial class
   private
     method resolveBounds(const node: TSyntaxNode): List<CGEntity>;
     method PrepareConstArrayExpression(const aType : CGTypeReference; const node: TSyntaxNode): CGExpression;
 
-  public
 
     method PrepareArrayVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGFieldDefinition;
     method PrepareSetVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGFieldDefinition;
@@ -21,7 +20,7 @@ type
 
 implementation
 
-method CodeBuilderMethods.PrepareArrayVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGFieldDefinition;
+method CodeBuilder.PrepareArrayVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGFieldDefinition;
 begin
   var constName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
   var typeNode := node.FindNode(TSyntaxNodeType.ntType);
@@ -43,7 +42,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareConstArrayExpression(const aType : CGTypeReference; const node: TSyntaxNode): CGExpression;
+method CodeBuilder.PrepareConstArrayExpression(const aType : CGTypeReference; const node: TSyntaxNode): CGExpression;
 begin
   result := nil;
   if node = nil then exit;
@@ -89,7 +88,7 @@ begin
     end;
 end;
 
-method CodeBuilderMethods.resolveBounds(const node: TSyntaxNode): List<CGEntity>;
+method CodeBuilder.resolveBounds(const node: TSyntaxNode): List<CGEntity>;
 begin
   result := nil;
   var lBounds := node.FindNode(TSyntaxNodeType.ntBounds);
@@ -122,7 +121,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareSetVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGFieldDefinition;
+method CodeBuilder.PrepareSetVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGFieldDefinition;
 begin
   var constName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
   var typeNode := node.FindNode(TSyntaxNodeType.ntType):FindNode(TSyntaxNodeType.ntType);

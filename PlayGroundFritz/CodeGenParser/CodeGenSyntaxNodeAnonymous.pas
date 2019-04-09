@@ -5,17 +5,15 @@ uses ProHolz.Ast;
 
 type
   // This part is used for ntAnonym* Types
-  CodeBuilderMethods = static partial class
+  CodeBuilder =  partial class
   private
     method PrepareAnonymousMethod(const node: TSyntaxNode): CGExpression;
-  public
     method BuildAnonymousBlockType(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
-
   end;
 
 implementation
 
-method CodeBuilderMethods.PrepareAnonymousMethod(const node: TSyntaxNode): CGExpression;
+method CodeBuilder.PrepareAnonymousMethod(const node: TSyntaxNode): CGExpression;
 begin
   var lParamList := new List<CGParameterDefinition>;
   var lStatements := node.FindNode(TSyntaxNodeType.ntStatements);
@@ -42,7 +40,7 @@ else
   exit lMethod;
 end;
 
-method CodeBuilderMethods.BuildAnonymousBlockType(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
+method CodeBuilder.BuildAnonymousBlockType(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
 begin
   Var typenode := node.FindNode(TSyntaxNodeType.ntAnonymousMethodType);
   if assigned(typenode) then

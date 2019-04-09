@@ -4,13 +4,15 @@ interface
 uses ProHolz.Ast;
 
 type
-  CodeBuilderMethods = static partial class
+  CodeBuilder =  partial class
   private
-    method PrepareExternalName(const node: TSyntaxNode): CGExpression;
-    method PrepareFieldExpression(const node: TSyntaxNode): CGPropertyInitializer;
 
     type
     checkDot = enum(named, &method, &array, PointerDereference, &result);
+
+    method PrepareExternalName(const node: TSyntaxNode): CGExpression;
+    method PrepareFieldExpression(const node: TSyntaxNode): CGPropertyInitializer;
+
 
     method PrepareIdentifierExpression(const node: TSyntaxNode): CGExpression;
     method PrepareRecordConstantExpression(const node: TSyntaxNode): CGExpression;
@@ -40,7 +42,7 @@ type
 implementation
 
 
-method CodeBuilderMethods.PrepareUnaryOp(const node: TSyntaxNode): CGExpression;
+method CodeBuilder.PrepareUnaryOp(const node: TSyntaxNode): CGExpression;
 begin
   case node.Typ of
     TSyntaxNodeType.ntAddr : exit new  CGUnaryOperatorExpression(PrepareSingleExpressionValue(node.ChildNodes[0]), CGUnaryOperatorKind.AddressOf);
@@ -49,7 +51,7 @@ begin
   end;
 end;
 
-method CodeBuilderMethods.PrepareBinaryOp(const left, right: TSyntaxNode; aType : TsyntaxnodeType): CGExpression;
+method CodeBuilder.PrepareBinaryOp(const left, right: TSyntaxNode; aType : TsyntaxnodeType): CGExpression;
 require
   aType.isBinaryOperator;
 begin
@@ -71,7 +73,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareLiteralExpression(const node: TSyntaxNode): CGExpression;
+method CodeBuilder.PrepareLiteralExpression(const node: TSyntaxNode): CGExpression;
 begin
   result := nil;
   if (node is TValuedSyntaxNode)  then
@@ -110,7 +112,7 @@ begin
   end;
 end;
 
-method CodeBuilderMethods.PrepareCallExpression(const node: TSyntaxNode): CGExpression;
+method CodeBuilder.PrepareCallExpression(const node: TSyntaxNode): CGExpression;
 begin
   result := nil;
   var lCall := PrepareSingleExpressionValue(node.ChildNodes[0]);
@@ -125,7 +127,7 @@ begin
     exit lCall;
 end;
 
-method CodeBuilderMethods.PrepareCallExpressions(const node: TSyntaxNode): Array of CGExpression;
+method CodeBuilder.PrepareCallExpressions(const node: TSyntaxNode): Array of CGExpression;
 begin
   result := nil;
   if  node.HasChildren then
@@ -143,7 +145,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareExpressionValue(const node: TSyntaxNode): CGExpression;
+method CodeBuilder.PrepareExpressionValue(const node: TSyntaxNode): CGExpression;
 begin
   result := nil;
   if node = nil then exit;
@@ -153,7 +155,7 @@ end;
 
 
 
-method CodeBuilderMethods.PrepareDotValue(const node: TSyntaxNode): CGExpression;
+method CodeBuilder.PrepareDotValue(const node: TSyntaxNode): CGExpression;
 
 
 method ResolveNameTyp(const value : CGExpression; out Name : not nullable String; out member : checkDot) : Boolean;
@@ -207,7 +209,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareIndexedExpression(const node : Tsyntaxnode) : CGExpression;
+method CodeBuilder.PrepareIndexedExpression(const node : Tsyntaxnode) : CGExpression;
 begin
   var lIdentfier : CGExpression;
  var lexpr := new List<CGExpression>;
@@ -230,7 +232,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareDeRefExpression(const node : Tsyntaxnode) : CGExpression;
+method CodeBuilder.PrepareDeRefExpression(const node : Tsyntaxnode) : CGExpression;
 begin
  var lIdent :=  PrepareSingleExpressionValue(  node.ChildNodes[0]);
  if assigned(lIdent) then
@@ -239,7 +241,7 @@ begin
  exit new CGNamedIdentifierExpression('======Deref=======');
 end;
 
-method CodeBuilderMethods.PrepareAsExpression(const node : Tsyntaxnode) : CGExpression;
+method CodeBuilder.PrepareAsExpression(const node : Tsyntaxnode) : CGExpression;
 begin
   if node.ChildCount = 2 then
   begin
@@ -254,7 +256,7 @@ begin
     exit  new CGNamedIdentifierExpression('======ntAS Childcount <> 2');
 end;
 
-method CodeBuilderMethods.PrepareSetExpression(const node : Tsyntaxnode) : CGExpression;
+method CodeBuilder.PrepareSetExpression(const node : Tsyntaxnode) : CGExpression;
 begin
   var lSet := new CGArrayLiteralExpression();
   for each child in node.ChildNodes.FindAll(Item->Item.Typ= TSyntaxNodeType.ntElement)  do
@@ -262,7 +264,7 @@ begin
   exit lSet;
 end;
 
-method CodeBuilderMethods.PrepareListExpression(const node : Tsyntaxnode) : CGExpression;
+method CodeBuilder.PrepareListExpression(const node : Tsyntaxnode) : CGExpression;
 begin
   var lTemp := PrepareCallExpressions(node);
   if lTemp <> nil then
@@ -274,13 +276,13 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareTypeExpression(const node : Tsyntaxnode) : CGExpression;
+method CodeBuilder.PrepareTypeExpression(const node : Tsyntaxnode) : CGExpression;
 begin
   exit node.AttribName.AsNamedIdentifierExpression;
 end;
 
 
-method CodeBuilderMethods.PrepareGenricExpression(const node : Tsyntaxnode) : CGExpression;
+method CodeBuilder.PrepareGenricExpression(const node : Tsyntaxnode) : CGExpression;
 begin
   var lIdent := PrepareSingleExpressionValue(node.FindNode(TSyntaxNodeType.ntIdentifier));
 
@@ -316,7 +318,7 @@ end;
 
 
 
-method CodeBuilderMethods.PrepareIdentifierExpression(const node : TSyntaxNode) : CGExpression;
+method CodeBuilder.PrepareIdentifierExpression(const node : TSyntaxNode) : CGExpression;
 begin
   case node.AttribName.ToLower of
     'result' : exit  CGResultExpression.Result;
@@ -330,7 +332,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareFieldExpression(const node : TSyntaxNode) : CGPropertyInitializer;
+method CodeBuilder.PrepareFieldExpression(const node : TSyntaxNode) : CGPropertyInitializer;
 begin
   Var lFieldName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
   Var lFieldExp :=  PrepareSingleExpressionValue(node.FindNode(TSyntaxNodeType.ntExpression));
@@ -339,7 +341,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareRecordConstantExpression(const node : TSyntaxNode) : CGExpression;
+method CodeBuilder.PrepareRecordConstantExpression(const node : TSyntaxNode) : CGExpression;
 begin
   var lFields := new List<CGPropertyInitializer>;
   for each child in node.FindChilds(TSyntaxNodeType.ntField) do
@@ -350,7 +352,7 @@ begin
  end;
 
 
- method CodeBuilderMethods.PrepareExternalName(const node : TSyntaxNode) : CGExpression;
+ method CodeBuilder.PrepareExternalName(const node : TSyntaxNode) : CGExpression;
  begin
      if node.ChildCount = 1 then
        exit PrepareSingleExpressionValue(node.ChildNodes[0])
@@ -372,7 +374,7 @@ begin
  end;
 
 
-method CodeBuilderMethods.PrepareSingleExpressionValue(const node: TSyntaxNode): CGExpression;
+method CodeBuilder.PrepareSingleExpressionValue(const node: TSyntaxNode): CGExpression;
 begin
   if node = nil then exit nil;
   // Operators

@@ -4,7 +4,7 @@ interface
 uses ProHolz.Ast;
 
 type
-  CodeBuilderMethods = static partial class
+  CodeBuilder =  partial class
   private
     method BuildCommentFromNode(const info: String; const node: TSyntaxNode; const isError : Boolean := false): CGStatement;
     method BuildComment(const Values: array of String): CGStatement;
@@ -12,7 +12,7 @@ type
 
 implementation
 
-method CodeBuilderMethods.BuildCommentFromNode(const info : string; const node : Tsyntaxnode; const isError : boolean := false) : CGStatement;
+method CodeBuilder.BuildCommentFromNode(const info : string; const node : Tsyntaxnode; const isError : boolean := false) : CGStatement;
 begin
   if isError then
   begin
@@ -29,7 +29,7 @@ end;
 
 
 
-method CodeBuilderMethods.BuildComment(const Values : Array of String) : CGStatement;
+method CodeBuilder.BuildComment(const Values : Array of String) : CGStatement;
 begin
   var lList := new List<String>;
   for each s in Values do lList.Add(s);

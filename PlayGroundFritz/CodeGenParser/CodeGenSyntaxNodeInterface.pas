@@ -4,10 +4,9 @@ interface
 uses ProHolz.Ast;
 
 type
-
   prepareNewTypeEnum = (&block, &enum);
 
-  CodeBuilderMethods = static partial class
+  CodeBuilder =  partial class
   private
     method PrepareInitializer(aType: CGTypeReference; node: TSyntaxNode): CGExpression;
 
@@ -31,7 +30,7 @@ type
 
     method PrepareMethod(const methodnode : TSyntaxNode; implnode: TSyntaxNode) : CGMethodLikeMemberDefinition;
 
-  public
+
     method BuildInterface(const node : TSyntaxNode; const name : not nullable String): CGInterfaceTypeDefinition;
     method BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassTypeDefinition;
     method BuildRecord(const node : TSyntaxNode; const name : not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassOrStructTypeDefinition;
@@ -47,15 +46,18 @@ type
     method BuildBlockType(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
 
 
-    method BuildMethodMangledName(const node: TSyntaxNode): String;
+
     method PrepareGenericParameterName(const node: TSyntaxNode): String;
     method PrepareAttribute(const node: TSyntaxNode): CGAttribute;
     method isVarWithNewType(const node : TSyntaxNode; out preparetyp : prepareNewTypeEnum) : Boolean;
+
+  public
+    class method BuildMethodMangledName(const node: TSyntaxNode): String;
   end;
 
 implementation
 
-method CodeBuilderMethods.PrepareArrayType(const node: TSyntaxNode): CGTypeReference;
+method CodeBuilder.PrepareArrayType(const node: TSyntaxNode): CGTypeReference;
 begin
   var typeNode := node.FindNode(TSyntaxNodeType.ntType);
   if assigned(typeNode) then
@@ -88,7 +90,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareProperty(prop : TSyntaxNode) : CGPropertyDefinition;
+method CodeBuilder.PrepareProperty(prop : TSyntaxNode) : CGPropertyDefinition;
 begin
   Var Propname := prop.AttribName;
   Var PropType := prop.FindNode(TSyntaxNodeType.ntType);
@@ -135,7 +137,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareInitializer(aType : CGTypeReference; node : TSyntaxNode) : CGExpression;
+method CodeBuilder.PrepareInitializer(aType : CGTypeReference; node : TSyntaxNode) : CGExpression;
 begin
   var lres := new CGNewInstanceExpression(aType);
   var lFields := new List<CGPropertyInitializer>;
@@ -158,7 +160,7 @@ if lFields.Count > 0 then
 
 end;
 
-method CodeBuilderMethods.PrepareVarOrConstant(const node: TSyntaxnode; const isConst : Boolean; const ispublic : Boolean; const newtypename : string = nil) : CGGlobalVariableDefinition;
+method CodeBuilder.PrepareVarOrConstant(const node: TSyntaxnode; const isConst : Boolean; const ispublic : Boolean; const newtypename : string = nil) : CGGlobalVariableDefinition;
 begin
   Var constName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
   Var typeNode := node.FindNode(TSyntaxNodeType.ntType);
@@ -229,7 +231,7 @@ else
 end;
 
 
-method CodeBuilderMethods.PrepareDefaultValue(const paramnode: TSyntaxNode; paramkind : string): CGExpression;
+method CodeBuilder.PrepareDefaultValue(const paramnode: TSyntaxNode; paramkind : string): CGExpression;
 begin
   result := nil;
   var literal := paramnode.FindNode(TSyntaxNodeType.ntExpression):FindNode(TSyntaxNodeType.ntLiteral);
@@ -245,7 +247,7 @@ begin
     exit PrepareSingleExpressionValue(literal.ChildNodes[0]);
 end;
 
-method CodeBuilderMethods.PrepareParam(const node: TSyntaxNode): CGParameterDefinition;
+method CodeBuilder.PrepareParam(const node: TSyntaxNode): CGParameterDefinition;
 begin
   result := nil;
   var paramName := node.FindNode(TSyntaxNodeType.ntName):AttribName;
@@ -303,7 +305,7 @@ end;
 
 
 
-method CodeBuilderMethods.PrepareClassCreateMethod(const node : TSyntaxNode; const name : not nullable String): CGMethodLikeMemberDefinition;
+method CodeBuilder.PrepareClassCreateMethod(const node : TSyntaxNode; const name : not nullable String): CGMethodLikeMemberDefinition;
 begin
   var lMethod : CGMethodLikeMemberDefinition;
   var lMethodNameNode := node.FindNode(TSyntaxNodeType.ntName);
@@ -338,7 +340,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareCallingConventionAttribute(const value : CGCallingConventionKind) : CGAttribute;
+method CodeBuilder.PrepareCallingConventionAttribute(const value : CGCallingConventionKind) : CGAttribute;
 begin
   result :=
   case value of
@@ -349,7 +351,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareDllCallAttribute(const node : TSyntaxNode) : CGAttribute;
+method CodeBuilder.PrepareDllCallAttribute(const node : TSyntaxNode) : CGAttribute;
 begin
   var lident := node.FindNode(TSyntaxNodeType.ntIdentifier);
   if not assigned(lident) then
@@ -378,7 +380,7 @@ end;
 
 
 
-method CodeBuilderMethods.PrepareMethod(const methodnode : TSyntaxNode; implnode: TSyntaxNode): CGMethodLikeMemberDefinition;
+method CodeBuilder.PrepareMethod(const methodnode : TSyntaxNode; implnode: TSyntaxNode): CGMethodLikeMemberDefinition;
 begin
   Var MethodType := methodnode.AttribKind;
   var lMethod : CGMethodLikeMemberDefinition;
@@ -515,7 +517,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.isImplementsMethod(const node : TSyntaxNode): CGMethodLikeMemberDefinition;
+method CodeBuilder.isImplementsMethod(const node : TSyntaxNode): CGMethodLikeMemberDefinition;
 begin
   var lMethod : CGMethodLikeMemberDefinition;
   var lMethodNameNode := node.FindNode(TSyntaxNodeType.ntName);
@@ -553,7 +555,7 @@ end;
 
 
 
-method CodeBuilderMethods.AddAncestors(const Value: CGClassOrStructTypeDefinition;  const Types : TSyntaxNode);
+method CodeBuilder.AddAncestors(const Value: CGClassOrStructTypeDefinition;  const Types : TSyntaxNode);
 begin
   // Interface
   if Value is CGInterfaceTypeDefinition then
@@ -575,7 +577,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.BuildInterface(const node: TSyntaxNode; const name: not nullable String): CGInterfaceTypeDefinition;
+method CodeBuilder.BuildInterface(const node: TSyntaxNode; const name: not nullable String): CGInterfaceTypeDefinition;
 begin
   result := new CGInterfaceTypeDefinition(name);
   result.GenericParameters.Add(PrepareGenericParameterDefinition(node.ParentNode).ToArray);
@@ -605,7 +607,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareGenericParameterDefinition(const node: TSyntaxNode) : List<CGGenericParameterDefinition>;
+method CodeBuilder.PrepareGenericParameterDefinition(const node: TSyntaxNode) : List<CGGenericParameterDefinition>;
 begin
   result := new List<CGGenericParameterDefinition>;
   var TypParams := node.FindNode(TSyntaxNodeType.ntTypeParams);
@@ -619,7 +621,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareGenericParameterName(const node: TSyntaxNode): String;
+method CodeBuilder.PrepareGenericParameterName(const node: TSyntaxNode): String;
 begin
   result := nil;
   if assigned(node) then
@@ -643,7 +645,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.AddMembers(const res : CGClassOrStructTypeDefinition; const node: TSyntaxNode;
+method CodeBuilder.AddMembers(const res : CGClassOrStructTypeDefinition; const node: TSyntaxNode;
 const visibility :CGMemberVisibilityKind; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>);
 begin
   if assigned(node) then
@@ -763,7 +765,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassTypeDefinition;
+method CodeBuilder.BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassTypeDefinition;
 begin
   //public var GenericParameters = List<CGGenericParameterDefinition>()
   result := new CGClassTypeDefinition(name);
@@ -773,7 +775,7 @@ begin
   var lTypeParams := node.ParentNode.FindNode(TSyntaxNodeType.ntTypeParams);
   var lname : String := '';
   if assigned(lTypeParams) then
-    lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
+    lname := PrepareGenericParameterName(lTypeParams);
 
     // Descenting from
   AddAncestors(result, node);
@@ -784,7 +786,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.BuildSet(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
+method CodeBuilder.BuildSet(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
 begin
   var typenode := node.Findnode(TSyntaxNodeType.ntType);
   var typename := typenode:AttribName;
@@ -794,7 +796,7 @@ begin
   typename := typenode:AttribType;
 
   case typename:ToLower of
-    'enum' : exit CodeBuilderEnum.BuildSet(node,className);
+    'enum' : exit BuildSet2(node,className);
 
   end; // Case
 
@@ -821,7 +823,7 @@ begin
   //raise new Exception("Could not create set or enum");
 end;
 
-method CodeBuilderMethods.BuildGlobMethod(const methodnode: TSyntaxNode; const ispublic : Boolean): CGGlobalFunctionDefinition;
+method CodeBuilder.BuildGlobMethod(const methodnode: TSyntaxNode; const ispublic : Boolean): CGGlobalFunctionDefinition;
 begin
   Var res := PrepareMethod(methodnode, nil);
   if res is CGMethodDefinition then
@@ -832,7 +834,7 @@ begin
   else exit nil;
 end;
 
-method CodeBuilderMethods.BuildRecord(const node: TSyntaxNode; const name: not nullable String;const methodBodys : Dictionary<String,TSyntaxNode>) : CGClassOrStructTypeDefinition;
+method CodeBuilder.BuildRecord(const node: TSyntaxNode; const name: not nullable String;const methodBodys : Dictionary<String,TSyntaxNode>) : CGClassOrStructTypeDefinition;
 begin
 {$IF LOG}
   writeLn(TSyntaxTreeWriter.ToXML(node, true ) );
@@ -853,7 +855,7 @@ begin
   var lTypeParams := node.ParentNode.FindNode(TSyntaxNodeType.ntTypeParams);
   var lname : String := '';
   if assigned(lTypeParams) then
-    lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
+    lname := PrepareGenericParameterName(lTypeParams);
 
   AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name+lname, methodBodys);
 
@@ -863,18 +865,18 @@ begin
 
 end;
 
-method CodeBuilderMethods.BuildVariable(const node: TSyntaxnode; const ispublic : Boolean; const newtypename : string = nil) : CGGlobalVariableDefinition;
+method CodeBuilder.BuildVariable(const node: TSyntaxnode; const ispublic : Boolean; const newtypename : string = nil) : CGGlobalVariableDefinition;
 begin
   exit PrepareVarOrConstant(node, false, ispublic, newtypename);
 end;
 
-method CodeBuilderMethods.BuildConstant(const node: TSyntaxnode; const ispublic : Boolean) : CGGlobalVariableDefinition;
+method CodeBuilder.BuildConstant(const node: TSyntaxnode; const ispublic : Boolean) : CGGlobalVariableDefinition;
 begin
   exit PrepareVarOrConstant(node, true, ispublic);
 end;
 
 
-method CodeBuilderMethods.BuildMethodMangledName(const node: TSyntaxNode ): String;
+class method CodeBuilder.BuildMethodMangledName(const node: TSyntaxNode ): String;
 begin
   var lName := node.Findnode(TSyntaxNodeType.ntName);
   var MethodName := lName:AttribName;
@@ -888,7 +890,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.BuildArray(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
+method CodeBuilder.BuildArray(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
 begin
   var lArray := PrepareArrayType(node);
   if assigned(lArray) then
@@ -896,7 +898,7 @@ begin
   else raise new Exception("Array Type Alias not solved");
 end;
 
-method CodeBuilderMethods.BuildAlias(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
+method CodeBuilder.BuildAlias(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
 require
   (node <> nil) implies (node.Typ = TSyntaxNodeType.ntType);
 begin
@@ -909,7 +911,7 @@ begin
   else raise new Exception("BuildAlias not solved");
 end;
 
-method CodeBuilderMethods.BuildClassOf(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
+method CodeBuilder.BuildClassOf(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
 begin
   Var typeName := node.AttribName;
   if not String.IsNullOrEmpty(typeName)  then
@@ -917,7 +919,7 @@ begin
   else raise new Exception("Type ClassOf not solved");
 end;
 
-method CodeBuilderMethods.BuildBlockType(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
+method CodeBuilder.BuildBlockType(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
 begin
   Var typenode := node.FindNode(TSyntaxNodeType.ntType);
   if assigned(typenode) then
@@ -941,7 +943,7 @@ begin
   else raise new Exception("BuildBlockType not solved");
 end;
 
-method CodeBuilderMethods.PrepareAttribute(const node: TSyntaxNode): CGAttribute;
+method CodeBuilder.PrepareAttribute(const node: TSyntaxNode): CGAttribute;
 begin
   Var lName := node.FindNode(TSyntaxNodeType.ntName):AttribName;
   if not String.IsNullOrEmpty(lName) then
@@ -962,7 +964,7 @@ begin
   end;
 end;
 
-method CodeBuilderMethods.isVarWithNewType(const node: TSyntaxnode; out preparetyp : prepareNewTypeEnum): Boolean;
+method CodeBuilder.isVarWithNewType(const node: TSyntaxnode; out preparetyp : prepareNewTypeEnum): Boolean;
 begin
   case node.FindNode(TSyntaxNodeType.ntType):AttribType.ToLower of
     'function','procedure' : begin

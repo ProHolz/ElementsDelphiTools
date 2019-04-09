@@ -6,7 +6,7 @@ uses ProHolz.Ast;
 type
   // This part is used for Methods
 
-  CodeBuilderMethods = static partial class
+  CodeBuilder =  partial class
   private
     method GetReturnType(const node: TSyntaxNode) : CGTypeReference;
     method BuildLocalMethod(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
@@ -18,7 +18,7 @@ type
   end;
 implementation
 
-method CodeBuilderMethods.PrepareLocalVarOrConstant(const node: TSyntaxnode; const isConst : Boolean) : CGVariableDeclarationStatement;
+method CodeBuilder.PrepareLocalVarOrConstant(const node: TSyntaxnode; const isConst : Boolean) : CGVariableDeclarationStatement;
 begin
   Var constName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
   Var typeNode := node.FindNode(TSyntaxNodeType.ntType);
@@ -57,7 +57,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.BuildLocalMethod(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
+method CodeBuilder.BuildLocalMethod(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
 begin
   var lTemp := PrepareMethod(node, nil);
   if assigned(lTemp) and (lTemp is CGMethodDefinition) then
@@ -71,7 +71,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.BuildVariablesMethod(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
+method CodeBuilder.BuildVariablesMethod(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
 begin
   for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntVariable) do
     begin
@@ -88,7 +88,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.BuildConstantsMethodClause(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
+method CodeBuilder.BuildConstantsMethodClause(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
 begin
   for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntConstant) do
     begin
@@ -103,7 +103,7 @@ begin
      end;
 end;
 
-method CodeBuilderMethods.BuildTypesMethodClause(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
+method CodeBuilder.BuildTypesMethodClause(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
 begin
   if node = nil  then exit;
   for each child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntTypeDecl) do
@@ -128,7 +128,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.GetReturnType(const node: TSyntaxNode): CGTypeReference;
+method CodeBuilder.GetReturnType(const node: TSyntaxNode): CGTypeReference;
 begin
   if not assigned(node) then exit nil;
   assert(node.Typ = TSyntaxNodeType.ntReturnType);

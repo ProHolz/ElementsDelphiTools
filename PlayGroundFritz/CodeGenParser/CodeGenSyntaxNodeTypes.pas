@@ -6,14 +6,14 @@ uses ProHolz.Ast;
 
 type
   // This part is used for ntTypes
-  CodeBuilderMethods = static partial class
-  public
+  CodeBuilder =  partial class
+   private
     method PrepareTypeRef(const node: TSyntaxNode): CGTypeReference;
   end;
 
 implementation
 
-method CodeBuilderMethods.PrepareTypeRef(const node: TSyntaxNode): CGTypeReference;
+method CodeBuilder.PrepareTypeRef(const node: TSyntaxNode): CGTypeReference;
 var lTemp : CGTypeReference;
 begin
   if CodeBuilderDefaultTypes.isDefaultType(node.AttribName) then

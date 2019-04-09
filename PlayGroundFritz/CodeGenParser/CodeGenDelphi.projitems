@@ -22,6 +22,5 @@
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeStatements.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeTypes.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeSettings.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeFile.pas" />
   </ItemGroup>
 </Project>

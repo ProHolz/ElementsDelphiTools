@@ -5,7 +5,7 @@ uses
 
 
 type
-  CodeBuilder =  class
+  CodeBuilder =  partial class
   private
     fUnit : CGCodeUnit;
     fInterfaceMethods : Dictionary<String, TSyntaxNode>;
@@ -41,15 +41,15 @@ begin
   begin
     for each child in interfaceNode.ChildNodes.where(Item->Item.Typ = TSyntaxNodeType.ntMethod) do
       begin
-      fInterfaceMethods.add(CodeBuilderMethods.BuildMethodMangledName(child), child);
+      fInterfaceMethods.add(BuildMethodMangledName(child), child);
     end;
   end;
 //  writeLn('**** implementationNode  **** ' );
   if assigned(implementationNode) then
     for each child in implementationNode.ChildNodes.where(Item->Item.Typ = TSyntaxNodeType.ntMethod) do
       begin
-    //  writeLn(CodeBuilderMethods.BuildMethodMangledName(child));
-      fImplementationMethods.add(CodeBuilderMethods.BuildMethodMangledName(child), child);
+
+      fImplementationMethods.add(BuildMethodMangledName(child), child);
     end;
 
 end;
@@ -59,7 +59,7 @@ begin
  // We must have the node in fInterfaceMethods
   if fInterfaceMethods.ContainsValue(node) then
   begin
-    var lname := CodeBuilderMethods.BuildMethodMangledName(node);
+    var lname := BuildMethodMangledName(node);
     if not String.IsNullOrEmpty(lname) then
     begin
       if fImplementationMethods.ContainsKey(lname) then
@@ -82,7 +82,7 @@ begin
 
   if fImplementationMethods.ContainsValue(node) then
   begin
-    var lname := CodeBuilderMethods.BuildMethodMangledName(node);
+    var lname := BuildMethodMangledName(node);
     if not String.IsNullOrEmpty(lname) then
     begin
       if fImplementationMethods.ContainsKey(lname) then
@@ -124,7 +124,7 @@ begin
     var lRefType := lType.FindNode(TSyntaxNodeType.ntType);
     if assigned(lRefType) then
     begin
-    var lRef := CodeBuilderMethods.PrepareTypeRef(lRefType);
+    var lRef := PrepareTypeRef(lRefType);
     var lclass := new CGTypeAliasDefinition(node.AttribName, new CGPointerTypeReference(lRef));
     fUnit.Types.Add(lclass);
     end
@@ -143,7 +143,7 @@ end;
 
 method CodeBuilder.BuildGlobMethodClause(const node: TSyntaxNode; const ispublic: Boolean);
 begin
-  var lTemp := CodeBuilderMethods.BuildGlobMethod(node, ispublic);
+  var lTemp := BuildGlobMethod(node, ispublic);
   if assigned(lTemp) then
     fUnit.Globals.Add(lTemp) else
     assert(false, 'Method not solved');
@@ -152,10 +152,10 @@ end;
 method CodeBuilder.BuildConstantsClause(const node: TSyntaxNode; const ispublic: Boolean);
 begin
     for each Child in node.FindChilds(TSyntaxNodeType.ntConstant) do
-      fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
+      fUnit.Globals.Add(BuildConstant(Child, ispublic));
 
     for each Child in node.FindChilds( TSyntaxNodeType.ntResourceString) do
-      fUnit.Globals.Add(CodeBuilderMethods.BuildConstant(Child, ispublic));
+      fUnit.Globals.Add(BuildConstant(Child, ispublic));
 
 end;
 
@@ -165,7 +165,7 @@ begin
    begin
     // Here we check of a new Type declarartion inside the var decl
     var lnewtypeEnum : prepareNewTypeEnum;
-    if CodeBuilderMethods.isVarWithnewType(Child, out lnewtypeEnum) then
+    if isVarWithNewType(Child, out lnewtypeEnum) then
     begin
       // Pick up the varname and add a '_type'
       var lname := Child.FindNode(TSyntaxNodeType.ntName).AttribName + '_type';
@@ -173,18 +173,18 @@ begin
 
       Var lnewType :=
       case lnewtypeEnum of
-         prepareNewTypeEnum.block : CodeBuilderMethods.BuildBlockType(Child, lname);
-         prepareNewTypeEnum.enum : CodeBuilderEnum.BuildEnum(Child.FindNode(TSyntaxNodeType.ntType), lname);
+         prepareNewTypeEnum.block : BuildBlockType(Child, lname);
+         prepareNewTypeEnum.enum : BuildEnum(Child.FindNode(TSyntaxNodeType.ntType), lname);
        end;
 
       lnewType.Comment := 'Type automatic created'.AsBuilderComment;
       fUnit.Types.Add(lnewType);
-      var lvar := CodeBuilderMethods.BuildVariable(Child, ispublic, lname);
+      var lvar := BuildVariable(Child, ispublic, lname);
       lvar.Variable.Comment := 'Type automatic added'.AsBuilderComment;
       fUnit.Globals.Add(lvar);
     end
     else
-    fUnit.Globals.Add(CodeBuilderMethods.BuildVariable(Child, ispublic));
+    fUnit.Globals.Add(BuildVariable(Child, ispublic));
    end;
 end;
 
@@ -199,7 +199,7 @@ begin
       TSyntaxNodeType.ntAttributes : begin
           for each lNodeAttr in child.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntAttribute) do
             begin
-            var lattr := CodeBuilderMethods.PrepareAttribute(lNodeAttr);
+            var lattr := PrepareAttribute(lNodeAttr);
             if assigned(lattr) then
               lAttributes.Add(lattr);
           end;
@@ -223,10 +223,10 @@ begin
                 var lTypeParams := child.FindNode(TSyntaxNodeType.ntTypeParams);
                 var lname : String := '';
                 if assigned(lTypeParams) then
-                  lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
+                  lname := PrepareGenericParameterName(lTypeParams);
 
                 var lList := getImplementationMethodNodesFor((child.AttribName+lname).ToLower);
-                var lClass := CodeBuilderMethods.BuildClass(lTypNode, child.AttribName, lList);
+                var lClass := BuildClass(lTypNode, child.AttribName, lList);
                 if lAttributes.Count > 0  then
                 begin
                   lClass.Attributes.add(lAttributes);
@@ -236,49 +236,49 @@ begin
               end;
 
               'class of' : begin
-                fUnit.Types.Add(CodeBuilderMethods.BuildClassOf(child, child.AttribName));
+                fUnit.Types.Add(BuildClassOf(child, child.AttribName));
               end;
 
               'function' : begin
-                fUnit.Types.Add(CodeBuilderMethods.BuildBlockType(child, child.AttribName));
+                fUnit.Types.Add(BuildBlockType(child, child.AttribName));
               end;
 
               'procedure' : begin
-                fUnit.Types.Add(CodeBuilderMethods.BuildBlockType(child, child.AttribName));
+                fUnit.Types.Add(BuildBlockType(child, child.AttribName));
               end;
 
               'interface' : begin
-                fUnit.Types.Add(CodeBuilderMethods.BuildInterface(lTypNode, child.AttribName));
+                fUnit.Types.Add(BuildInterface(lTypNode, child.AttribName));
               end;
               'record' :  begin
                 var lTypeParams := child.FindNode(TSyntaxNodeType.ntTypeParams);
                 var lname : String := '';
                 if assigned(lTypeParams) then
-                  lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
+                  lname := PrepareGenericParameterName(lTypeParams);
 
                 var lList := getImplementationMethodNodesFor((child.AttribName+lname).ToLower);
 
-                fUnit.Types.Add(CodeBuilderMethods.BuildRecord(lTypNode, child.AttribName, lList));
+                fUnit.Types.Add(BuildRecord(lTypNode, child.AttribName, lList));
               end;
               'object' :  begin
                 var lTypeParams := child.FindNode(TSyntaxNodeType.ntTypeParams);
                 var lname : String := '';
                 if assigned(lTypeParams) then
-                  lname := CodeBuilderMethods.PrepareGenericParameterName(lTypeParams);
+                  lname := PrepareGenericParameterName(lTypeParams);
 
                 var lList := getImplementationMethodNodesFor((child.AttribName+lname).ToLower);
-                var lrec := CodeBuilderMethods.BuildRecord(lTypNode, child.AttribName, lList);
+                var lrec := BuildRecord(lTypNode, child.AttribName, lList);
                 lrec.Comment := '***Object Type written as Record ***'.AsBuilderComment;
                 fUnit.Types.Add(lrec);
               end;
 
 
               'pointer' : BuildPointerClause(child);
-              'enum' : fUnit.Types.Add(CodeBuilderEnum.BuildEnum(lTypNode, child.AttribName));
-              'set' : fUnit.Types.Add(CodeBuilderMethods.BuildSet(lTypNode, child.AttribName));
-              'array': fUnit.Types.Add(CodeBuilderMethods.BuildArray(lTypNode, child.AttribName));
+              'enum' : fUnit.Types.Add(BuildEnum(lTypNode, child.AttribName));
+              'set' : fUnit.Types.Add(BuildSet(lTypNode, child.AttribName));
+              'array': fUnit.Types.Add(BuildArray(lTypNode, child.AttribName));
               else
-                fUnit.Types.Add(CodeBuilderMethods.BuildAlias(lTypNode, child.AttribName));
+                fUnit.Types.Add(BuildAlias(lTypNode, child.AttribName));
             // raise new Exception("Unknown type "+lTyp);
 
             end;
@@ -288,8 +288,8 @@ begin
           begin
             Var lTyp := lTypNode.AttribKind.ToLower;
             case lTyp  of
-              'procedure' : fUnit.Types.Add(CodeBuilderMethods.BuildAnonymousBlockType(child, child.AttribName));
-              'function' : fUnit.Types.Add(CodeBuilderMethods.BuildAnonymousBlockType(child, child.AttribName));
+              'procedure' : fUnit.Types.Add(BuildAnonymousBlockType(child, child.AttribName));
+              'function' : fUnit.Types.Add(BuildAnonymousBlockType(child, child.AttribName));
             end;
           end;
         end;
@@ -380,7 +380,7 @@ begin
   var lmethod := new CGMethodDefinition(methodname);
   lmethod.Visibility := CGMemberVisibilityKind.Public;
   lmethod.Statements.add(new CGRawStatement('{$HINT "Replaces Initialization/Finalization"}'));
-  CodeBuilderMethods.BuildStatements(node, lmethod);
+  BuildStatements(node, lmethod);
   lmethod.Comment := (methodname + ' added as method').AsBuilderComment;
   fUnit.Globals.Add(lmethod.AsGlobal);
 

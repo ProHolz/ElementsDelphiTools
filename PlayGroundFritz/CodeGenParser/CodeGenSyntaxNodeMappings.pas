@@ -3,7 +3,7 @@ uses
   ProHolz.Ast;
 
 type
-  CodeBuilderMethods = static partial class
+  CodeBuilder =  partial class
   private
     method mapSyntaxnodeToOperatorKind(const node : TSyntaxNodeType) : CGBinaryOperatorKind;
     begin

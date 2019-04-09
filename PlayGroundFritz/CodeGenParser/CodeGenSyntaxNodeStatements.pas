@@ -32,7 +32,7 @@ type
 
     end;
 
-  CodeBuilderMethods = static partial class
+  CodeBuilder =  partial class
   private
     method PrepareLabeledStatement(const node: TSyntaxNode): CGStatementList;
     method PrepareWithStatement(const node: TSyntaxNode): CGStatementList;
@@ -53,14 +53,14 @@ type
     method PrepareStatementBlockOrSingle(const node: TSyntaxNode): CGStatementList;
     method PrepareCaseStatement(const node: TSyntaxNode): CGStatementList;
     method PrepareStatement(const node : TSyntaxNode; const isConstructor : Boolean = false) : CGStatementList;
-  public
+  private
     method BuildStatements(const node : TSyntaxNode; const lMethod : CGMethodLikeMemberDefinition);
 
   end;
 
 implementation
 
-method CodeBuilderMethods.PrepareExpressionStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareExpressionStatement(const node: TSyntaxNode): CGStatementList;
 begin
   Var lexpr := PrepareSingleExpressionValue(node.ChildNodes[0]);
   if assigned(lexpr)  then
@@ -71,7 +71,7 @@ begin
     exit new  CGStatementList(BuildCommentFromNode('ntExpression not solved', node));
 end;
 
-method CodeBuilderMethods.PrepareCaseLabels(const node: TSyntaxNode): List<CGExpression>;
+method CodeBuilder.PrepareCaseLabels(const node: TSyntaxNode): List<CGExpression>;
 begin
   result := new List<CGExpression>;
   for each child in node.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntCaseLabel) do
@@ -100,7 +100,7 @@ begin
   end;
 end;
 
-method CodeBuilderMethods.PrepareStatementList(const node: TSyntaxNode): List<CGStatement>;
+method CodeBuilder.PrepareStatementList(const node: TSyntaxNode): List<CGStatement>;
 begin
   var temp := new List<CGStatement>;
   if assigned(node) then
@@ -113,7 +113,7 @@ begin
   exit temp;
 end;
 
-method CodeBuilderMethods.PrepareStatementBlockOrSingle(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareStatementBlockOrSingle(const node: TSyntaxNode): CGStatementList;
 begin
   if node.Typ.isStatement then
     exit new  CGStatementList(PrepareStatement(node).First);
@@ -124,7 +124,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareCaseStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareCaseStatement(const node: TSyntaxNode): CGStatementList;
 begin
   result := nil;
   var lCaseIdent :=  PrepareSingleExpressionValue(node.FindNode(TSyntaxNodeType.ntExpression):ChildNodes[0]);
@@ -150,7 +150,7 @@ begin
     exit new  CGStatementList(BuildCommentFromNode('ntCase not solved', node));
 end;
 
-method CodeBuilderMethods.PrepareAssignMentStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareAssignMentStatement(const node: TSyntaxNode): CGStatementList;
 begin
   var lhs := PrepareSingleExpressionValue(node.FindNode(TSyntaxNodeType.ntLHS).ChildNodes[0]);
   var rhs := PrepareSingleExpressionValue(node.FindNode(TSyntaxNodeType.ntRHS).ChildNodes[0]);
@@ -163,7 +163,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareCallStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareCallStatement(const node: TSyntaxNode): CGStatementList;
 begin
   if node.ChildCount = 1 then
     begin
@@ -195,7 +195,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareIfStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareIfStatement(const node: TSyntaxNode): CGStatementList;
 begin
   var lIfLeft := PrepareSingleExpressionValue(node.FindNode(TSyntaxNodeType.ntExpression):ChildNodes[0]);
   var lIfThen := PrepareStatement(node.FindNode(TSyntaxNodeType.ntThen):ChildNodes[0]);
@@ -208,7 +208,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareListStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareListStatement(const node: TSyntaxNode): CGStatementList;
 begin
   var temp := PrepareStatementList(node);
   if temp.Count = 1 then
@@ -217,7 +217,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareForStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareForStatement(const node: TSyntaxNode): CGStatementList;
 begin
   var Down : Boolean := false;
   var lFromvar : String;
@@ -273,7 +273,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareWhileStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareWhileStatement(const node: TSyntaxNode): CGStatementList;
 begin
   if node.ChildCount = 2 then
   begin
@@ -290,7 +290,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareRepeatStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareRepeatStatement(const node: TSyntaxNode): CGStatementList;
 begin
   if node.ChildCount = 2 then
   begin
@@ -306,7 +306,7 @@ begin
 end;
 
 
-method CodeBuilderMethods.PrepareInheritedStatement(const node: TSyntaxNode; const isConstructor : boolean = false): CGStatementList;
+method CodeBuilder.PrepareInheritedStatement(const node: TSyntaxNode; const isConstructor : boolean = false): CGStatementList;
 begin
   if node.ChildCount > 0 then
   begin
@@ -336,7 +336,7 @@ begin
   exit new  CGStatementList(new CGInheritedExpression());
 end;
 
-method CodeBuilderMethods.PrepareExceptionBlocksList(const node: TSyntaxNode): List<CGCatchBlockStatement>;
+method CodeBuilder.PrepareExceptionBlocksList(const node: TSyntaxNode): List<CGCatchBlockStatement>;
 begin
   result := new List<CGCatchBlockStatement>;
   for each child in node.FindChilds(TSyntaxNodeType.ntExceptionHandler) do
@@ -381,7 +381,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareTryStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareTryStatement(const node: TSyntaxNode): CGStatementList;
 begin
   var lFinally : List<CGStatement>;
   var lExceptStatements : List<CGStatement>;
@@ -440,7 +440,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareRaiseStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareRaiseStatement(const node: TSyntaxNode): CGStatementList;
 begin
   if node.HasChildren then
   begin
@@ -451,7 +451,7 @@ begin
   else exit new  CGStatementList(new CGThrowStatement());
 end;
 
-method CodeBuilderMethods.PrepareWithStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareWithStatement(const node: TSyntaxNode): CGStatementList;
 begin
   if node.ChildCount = 2 then
   begin
@@ -475,7 +475,7 @@ begin
 
 end;
 
-method CodeBuilderMethods.PrepareLabeledStatement(const node: TSyntaxNode): CGStatementList;
+method CodeBuilder.PrepareLabeledStatement(const node: TSyntaxNode): CGStatementList;
 begin
   if node.ChildCount = 2 then
   begin
@@ -490,7 +490,7 @@ begin
   else exit new  CGStatementList(BuildCommentFromNode('PrepareLabeledStatement Childcount wrong', node));
 end;
 
-method CodeBuilderMethods.PrepareStatement(const node: TSyntaxNode; const isConstructor : Boolean = false): CGStatementList;
+method CodeBuilder.PrepareStatement(const node: TSyntaxNode; const isConstructor : Boolean = false): CGStatementList;
 begin
   result := nil;
   if not assigned(node) then exit nil;
@@ -536,7 +536,7 @@ begin
         exit new  CGStatementList(new CGCodeCommentStatement(new CGRawStatement(node.Typ.ToString+  '======= Typ not in Statement Enum =======')));
   end;
 
-  method CodeBuilderMethods.BuildStatements(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
+  method CodeBuilder.BuildStatements(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
   begin
     for each child in node.ChildNodes do //.Where(Item->Item.Typ = TSyntaxNodeType.ntStatement) do
       begin

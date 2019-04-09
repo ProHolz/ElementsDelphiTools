@@ -5,7 +5,7 @@ uses ProHolz.Ast;
 
 type
 
- BuildSettings  nested in CodeBuilderMethods = static class
+ BuildSettings  nested in CodeBuilder = static class
   public
     property InterfaceGuids : Boolean  := true;
     property ComInterfaces : Boolean  := true;
@@ -17,7 +17,7 @@ type
 
  end;
 
-  CodeBuilderMethods = static partial class
+  CodeBuilder =  partial class
   private
 
   public
