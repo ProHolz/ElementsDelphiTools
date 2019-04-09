@@ -223,7 +223,8 @@ end;
           Check.Contains('Destroy', m.Name);
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
-          Check.AreEqual( m.Virtuality, CGMemberVirtualityKind.Virtual);
+          // Should not be virtual
+          Check.AreNotEqual( m.Virtuality, CGMemberVirtualityKind.Virtual);
           Check.AreEqual(m.Statements.Count, 1);
         end;
       end;
@@ -295,7 +296,8 @@ end;
           Check.EndsWith('Destroy', m.Name );
           Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
           Check.IsFalse( m.Static);
-          Check.AreEqual( m.Virtuality, CGMemberVirtualityKind.Virtual);
+           // Should not be virtual
+          Check.AreNotEqual( m.Virtuality, CGMemberVirtualityKind.Virtual);
         end;
         3 : begin
 

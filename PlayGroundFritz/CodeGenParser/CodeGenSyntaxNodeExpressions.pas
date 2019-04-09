@@ -6,6 +6,7 @@ uses ProHolz.Ast;
 type
   CodeBuilderMethods = static partial class
   private
+    method PrepareExternalName(const node: TSyntaxNode): CGExpression;
     method PrepareFieldExpression(const node: TSyntaxNode): CGPropertyInitializer;
 
     type
@@ -343,12 +344,31 @@ begin
   var lFields := new List<CGPropertyInitializer>;
   for each child in node.FindChilds(TSyntaxNodeType.ntField) do
    lFields.Add(PrepareFieldExpression(child));
-
    var ltemp := new  CGNewInstanceExpression(CGPredefinedTypeReference.Dynamic);
    ltemp.PropertyInitializers := lFields;
-
-
   exit  ltemp;
+ end;
+
+
+ method CodeBuilderMethods.PrepareExternalName(const node : TSyntaxNode) : CGExpression;
+ begin
+     if node.ChildCount = 1 then
+       exit PrepareSingleExpressionValue(node.ChildNodes[0])
+     else
+       begin
+         var s : String := '';
+         for each child in node.ChildNodes do
+          begin
+            case child.Typ of
+              TSyntaxNodeType.ntLiteral :  s :=  $"{s}'{TValuedSyntaxNode(child).Value.trim}'" ;
+              TSyntaxNodeType.ntIdentifier : s :=  $"{s}{child.AttribName}" ;
+              TSyntaxNodeType.ntAdd : s :=  $"{s} + " ;
+            end;
+          end;
+         if s.Trim.Length > 0 then
+          exit new CGRawExpression(s.Trim);
+        raise new Exception($"External Name can not be resolved in Line {node.Line}");
+       end;
  end;
 
 
@@ -397,12 +417,7 @@ begin
       TSyntaxNodeType.ntGeneric : exit PrepareGenricExpression(node);
     //  TSyntaxNodeType.ntField : exit PrepareFieldExpression(node);
       TSyntaxNodeType.ntElement : exit PrepareSingleExpressionValue(node.ChildNodes[0]);
-      TSyntaxNodeType.ntExternalName : begin
-          if node.ChildCount = 1 then
-            exit PrepareSingleExpressionValue(node.ChildNodes[0])
-          else
-            raise new Exception($"External Name can not be resolved in Line {node.Line}");
-        end;
+      TSyntaxNodeType.ntExternalName : exit PrepareExternalName(node);
 
 
       else raise new Exception(node.Typ.ToString+  '=======Unknown Paramtype in PrepareSingleExpressionValue =======');

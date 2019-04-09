@@ -33,7 +33,7 @@ type
       // Add now the wanted checks
 
       // I use here a Level Var
-      Var Level := 12;
+      Var Level := 1;
 
       // First the critical ones we should solve before move to Elements
       // These should always run
@@ -42,12 +42,13 @@ type
         project.AddCheck(eEleCheck.eTypesInMethods);  // Type declaration in Methods
         project.AddCheck(eEleCheck.eAsm);  // Asm Statements in Methods
         project.AddCheck(eEleCheck.eTypeinType);  // nested Type declaration
+         project.AddCheck(eEleCheck.eWith); // with clause in source
 
       // now  the critical ones we can  solve after move to Elements
 
       if Level > 1 then
       begin
-        project.AddCheck(eEleCheck.eWith); // with clause in source
+
         project.AddCheck(eEleCheck.ePublicEnums);        // Enum Types without ScopedEnums
         project.AddCheck(eEleCheck.eConstRecord);     // Const Records with initialisation;
       end;

@@ -834,9 +834,9 @@ end;
 
 method CodeBuilderMethods.BuildRecord(const node: TSyntaxNode; const name: not nullable String;const methodBodys : Dictionary<String,TSyntaxNode>) : CGClassOrStructTypeDefinition;
 begin
-
+{$IF LOG}
   writeLn(TSyntaxTreeWriter.ToXML(node, true ) );
-
+{$ENDIF}
   var Helper := node.FindNode(TSyntaxNodeType.ntHelper);
 
   if assigned(Helper) then

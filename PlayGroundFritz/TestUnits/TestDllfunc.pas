@@ -15,7 +15,7 @@ const
    {$ELSE}
    {$MESSAGE Error 'Unsupported platform'}
    {$ENDIF}
- function cairo_version(): Integer; cdecl; external LIB_CAIRO_32 name 'cairo_version';
+ function cairo_version(): Integer; cdecl; external LIB_CAIRO_32 name  PU+ 'cairo_version';
 
 function cairo_interfaceimplementation(): Integer; cdecl;
 
