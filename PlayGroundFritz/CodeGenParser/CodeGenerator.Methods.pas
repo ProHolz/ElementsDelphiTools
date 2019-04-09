@@ -10,11 +10,11 @@ type
   private
     method isImplementsMethod(const node: TSyntaxNode): CGMethodLikeMemberDefinition;
     method GetReturnType(const node: TSyntaxNode) : CGTypeReference;
-    method PrepareDefaultValue(const paramnode: TSyntaxNode; paramkind : String): CGExpression;
+    method PrepareDefaultValue(const node: TSyntaxNode; paramkind : String): CGExpression;
     method PrepareParam(const node: TSyntaxNode): CGParameterDefinition;
     method PrepareClassCreateMethod(const node: TSyntaxNode; const name : not nullable String): CGMethodLikeMemberDefinition;
 
-    method PrepareMethod(const methodnode : TSyntaxNode; implnode: TSyntaxNode) : CGMethodLikeMemberDefinition;
+    method PrepareMethod(const node : TSyntaxNode; implnode: TSyntaxNode) : CGMethodLikeMemberDefinition;
     method BuildLocalMethod(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
     method PrepareLocalVarOrConstant(const node: TSyntaxNode; const isConst: Boolean): CGVariableDeclarationStatement;
     method BuildVariablesMethod(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
@@ -179,11 +179,11 @@ begin
   result := nil;
 end;
 
-method CodeBuilder.PrepareMethod(const methodnode : TSyntaxNode; implnode: TSyntaxNode): CGMethodLikeMemberDefinition;
+method CodeBuilder.PrepareMethod(const node : TSyntaxNode; implnode: TSyntaxNode): CGMethodLikeMemberDefinition;
 begin
-  Var MethodType := methodnode.AttribKind;
+  Var MethodType := node.AttribKind;
   var lMethod : CGMethodLikeMemberDefinition;
-  var lMethodNameNode := methodnode.FindNode(TSyntaxNodeType.ntName);
+  var lMethodNameNode := node.FindNode(TSyntaxNodeType.ntName);
   var lMethodName := lMethodNameNode:AttribName;
   var lGenerics : List<CGGenericParameterDefinition> := nil;
   var lImplementationName : String;
@@ -192,7 +192,7 @@ begin
 
   if not assigned(lMethodNameNode) then
   begin
-    var lResClause := methodnode.FindNode(TSyntaxNodeType.ntResolutionClause);
+    var lResClause := node.FindNode(TSyntaxNodeType.ntResolutionClause);
     if assigned(lResClause) then
     begin
       var lNames := lResClause.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntName).toArray;
@@ -243,26 +243,26 @@ begin
   end;
 
 
-  lMethod.Visibility := mapVisibility(methodnode.ParentNode.Typ);
-  if methodnode.getAttribute(TAttributeName.anAbstract).ToLower = 'true' then
+  lMethod.Visibility := mapVisibility(node.ParentNode.Typ);
+  if node.getAttribute(TAttributeName.anAbstract).ToLower = 'true' then
     lMethod.Virtuality := CGMemberVirtualityKind.Abstract
   else
     if not (lMethod is CGConstructorDefinition) then
-      lMethod.Virtuality := mapBinding(methodnode.GetAttribute(TAttributeName.anMethodBinding));
+      lMethod.Virtuality := mapBinding(node.GetAttribute(TAttributeName.anMethodBinding));
      // Class Method?
-  if methodnode.GetAttribute(TAttributeName.anClass).ToLower = 'true' then
+  if node.GetAttribute(TAttributeName.anClass).ToLower = 'true' then
     lMethod.Static := true;
 
 // Reintroduce?
   if not (lMethod is CGConstructorDefinition) then
-    if methodnode.getAttribute(TAttributeName.anReintroduce).ToLower = 'true' then
+    if node.getAttribute(TAttributeName.anReintroduce).ToLower = 'true' then
       lMethod.Reintroduced := true;
 
 
 
 
 // Is there an implementation?
-  var lImplnode := if  assigned(implnode) then implnode else methodnode;
+  var lImplnode := if  assigned(implnode) then implnode else node;
 
   for each ltypesec in lImplnode.ChildNodes do
     begin
@@ -292,7 +292,7 @@ begin
       end;
   end;
 
-  lMethod.CallingConvention := mapCallingConvention(methodnode.GetAttribute(TAttributeName.anCallingConvention));
+  lMethod.CallingConvention := mapCallingConvention(node.GetAttribute(TAttributeName.anCallingConvention));
 
   if lMethod.External then
   begin
@@ -402,11 +402,10 @@ end;
 
 
 
-method CodeBuilder.PrepareDefaultValue(const paramnode: TSyntaxNode; paramkind : string): CGExpression;
+method CodeBuilder.PrepareDefaultValue(const node: TSyntaxNode; paramkind : string): CGExpression;
 begin
   result := nil;
-
-  var literal := paramnode.FindNode(TSyntaxNodeType.ntExpression);
+  var literal := node.FindNode(TSyntaxNodeType.ntExpression);
   if  assigned(literal)  then
     exit PrepareSingleExpressionValue(literal);
 

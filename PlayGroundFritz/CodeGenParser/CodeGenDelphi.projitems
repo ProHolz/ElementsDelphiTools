@@ -9,11 +9,6 @@
     <Import_RootNamespace>CodeGenDelphi</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNode.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeExpressions.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeInterface.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeMappings.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeStatements.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Attributes.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Blocks.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.pas" />
@@ -23,5 +18,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Variables.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Types.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Methods.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Mappings.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Statements.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Expressions.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Builder.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.BuildTypes.pas" />
   </ItemGroup>
 </Project>

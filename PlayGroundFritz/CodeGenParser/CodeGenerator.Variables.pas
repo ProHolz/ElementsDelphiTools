@@ -8,6 +8,7 @@ type
   private
     method isVarWithNewType(const node : TSyntaxNode; out preparetyp : eNewType) : Boolean;
     method resolveBounds(const node: TSyntaxNode): List<CGEntity>;
+    method PrepareInitializer(aType: CGTypeReference; node: TSyntaxNode): CGExpression;
     method PrepareConstArrayExpression(const aType : CGTypeReference; const node: TSyntaxNode): CGExpression;
     method PrepareArrayVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGFieldDefinition;
     method PrepareSetVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean): CGFieldDefinition;
@@ -226,6 +227,28 @@ begin
 
 end;
 
+method CodeBuilder.PrepareInitializer(aType : CGTypeReference; node : TSyntaxNode) : CGExpression;
+begin
+  var lres := new CGNewInstanceExpression(aType);
+  var lFields := new List<CGPropertyInitializer>;
+
+  if node.Typ = TSyntaxNodeType.ntRecordConstant then
+  begin
+    for each child in node.FindChilds(TSyntaxNodeType.ntField) do
+      lFields.Add(PrepareFieldExpression(child));
+  end
+  else
+  begin
+    for each rec in node.FindChilds(TSyntaxNodeType.ntRecordConstant) do
+      for each child in rec.FindChilds(TSyntaxNodeType.ntField) do
+        lFields.Add(PrepareFieldExpression(child));
+  end;
+  if lFields.Count > 0 then
+    lres.PropertyInitializers := lFields;
+
+  result := lres;
+
+end;
 
 
 
