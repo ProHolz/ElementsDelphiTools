@@ -8,22 +8,22 @@ uses
 type
   LexerTest =  class(Test)
   private
-   fLexer : TmwBasePasLex;
 
+   fLexer : TmwBasePasLex;
+    method TestElements;
   public
-    procedure Setup; override;
+    method Setup; override;
     procedure Teardown; override;
 
-    Procedure Test;
+    method Test;
 
   end;
 
 implementation
 
 
-Procedure LexerTest.Test;
+method LexerTest.Test;
 begin
-
    fLexer.Origin := 'Unit Test; interface implementation end.';
    Assert.AreEqual('Unit', fLexer.Token);
    fLexer.NextNoSpace;
@@ -45,12 +45,37 @@ begin
 
 end;
 
-procedure LexerTest.Setup;
+method LexerTest.TestElements;
+begin
+
+   fLexer.Origin := 'NameSpace Test; interface implementation end.';
+  Assert.AreEqual(fLexer.Token, 'NameSpace');
+   fLexer.NextNoSpace;
+   Assert.AreEqual(4, fLexer.TokenLen);
+  Assert.AreEqual('Test', fLexer.Token);
+   fLexer.NextNoSpace;
+   Assert.AreEqual(';', fLexer.Token);
+   fLexer.NextNoSpace;
+   Assert.AreEqual('Interface'.ToUpper, fLexer.Token.ToUpper);
+   fLexer.NextNoSpace;
+   Assert.AreEqual('Implementation'.ToUpper, fLexer.Token.ToUpper);
+   fLexer.NextNoSpace;
+
+   Assert.AreEqual('END', fLexer.Token.ToUpper);
+   fLexer.NextNoSpace;
+   Assert.AreEqual('.', fLexer.Token);
+   fLexer.NextNoSpace;
+   Assert.AreEqual(TptTokenKind.ptNull ,  fLexer.TokenID);
+
+end;
+
+
+method LexerTest.Setup;
 begin
    fLexer := new TmwBasePasLex(DelphiCompiler.dcDefault);
 end;
 
-procedure LexerTest.Teardown;
+method LexerTest.Teardown;
 begin
 
 end;

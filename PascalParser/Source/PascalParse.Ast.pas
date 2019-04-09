@@ -303,6 +303,7 @@ type
     method TypeSimple; override;
     method UnaryMinus; override;
     method UnitFile; override;
+    method ElementsFile; override;
     method UnitName; override;
     method UnitId; override;
     method UsesClause; override;
@@ -2721,297 +2722,98 @@ type
       method TPasSyntaxTreeBuilder.StringConstSimple;
       begin
   //TODO support ptAsciiChar
-              FStack.AddValuedChild(TSyntaxNodeType.ntLiteral, StrHelper.AnsiDequotedStr(Lexer.Token, ''''));
+        FStack.AddValuedChild(TSyntaxNodeType.ntLiteral, StrHelper.AnsiDequotedStr(Lexer.Token, ''''));
   //FStack.AddValuedChild(TSyntaxNodeType.ntLiteral, Lexer.Token);
-              inherited;
-            end;
-
-            method TPasSyntaxTreeBuilder.StringStatement;
-            begin
-              FStack.AddChild(TSyntaxNodeType.ntType).SetAttribute(TAttributeName.anName, Lexer.Token);
-              inherited;
-            end;
-
-            method TPasSyntaxTreeBuilder.StructuredType;
-            begin
-              FStack.Push(TSyntaxNodeType.ntType).SetAttribute(TAttributeName.anType, Lexer.Token);
-              try
-                inherited;
-              finally
-                FStack.Pop;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.SubrangeType;
-            begin
-              FStack.Push(TSyntaxNodeType.ntType).SetAttribute(TAttributeName.anName, AttributeValues[TAttributeValue.atSubRange]);
-              try
-                inherited;
-              finally
-                FStack.Pop;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.TagField;
-            var
-            TagNode: TSyntaxNode;
-            TypeNode: TSyntaxNode;
-            begin
-              TagNode:= FStack.Push(TSyntaxNodeType.ntCaseSelector);
-              TagNode.Attributes[TAttributeName.anKind]:= Lexer.Token;
-              try
-                inherited;
-                TypeNode:= FStack.Peek.FindNode(TSyntaxNodeType.ntIdentifier);
-                if (assigned(TypeNode)) then begin
-                  TagNode.Attributes[TAttributeName.anName]:= TagNode.Attributes[TAttributeName.anKind];
-                  TagNode.Attributes[TAttributeName.anKind]:= TypeNode.Attributes[TAttributeName.anKind];
-                  TagNode.DeleteChild(TypeNode);
-                end;
-              finally
-                FStack.Pop;
-              end;
-            end;
-            method TPasSyntaxTreeBuilder.TagFieldTypeName;
-            begin
-              FStack.Push(TSyntaxNodeType.ntIdentifier).Attributes[TAttributeName.anKind]:= Lexer.Token;
-              try
-                inherited;
-              finally
-                FStack.Pop;
-              end;
-            end;
-            method TPasSyntaxTreeBuilder.ThenStatement;
-            begin
-              FStack.Push(TSyntaxNodeType.ntThen);
-              try
-                inherited;
-              finally
-                FStack.Pop;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.TryStatement;
-            begin
-              FStack.Push(TSyntaxNodeType.ntTry);
-              try
-                inherited;
-              finally
-                FStack.Pop;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.TypeArgs;
-            begin
-              FStack.Push(TSyntaxNodeType.ntTypeArgs);
-              try
-                inherited;
-              finally
-                FStack.Pop;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.TypeDeclaration;
-            begin
-              FStack.PushCompoundSyntaxNode(TSyntaxNodeType.ntTypeDecl).SetAttribute(TAttributeName.anName, Lexer.Token);
-              try
-                inherited;
-                SetCurrentCompoundNodesEndPosition;
-              finally
-                FStack.Pop;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.TypeId;
-            var
-            TypeNode, InnerTypeNode, SubNode: TSyntaxNode;
-            TypeName, InnerTypeName: String;
-            i: Integer;
-            begin
-              TypeNode := FStack.Push(TSyntaxNodeType.ntType);
-              try
-                inherited;
-
-                InnerTypeName := '';
-                InnerTypeNode := TypeNode.FindNode(TSyntaxNodeType.ntType);
-                if assigned(InnerTypeNode) then
-                begin
-                  InnerTypeName := InnerTypeNode.AttribName;
-                  for SubNode in InnerTypeNode.ChildNodes do
-                    TypeNode.AddChild(SubNode.Clone);
-
-                  TypeNode.DeleteChild(InnerTypeNode);
-                end;
-
-                TypeName := '';
-                for i := length(TypeNode.ChildNodes) - 1 downto 0 do
-                  begin
-                  SubNode := TypeNode.ChildNodes[i];
-                  if SubNode.Typ = TSyntaxNodeType.ntType then
-                  begin
-                    if TypeName <> '' then
-                      TypeName := '.' + TypeName;
-
-                    TypeName := SubNode.AttribName + TypeName;
-                    TypeNode.DeleteChild(SubNode);
-                  end;
-                end;
-
-                if TypeName <> '' then
-                  TypeName := '.' + TypeName;
-                TypeName := InnerTypeName + TypeName;
-
-                DoHandleString(var TypeName);
-                TypeNode.SetAttribute(TAttributeName.anName, TypeName);
-              finally
-                FStack.Pop;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.TypeParamDecl;
-            var
-            OriginTypeParamNode, NewTypeParamNode, Constraints: TSyntaxNode;
-            TypeNodeCount: Integer;
-            TypeNodesToDelete: List<TSyntaxNode>;
-            begin
-              OriginTypeParamNode := FStack.Push(TSyntaxNodeType.ntTypeParam);
-              try
-                inherited;
-              finally
-                FStack.Pop;
-              end;
-
-              Constraints := OriginTypeParamNode.FindNode(TSyntaxNodeType.ntConstraints);
-              TypeNodeCount := 0;
-              TypeNodesToDelete := new List<TSyntaxNode>;
-              try
-                for TypeNode in OriginTypeParamNode.ChildNodes do
-                  begin
-                  if TypeNode.Typ = TSyntaxNodeType.ntType then
-                  begin
-                    inc(TypeNodeCount);
-                    if TypeNodeCount > 1 then
-                    begin
-                      NewTypeParamNode := FStack.Push(TSyntaxNodeType.ntTypeParam);
-                      try
-                        NewTypeParamNode.AddChild(TypeNode.Clone);
-                        if assigned(Constraints) then
-                          NewTypeParamNode.AddChild(Constraints.Clone);
-                        TypeNodesToDelete.Add(TypeNode);
-                      finally
-                        FStack.Pop;
-                      end;
-                    end;
-                  end;
-                end;
-
-                for TypeNode in TypeNodesToDelete do
-                  OriginTypeParamNode.DeleteChild(TypeNode);
-              finally
-                TypeNodesToDelete := nil;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.TypeParams;
-            begin
-              FStack.Push(TSyntaxNodeType.ntTypeParams);
-              try
-                inherited;
-              finally
-                FStack.Pop;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.TypeSection;
-            begin
-              FStack.Push(TSyntaxNodeType.ntTypeSection);
-              try
-                inherited;
-              finally
-                FStack.Pop;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.TypeSimple;
-            begin
-              FStack.Push(TSyntaxNodeType.ntType).SetAttribute(TAttributeName.anName, Lexer.Token);
-              try
-                inherited;
-              finally
-                FStack.Pop;
-              end;
-            end;
-
-            method TPasSyntaxTreeBuilder.UnaryMinus;
-            begin
-              FStack.AddChild(TSyntaxNodeType.ntUnaryMinus);
-              inherited;
-            end;
-
-            method TPasSyntaxTreeBuilder.UnitFile;
-            begin
-         //Assert(FStack.Peek.ParentNode = nil);
-        FStack.Push(TSyntaxNode.Create(TSyntaxNodeType.ntUnit));
-        AssignLexerPositionToNode(Lexer, FStack.Peek);
-        inherited;
-         //Stack.pop is done in `Run`
-      end;
-
-      method TPasSyntaxTreeBuilder.UnitId;
-      begin
-        FStack.AddChild(TSyntaxNodeType.ntUnknown).SetAttribute(TAttributeName.anName, Lexer.Token);
         inherited;
       end;
 
-      method TPasSyntaxTreeBuilder.UnitName;
-      var
-      NamesNode: TSyntaxNode;
+      method TPasSyntaxTreeBuilder.StringStatement;
       begin
-        NamesNode := new TSyntaxNode(TSyntaxNodeType.ntUnknown);
-        try
-          FStack.Push(NamesNode);
-          try
-            inherited;
-          finally
-            FStack.Pop;
-          end;
+        FStack.AddChild(TSyntaxNodeType.ntType).SetAttribute(TAttributeName.anName, Lexer.Token);
+        inherited;
+      end;
 
-          FStack.Peek.SetAttribute(TAttributeName.anName, NodeListToString(NamesNode));
+      method TPasSyntaxTreeBuilder.StructuredType;
+      begin
+        FStack.Push(TSyntaxNodeType.ntType).SetAttribute(TAttributeName.anType, Lexer.Token);
+        try
+          inherited;
         finally
-          NamesNode := nil;
+          FStack.Pop;
         end;
       end;
 
-      method TPasSyntaxTreeBuilder.UsedUnitName;
-      var
-      NamesNode, UnitNode: TSyntaxNode;
-      Position: TTokenPoint;
-      FileName: String;
+      method TPasSyntaxTreeBuilder.SubrangeType;
       begin
-        Position := Lexer.PosXY;
-        FileName := Lexer.FileName;
-
-        NamesNode := new TSyntaxNode(TSyntaxNodeType.ntUnit);
+        FStack.Push(TSyntaxNodeType.ntType).SetAttribute(TAttributeName.anName, AttributeValues[TAttributeValue.atSubRange]);
         try
-          FStack.Push(NamesNode);
-          try
-            inherited;
-          finally
-            FStack.Pop;
-          end;
-
-          UnitNode := FStack.AddChild(TSyntaxNodeType.ntUnit);
-          UnitNode.SetAttribute(TAttributeName.anName, NodeListToString(NamesNode));
-          UnitNode.Col  := Position.X;
-          UnitNode.Line := Position.Y;
-          UnitNode.FileName := FileName;
+          inherited;
         finally
-          NamesNode := nil;
+          FStack.Pop;
         end;
       end;
 
-      method TPasSyntaxTreeBuilder.UsesClause;
+      method TPasSyntaxTreeBuilder.TagField;
+      var
+      TagNode: TSyntaxNode;
+      TypeNode: TSyntaxNode;
       begin
-        FStack.PushCompoundSyntaxNode(TSyntaxNodeType.ntUses);
+        TagNode:= FStack.Push(TSyntaxNodeType.ntCaseSelector);
+        TagNode.Attributes[TAttributeName.anKind]:= Lexer.Token;
+        try
+          inherited;
+          TypeNode:= FStack.Peek.FindNode(TSyntaxNodeType.ntIdentifier);
+          if (assigned(TypeNode)) then begin
+            TagNode.Attributes[TAttributeName.anName]:= TagNode.Attributes[TAttributeName.anKind];
+            TagNode.Attributes[TAttributeName.anKind]:= TypeNode.Attributes[TAttributeName.anKind];
+            TagNode.DeleteChild(TypeNode);
+          end;
+        finally
+          FStack.Pop;
+        end;
+      end;
+      method TPasSyntaxTreeBuilder.TagFieldTypeName;
+      begin
+        FStack.Push(TSyntaxNodeType.ntIdentifier).Attributes[TAttributeName.anKind]:= Lexer.Token;
+        try
+          inherited;
+        finally
+          FStack.Pop;
+        end;
+      end;
+      method TPasSyntaxTreeBuilder.ThenStatement;
+      begin
+        FStack.Push(TSyntaxNodeType.ntThen);
+        try
+          inherited;
+        finally
+          FStack.Pop;
+        end;
+      end;
+
+      method TPasSyntaxTreeBuilder.TryStatement;
+      begin
+        FStack.Push(TSyntaxNodeType.ntTry);
+        try
+          inherited;
+        finally
+          FStack.Pop;
+        end;
+      end;
+
+      method TPasSyntaxTreeBuilder.TypeArgs;
+      begin
+        FStack.Push(TSyntaxNodeType.ntTypeArgs);
+        try
+          inherited;
+        finally
+          FStack.Pop;
+        end;
+      end;
+
+      method TPasSyntaxTreeBuilder.TypeDeclaration;
+      begin
+        FStack.PushCompoundSyntaxNode(TSyntaxNodeType.ntTypeDecl).SetAttribute(TAttributeName.anName, Lexer.Token);
         try
           inherited;
           SetCurrentCompoundNodesEndPosition;
@@ -3020,289 +2822,495 @@ type
         end;
       end;
 
-      method TPasSyntaxTreeBuilder.VarAbsolute;
+      method TPasSyntaxTreeBuilder.TypeId;
       var
-      AbsoluteNode: TSyntaxNode;
-      ValueNode: TSyntaxNode;
+      TypeNode, InnerTypeNode, SubNode: TSyntaxNode;
+      TypeName, InnerTypeName: String;
+      i: Integer;
       begin
-        AbsoluteNode:= new TSyntaxNode(TSyntaxNodeType.ntUnknown);
-        FStack.Push(AbsoluteNode);
+        TypeNode := FStack.Push(TSyntaxNodeType.ntType);
         try
           inherited;
-        finally
-          FStack.Pop;
-          ValueNode:=   AbsoluteNode.ExtractChild(AbsoluteNode.ChildNodes[0] );
-          ValueNode.Attributes[TAttributeName.anKind]:= AttributeValues[TAttributeValue.atAbsolute];
-          AbsoluteNode := nil;
-          FStack.Peek.AddChild(ValueNode);
-        end;
-      end;
 
-      method TPasSyntaxTreeBuilder.VarDeclaration;
-      begin
-        FStack.Push(TSyntaxNodeType.ntVariables);
-        try
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
+          InnerTypeName := '';
+          InnerTypeNode := TypeNode.FindNode(TSyntaxNodeType.ntType);
+          if assigned(InnerTypeNode) then
+          begin
+            InnerTypeName := InnerTypeNode.AttribName;
+            for SubNode in InnerTypeNode.ChildNodes do
+              TypeNode.AddChild(SubNode.Clone);
 
-      method TPasSyntaxTreeBuilder.RecordVariantSection;
-      begin
-        FStack.Push(TSyntaxNodeType.ntVariantSection);
-        try
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.RecordVariantTag;
-      var
-      Temp: TSyntaxNode;
-      begin
-        Temp:= FStack.Push(TSyntaxNodeType.ntVariantTag);
-
-        try
-          inherited;
-          if Temp.ChildCount = 2 then begin
-            Temp.Attributes[TAttributeName.anName]:= Temp.ChildNodes[0].Attributes[TAttributeName.anName];
-            Temp.Attributes[TAttributeName.anType]:= Temp.ChildNodes[1].Attributes[TAttributeName.anName];
-            Temp.DeleteChild(Temp.ChildNodes[1]);
-          end else begin
-            Temp.Attributes[TAttributeName.anType]:= Temp.ChildNodes[0].Attributes[TAttributeName.anName];
+            TypeNode.DeleteChild(InnerTypeNode);
           end;
-          Temp.DeleteChild(Temp.ChildNodes[0]);
+
+          TypeName := '';
+          for i := length(TypeNode.ChildNodes) - 1 downto 0 do
+            begin
+            SubNode := TypeNode.ChildNodes[i];
+            if SubNode.Typ = TSyntaxNodeType.ntType then
+            begin
+              if TypeName <> '' then
+                TypeName := '.' + TypeName;
+
+              TypeName := SubNode.AttribName + TypeName;
+              TypeNode.DeleteChild(SubNode);
+            end;
+          end;
+
+          if TypeName <> '' then
+            TypeName := '.' + TypeName;
+          TypeName := InnerTypeName + TypeName;
+
+          DoHandleString(var TypeName);
+          TypeNode.SetAttribute(TAttributeName.anName, TypeName);
         finally
           FStack.Pop;
         end;
       end;
 
-      method TPasSyntaxTreeBuilder.VarName;
+      method TPasSyntaxTreeBuilder.TypeParamDecl;
+      var
+      OriginTypeParamNode, NewTypeParamNode, Constraints: TSyntaxNode;
+      TypeNodeCount: Integer;
+      TypeNodesToDelete: List<TSyntaxNode>;
       begin
-        FStack.AddChild(TSyntaxNodeType.ntName).Attributes[TAttributeName.anName]:= Lexer.Token; //#222
+        OriginTypeParamNode := FStack.Push(TSyntaxNodeType.ntTypeParam);
+        try
+          inherited;
+        finally
+          FStack.Pop;
+        end;
+
+        Constraints := OriginTypeParamNode.FindNode(TSyntaxNodeType.ntConstraints);
+        TypeNodeCount := 0;
+        TypeNodesToDelete := new List<TSyntaxNode>;
+        try
+          for TypeNode in OriginTypeParamNode.ChildNodes do
+            begin
+            if TypeNode.Typ = TSyntaxNodeType.ntType then
+            begin
+              inc(TypeNodeCount);
+              if TypeNodeCount > 1 then
+              begin
+                NewTypeParamNode := FStack.Push(TSyntaxNodeType.ntTypeParam);
+                try
+                  NewTypeParamNode.AddChild(TypeNode.Clone);
+                  if assigned(Constraints) then
+                    NewTypeParamNode.AddChild(Constraints.Clone);
+                  TypeNodesToDelete.Add(TypeNode);
+                finally
+                  FStack.Pop;
+                end;
+              end;
+            end;
+          end;
+
+          for TypeNode in TypeNodesToDelete do
+            OriginTypeParamNode.DeleteChild(TypeNode);
+        finally
+          TypeNodesToDelete := nil;
+        end;
+      end;
+
+      method TPasSyntaxTreeBuilder.TypeParams;
+      begin
+        FStack.Push(TSyntaxNodeType.ntTypeParams);
+        try
+          inherited;
+        finally
+          FStack.Pop;
+        end;
+      end;
+
+      method TPasSyntaxTreeBuilder.TypeSection;
+      begin
+        FStack.Push(TSyntaxNodeType.ntTypeSection);
+        try
+          inherited;
+        finally
+          FStack.Pop;
+        end;
+      end;
+
+      method TPasSyntaxTreeBuilder.TypeSimple;
+      begin
+        FStack.Push(TSyntaxNodeType.ntType).SetAttribute(TAttributeName.anName, Lexer.Token);
+        try
+          inherited;
+        finally
+          FStack.Pop;
+        end;
+      end;
+
+      method TPasSyntaxTreeBuilder.UnaryMinus;
+      begin
+        FStack.AddChild(TSyntaxNodeType.ntUnaryMinus);
         inherited;
       end;
 
-      method TPasSyntaxTreeBuilder.VarParameter;
+      method TPasSyntaxTreeBuilder.UnitFile;
       begin
-        FStack.Push(TSyntaxNodeType.ntParameters).Attributes[TAttributeName.anKind]:= AttributeValues[TAttributeValue.atVar];
-        try
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
+         //Assert(FStack.Peek.ParentNode = nil);
+              FStack.Push(TSyntaxNode.Create(TSyntaxNodeType.ntUnit));
+              AssignLexerPositionToNode(Lexer, FStack.Peek);
+              inherited;
+         //Stack.pop is done in `Run`
+            end;
 
-      method TPasSyntaxTreeBuilder.VarSection;
-      var
-      VarSect, Temp: TSyntaxNode;
-      TypeInfo, ValueInfo: TSyntaxNode;
-      begin
-        VarSect := new TSyntaxNode(TSyntaxNodeType.ntUnknown);
-        try
-          FStack.Push(TSyntaxNodeType.ntVariables);
-          FStack.Push(VarSect);
-          try
-            inherited VarSection;
-          finally
-            FStack.Pop;
-          end;
-          for each VarList in VarSect.ChildNodes do
+            method TPasSyntaxTreeBuilder.UnitId;
             begin
-            TypeInfo := VarList.FindNode(TSyntaxNodeType.ntType);
-            ValueInfo := VarList.FindNode(TSyntaxNodeType.ntValue);
-            for each Variable in VarList.ChildNodes do
-              begin
-              if Variable.Typ <> TSyntaxNodeType.ntName then
-                Continue;
+              FStack.AddChild(TSyntaxNodeType.ntUnknown).SetAttribute(TAttributeName.anName, Lexer.Token);
+              inherited;
+            end;
 
-              Temp := FStack.Push(TSyntaxNodeType.ntVariable);
+            method TPasSyntaxTreeBuilder.UnitName;
+            var
+            NamesNode: TSyntaxNode;
+            begin
+              NamesNode := new TSyntaxNode(TSyntaxNodeType.ntUnknown);
               try
-                Temp.AssignPositionFrom(Variable);
+                FStack.Push(NamesNode);
+                try
+                  inherited;
+                finally
+                  FStack.Pop;
+                end;
 
-                FStack.AddChild(Variable.Clone);
-                if assigned(TypeInfo) then
-                  FStack.AddChild(TypeInfo.Clone);
+                FStack.Peek.SetAttribute(TAttributeName.anName, NodeListToString(NamesNode));
+              finally
+                NamesNode := nil;
+              end;
+            end;
 
-                if assigned(ValueInfo) then
-                  FStack.AddChild(ValueInfo.Clone);
+            method TPasSyntaxTreeBuilder.UsedUnitName;
+            var
+            NamesNode, UnitNode: TSyntaxNode;
+            Position: TTokenPoint;
+            FileName: String;
+            begin
+              Position := Lexer.PosXY;
+              FileName := Lexer.FileName;
+
+              NamesNode := new TSyntaxNode(TSyntaxNodeType.ntUnit);
+              try
+                FStack.Push(NamesNode);
+                try
+                  inherited;
+                finally
+                  FStack.Pop;
+                end;
+
+                UnitNode := FStack.AddChild(TSyntaxNodeType.ntUnit);
+                UnitNode.SetAttribute(TAttributeName.anName, NodeListToString(NamesNode));
+                UnitNode.Col  := Position.X;
+                UnitNode.Line := Position.Y;
+                UnitNode.FileName := FileName;
+              finally
+                NamesNode := nil;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.UsesClause;
+            begin
+              FStack.PushCompoundSyntaxNode(TSyntaxNodeType.ntUses);
+              try
+                inherited;
+                SetCurrentCompoundNodesEndPosition;
               finally
                 FStack.Pop;
               end;
             end;
-          end;
-          FStack.Pop;
-        finally
-          VarSect := nil;
-        end;
-      end;
 
-      method TPasSyntaxTreeBuilder.VisibilityStrictPrivate;
-      var
-      Temp: TSyntaxNode;
-      begin
-        Temp := FStack.Push(TSyntaxNodeType.ntStrictPrivate);
-        try
-          Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.VisibilityPrivate;
-      var
-      Temp: TSyntaxNode;
-      begin
-        Temp := FStack.Push(TSyntaxNodeType.ntPrivate);
-        try
-          Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.VisibilityStrictProtected;
-      var
-      Temp: TSyntaxNode;
-      begin
-        Temp := FStack.Push(TSyntaxNodeType.ntStrictProtected);
-        try
-          Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.VisibilityProtected;
-      var
-      Temp: TSyntaxNode;
-      begin
-        Temp := FStack.Push(TSyntaxNodeType.ntProtected);
-        try
-          Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.VisibilityPublic;
-      var
-      Temp: TSyntaxNode;
-      begin
-        Temp := FStack.Push(TSyntaxNodeType.ntPublic);
-        try
-          Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.VisibilityPublished;
-      var
-      Temp: TSyntaxNode;
-      begin
-        Temp := FStack.Push(TSyntaxNodeType.ntPublished);
-        try
-          Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.VisibilityAutomated;
-      var
-      Temp: TSyntaxNode;
-      begin
-        Temp := FStack.Push(TSyntaxNodeType.ntAutomated);
-        try
-          Temp.Attributes[TAttributeName.anVisibility]:= AttributeValues[TAttributeValue.atTrue];
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.WhileStatement;
-      begin
-        FStack.Push(TSyntaxNodeType.ntWhile);
-        try
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.WithExpressionList;
-      begin
-        FStack.Push(TSyntaxNodeType.ntExpressions);
-        try
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.WithStatement;
-      begin
-        FStack.Push(TSyntaxNodeType.ntWith);
-        try
-          inherited;
-        finally
-          FStack.Pop;
-        end;
-      end;
-
-      method TPasSyntaxTreeBuilder.RunWithString(const Context: not nullable String; const aCompiler : DelphiCompiler = DelphiCompiler.dcDefault): TSyntaxNode;
-      begin
-
-        try
-          FStack.Clear;
-          try
-            self.OnMessage := @ParserMessage;
-            inherited RunWithString(Context);
-          finally
-            if FStack.Count > 0 then
-              Result := FStack.Pop;
-          end;
-        except
-          on E: EParserException do
-            raise new ESyntaxTreeException(E.Line, E.Col, Lexer.FileName, E.Message, Result);
-            on E: ESyntaxError do
-
-              raise new ESyntaxTreeException(E.PosXY.X, E.PosXY.Y, Lexer.FileName, E.Message, Result);
-
-              on E : Exception do
-              begin
-                Result := nil;
-                raise;
+            method TPasSyntaxTreeBuilder.VarAbsolute;
+            var
+            AbsoluteNode: TSyntaxNode;
+            ValueNode: TSyntaxNode;
+            begin
+              AbsoluteNode:= new TSyntaxNode(TSyntaxNodeType.ntUnknown);
+              FStack.Push(AbsoluteNode);
+              try
+                inherited;
+              finally
+                FStack.Pop;
+                ValueNode:=   AbsoluteNode.ExtractChild(AbsoluteNode.ChildNodes[0] );
+                ValueNode.Attributes[TAttributeName.anKind]:= AttributeValues[TAttributeValue.atAbsolute];
+                AbsoluteNode := nil;
+                FStack.Peek.AddChild(ValueNode);
               end;
-        end;
+            end;
 
-        assert(FStack.Count = 0);
-      end;
+            method TPasSyntaxTreeBuilder.VarDeclaration;
+            begin
+              FStack.Push(TSyntaxNodeType.ntVariables);
+              try
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
 
-      class method TPasSyntaxTreeBuilder.RunWithString(const Context: not nullable String; InterfaceOnly: Boolean := false; const aCompiler : DelphiCompiler = DelphiCompiler.dcDefault; IncludeHandler: IIncludeHandler := nil; OnHandleString: TStringEvent := nil): TSyntaxNode;
-      begin
-        var Builder := new TPasSyntaxTreeBuilder(aCompiler);
-        Builder.InterfaceOnly := InterfaceOnly;
-        Builder.OnHandleString := OnHandleString;
+            method TPasSyntaxTreeBuilder.RecordVariantSection;
+            begin
+              FStack.Push(TSyntaxNodeType.ntVariantSection);
+              try
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
 
-        Builder.IncludeHandler := IncludeHandler;
-        result := Builder.RunWithString(Context, aCompiler);
+            method TPasSyntaxTreeBuilder.RecordVariantTag;
+            var
+            Temp: TSyntaxNode;
+            begin
+              Temp:= FStack.Push(TSyntaxNodeType.ntVariantTag);
 
-      end;
+              try
+                inherited;
+                if Temp.ChildCount = 2 then begin
+                  Temp.Attributes[TAttributeName.anName]:= Temp.ChildNodes[0].Attributes[TAttributeName.anName];
+                  Temp.Attributes[TAttributeName.anType]:= Temp.ChildNodes[1].Attributes[TAttributeName.anName];
+                  Temp.DeleteChild(Temp.ChildNodes[1]);
+                end else begin
+                  Temp.Attributes[TAttributeName.anType]:= Temp.ChildNodes[0].Attributes[TAttributeName.anName];
+                end;
+                Temp.DeleteChild(Temp.ChildNodes[0]);
+              finally
+                FStack.Pop;
+              end;
+            end;
 
-      class constructor TPasSyntaxTreeBuilder();
-      begin
-        InitAttributeValues;
-      end;
+            method TPasSyntaxTreeBuilder.VarName;
+            begin
+              FStack.AddChild(TSyntaxNodeType.ntName).Attributes[TAttributeName.anName]:= Lexer.Token; //#222
+              inherited;
+            end;
+
+            method TPasSyntaxTreeBuilder.VarParameter;
+            begin
+              FStack.Push(TSyntaxNodeType.ntParameters).Attributes[TAttributeName.anKind]:= AttributeValues[TAttributeValue.atVar];
+              try
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.VarSection;
+            var
+            VarSect, Temp: TSyntaxNode;
+            TypeInfo, ValueInfo: TSyntaxNode;
+            begin
+              VarSect := new TSyntaxNode(TSyntaxNodeType.ntUnknown);
+              try
+                FStack.Push(TSyntaxNodeType.ntVariables);
+                FStack.Push(VarSect);
+                try
+                  inherited VarSection;
+                finally
+                  FStack.Pop;
+                end;
+                for each VarList in VarSect.ChildNodes do
+                  begin
+                  TypeInfo := VarList.FindNode(TSyntaxNodeType.ntType);
+                  ValueInfo := VarList.FindNode(TSyntaxNodeType.ntValue);
+                  for each Variable in VarList.ChildNodes do
+                    begin
+                    if Variable.Typ <> TSyntaxNodeType.ntName then
+                      Continue;
+
+                    Temp := FStack.Push(TSyntaxNodeType.ntVariable);
+                    try
+                      Temp.AssignPositionFrom(Variable);
+
+                      FStack.AddChild(Variable.Clone);
+                      if assigned(TypeInfo) then
+                        FStack.AddChild(TypeInfo.Clone);
+
+                      if assigned(ValueInfo) then
+                        FStack.AddChild(ValueInfo.Clone);
+                    finally
+                      FStack.Pop;
+                    end;
+                  end;
+                end;
+                FStack.Pop;
+              finally
+                VarSect := nil;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.VisibilityStrictPrivate;
+            var
+            Temp: TSyntaxNode;
+            begin
+              Temp := FStack.Push(TSyntaxNodeType.ntStrictPrivate);
+              try
+                Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.VisibilityPrivate;
+            var
+            Temp: TSyntaxNode;
+            begin
+              Temp := FStack.Push(TSyntaxNodeType.ntPrivate);
+              try
+                Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.VisibilityStrictProtected;
+            var
+            Temp: TSyntaxNode;
+            begin
+              Temp := FStack.Push(TSyntaxNodeType.ntStrictProtected);
+              try
+                Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.VisibilityProtected;
+            var
+            Temp: TSyntaxNode;
+            begin
+              Temp := FStack.Push(TSyntaxNodeType.ntProtected);
+              try
+                Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.VisibilityPublic;
+            var
+            Temp: TSyntaxNode;
+            begin
+              Temp := FStack.Push(TSyntaxNodeType.ntPublic);
+              try
+                Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.VisibilityPublished;
+            var
+            Temp: TSyntaxNode;
+            begin
+              Temp := FStack.Push(TSyntaxNodeType.ntPublished);
+              try
+                Temp.SetAttribute(TAttributeName.anVisibility, AttributeValues[TAttributeValue.atTrue]);
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.VisibilityAutomated;
+            var
+            Temp: TSyntaxNode;
+            begin
+              Temp := FStack.Push(TSyntaxNodeType.ntAutomated);
+              try
+                Temp.Attributes[TAttributeName.anVisibility]:= AttributeValues[TAttributeValue.atTrue];
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.WhileStatement;
+            begin
+              FStack.Push(TSyntaxNodeType.ntWhile);
+              try
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.WithExpressionList;
+            begin
+              FStack.Push(TSyntaxNodeType.ntExpressions);
+              try
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.WithStatement;
+            begin
+              FStack.Push(TSyntaxNodeType.ntWith);
+              try
+                inherited;
+              finally
+                FStack.Pop;
+              end;
+            end;
+
+            method TPasSyntaxTreeBuilder.RunWithString(const Context: not nullable String; const aCompiler : DelphiCompiler = DelphiCompiler.dcDefault): TSyntaxNode;
+            begin
+
+              try
+                FStack.Clear;
+                try
+                  self.OnMessage := @ParserMessage;
+                  inherited RunWithString(Context);
+                finally
+                  if FStack.Count > 0 then
+                    Result := FStack.Pop;
+                end;
+              except
+                on E: EParserException do
+                  raise new ESyntaxTreeException(E.Line, E.Col, Lexer.FileName, E.Message, Result);
+                  on E: ESyntaxError do
+
+                    raise new ESyntaxTreeException(E.PosXY.X, E.PosXY.Y, Lexer.FileName, E.Message, Result);
+
+                    on E : Exception do
+                    begin
+                      Result := nil;
+                      raise;
+                    end;
+              end;
+
+              assert(FStack.Count = 0);
+            end;
+
+            class method TPasSyntaxTreeBuilder.RunWithString(const Context: not nullable String; InterfaceOnly: Boolean := false; const aCompiler : DelphiCompiler = DelphiCompiler.dcDefault; IncludeHandler: IIncludeHandler := nil; OnHandleString: TStringEvent := nil): TSyntaxNode;
+            begin
+              var Builder := new TPasSyntaxTreeBuilder(aCompiler);
+              Builder.InterfaceOnly := InterfaceOnly;
+              Builder.OnHandleString := OnHandleString;
+
+              Builder.IncludeHandler := IncludeHandler;
+              result := Builder.RunWithString(Context, aCompiler);
+
+            end;
+
+            class constructor TPasSyntaxTreeBuilder();
+            begin
+              InitAttributeValues;
+            end;
+
+method TPasSyntaxTreeBuilder.ElementsFile;
+begin
+  FStack.Push(TSyntaxNode.Create(TSyntaxNodeType.ntNamespace));
+  AssignLexerPositionToNode(Lexer, FStack.Peek);
+  inherited;
+end;
 
 end.

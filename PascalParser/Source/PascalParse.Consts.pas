@@ -200,6 +200,7 @@ type
     ntWhile, // Statement
     ntWith,  // Statement
     ntWrite, // Expression
+    ntNamespace, //Fileflow is Elements File
 
     ntAnsiComment, // Comment
     ntBorComment, // Comment

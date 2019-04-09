@@ -209,6 +209,20 @@ SimpleIntArray2 : Array[0..2] of Integer = (1 shl 2 -1, 1, 2);
 end.
 ";
 
+cTestNamespace =
+"namespace Test;
+interface
+const
+SimpleIntArray : Array[0..2] of Integer = (0, 1,2);
+
+SimpleIntArray2 : Array[0..2] of Integer = (1 shl 2 -1, 1, 2);
+
+ implementation
+end.
+";
+
+
+
 cTestClassMethodNames = "
 unit Test;
 interface

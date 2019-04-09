@@ -251,7 +251,8 @@ type
     ptWordBool,
     ptWrite,
     ptWriteonly,
-    ptXor);
+    ptXor,
+    ptNamespace);
 
    TptTokenKinds = Array of TptTokenKind;
 

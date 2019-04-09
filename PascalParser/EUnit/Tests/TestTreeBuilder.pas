@@ -8,18 +8,22 @@ uses
 type
   TestTreeBuilder = public class(Test)
   private
+
     // Only used internal for FW
     method TestSynEditUnitFromFile;
 
     method FirstTest;
+
+   public
+     method TestNames;
+     method TestAsm;
+     method TestNameSpace;
+
     method TestCompilerVersions;
     method TestCompilerDirectives;
     method TestSynEditUnit;
     method TestVariantRecord;
     method TestConstArrays;
-   public
-     method TestNames;
-     method TestAsm;
 
   end;
 
@@ -116,7 +120,7 @@ begin
   Assert.AreEqual(lConsts[0].ChildCount, 2);
   Var const1 := lConsts[0].ChildNodes[0];
   Var const2 := lConsts[0].ChildNodes[1];
-  Check.IsNotNil(const1.FindNode(TSyntaxNodeType.ntValue).FindNode(TSyntaxNodeType.ntExpression));
+  Check.IsNotNil(const1.FindNode(TSyntaxNodeType.ntValue).FindNode(TSyntaxNodeType.ntExpressions));
   Check.IsNotNil(const2.FindNode(TSyntaxNodeType.ntValue).FindNode(TSyntaxNodeType.ntExpression));
 end;
 
@@ -148,11 +152,17 @@ method TestTreeBuilder.TestAsm;
 begin
   var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
   Var Root := Builder.RunWithString(cTestAsm );
+  Check.AreEqual(Root.Typ, TSyntaxNodeType.ntUnit);
   //var Xml2 := TSyntaxTreeWriter.ToXML(Root, true);
   //File.WriteText('D:\Test\Testasm.xml', Xml2);
-
 end;
 
+method TestTreeBuilder.TestNameSpace;
+begin
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcDefault);
+  Var Root := Builder.RunWithString(cTestNamespace );
+  Check.AreEqual(Root.Typ, TSyntaxNodeType.ntNamespace);
 
+end;
 
 end.

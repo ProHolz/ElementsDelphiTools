@@ -108,7 +108,8 @@
     TSyntaxNodeType.ntPackage,
     TSyntaxNodeType.ntProgram,
     TSyntaxNodeType.ntUnit,
-    TSyntaxNodeType.ntUses
+    TSyntaxNodeType.ntUses,
+    TSyntaxNodeType.ntNamespace
     ];
 
 

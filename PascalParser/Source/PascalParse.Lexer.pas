@@ -405,6 +405,7 @@ type
     method TypeSection; virtual;
     method UnaryMinus; virtual;
     method UnitFile; virtual;
+    method ElementsFile; virtual;
     method UnitId; virtual;
     method UnitName; virtual;
     method UsedUnitName; virtual;
@@ -905,6 +906,10 @@ end;
         TptTokenKind.ptUnit:
         begin
           UnitFile;
+        end;
+        TptTokenKind.ptNamespace:
+        begin
+          ElementsFile;
         end;
         else
           begin
@@ -5684,6 +5689,40 @@ method TmwSimplePasPar.CustomAttribute;
 begin
   //TODO: Global vs. Local attributes
   AttributeSections;
+end;
+
+method TmwSimplePasPar.ElementsFile;
+begin
+  Expected(TptTokenKind.ptNamespace);
+  UnitName;
+  TypeDirective;
+  Semicolon;
+(*
+  InterfaceSection;
+  if not InterfaceOnly then
+  begin
+    ImplementationSection;
+    case TokenID of
+      TptTokenKind.ptInitialization:
+      begin
+        InitializationSection;
+        if TokenID = TptTokenKind.ptFinalization then
+          FinalizationSection;
+        Expected(TptTokenKind.ptEnd);
+      end;
+      TptTokenKind.ptBegin:
+      begin
+        CompoundStatement;
+      end;
+      TptTokenKind.ptEnd:
+      begin
+        NextToken;
+      end;
+    end;
+
+    Expected(TptTokenKind.ptPoint);
+  end;
+  *)
 end;
 
 

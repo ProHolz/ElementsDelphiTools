@@ -161,6 +161,7 @@ type
     method Func73: TptTokenKind;
     method Func75: TptTokenKind;
     method Func76: TptTokenKind;
+    method Func77: TptTokenKind;
     method Func78: TptTokenKind;
     method Func79: TptTokenKind;
     method Func81: TptTokenKind;
@@ -502,6 +503,7 @@ implementation
           73: FIdentFuncTable[I] := @Func73;
           75: FIdentFuncTable[I] := @Func75;
           76: FIdentFuncTable[I] := @Func76;
+          77: FIdentFuncTable[I] := @Func77;
           78: FIdentFuncTable[I] := @Func78;
           79: FIdentFuncTable[I] := @Func79;
           81: FIdentFuncTable[I] := @Func81;
@@ -918,6 +920,12 @@ implementation
     begin
       Result := TptTokenKind.ptIdentifier;
       if KeyComp('Until') then Result := TptTokenKind.ptUntil;
+    end;
+
+    method TmwBasePasLex.Func77: TptTokenKind;
+    begin
+      Result := TptTokenKind.ptIdentifier;
+      if KeyComp('Namespace') then Result := TptTokenKind.ptNamespace;
     end;
 
     method TmwBasePasLex.Func78: TptTokenKind;
