@@ -10,17 +10,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNode.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeAnonymous.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeComments.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeConstArray.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeDefaultTypes.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeEnum.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeExpressions.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeInterface.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeMappings.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeMethod.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeStatements.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeTypes.pas" />
-    <Compile Include="$(MSBuildThisFileDirectory)CodeGenSyntaxNodeSettings.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Attributes.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Blocks.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Comments.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Default.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.EnumSet.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Variables.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Types.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeGenerator.Methods.pas" />
   </ItemGroup>
 </Project>

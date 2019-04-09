@@ -7,10 +7,6 @@ uses
 type
   CodeBuilder =  partial class
   private
-    fUnit : CGCodeUnit;
-    fInterfaceMethods : Dictionary<String, TSyntaxNode>;
-    fImplementationMethods : Dictionary<String, TSyntaxNode>;
-
     method FillMethods(const interfaceNode, implementationNode: TSyntaxNode);
     method ResolveInterfaceMethod(const node : TSyntaxNode);
     method ResolveImplemenationMethod(const node : TSyntaxNode);
@@ -26,10 +22,6 @@ type
     method BuildTypesClause(const node : TSyntaxNode);
     method BuildGlobMethodWithStatements(const node : TSyntaxNode; const prefix : String; const name : String);
 
-
-  public
-    method BuildCGCodeUnitFomSyntaxNode(const rootnode : TSyntaxNode) : CGCodeUnit;
-    constructor();
   end;
 
 implementation
@@ -131,7 +123,7 @@ begin
     else
       begin
      // var lt := new CGTypeOfExpression('Pointer'.AsTypeReferenceExpression);
-      var lt :=  CodeBuilderDefaultTypes.getType(lType.AttribName);
+      var lt :=  GetType(lType.AttribName);
 
 
       var lclass := new CGTypeAliasDefinition(node.AttribName,  lt {'Type of Pointer'.AsTypeReference});
@@ -152,10 +144,10 @@ end;
 method CodeBuilder.BuildConstantsClause(const node: TSyntaxNode; const ispublic: Boolean);
 begin
     for each Child in node.FindChilds(TSyntaxNodeType.ntConstant) do
-      fUnit.Globals.Add(BuildConstant(Child, ispublic));
+      fUnit.Globals.Add(PrepareVarOrConstant(Child, true, ispublic));
 
     for each Child in node.FindChilds( TSyntaxNodeType.ntResourceString) do
-      fUnit.Globals.Add(BuildConstant(Child, ispublic));
+      fUnit.Globals.Add(PrepareVarOrConstant(Child, true, ispublic));
 
 end;
 
@@ -164,27 +156,27 @@ begin
   for each Child in node.ChildNodes.FindAll(Item -> Item.Typ = TSyntaxNodeType.ntVariable) do
    begin
     // Here we check of a new Type declarartion inside the var decl
-    var lnewtypeEnum : prepareNewTypeEnum;
-    if isVarWithNewType(Child, out lnewtypeEnum) then
+    var lNewType : eNewType;
+    if isVarWithNewType(Child, out lNewType) then
     begin
       // Pick up the varname and add a '_type'
       var lname := Child.FindNode(TSyntaxNodeType.ntName).AttribName + '_type';
       // Actual it can be a function or procedure
 
-      Var lnewType :=
-      case lnewtypeEnum of
-         prepareNewTypeEnum.block : BuildBlockType(Child, lname);
-         prepareNewTypeEnum.enum : BuildEnum(Child.FindNode(TSyntaxNodeType.ntType), lname);
+      Var lChangeType :=
+      case lNewType of
+        eNewType.block : BuildBlockType(Child, lname);
+        eNewType.enum : BuildEnum(Child.FindNode(TSyntaxNodeType.ntType), lname);
        end;
 
-      lnewType.Comment := 'Type automatic created'.AsBuilderComment;
-      fUnit.Types.Add(lnewType);
-      var lvar := BuildVariable(Child, ispublic, lname);
+      lChangeType.Comment := 'Type automatic created'.AsBuilderComment;
+      fUnit.Types.Add(lChangeType);
+      var lvar := PrepareVarOrConstant(Child, false, ispublic, lname);
       lvar.Variable.Comment := 'Type automatic added'.AsBuilderComment;
       fUnit.Globals.Add(lvar);
     end
     else
-    fUnit.Globals.Add(BuildVariable(Child, ispublic));
+      fUnit.Globals.Add(PrepareVarOrConstant(Child, false, ispublic));
    end;
 end;
 
@@ -298,64 +290,8 @@ begin
   end;
 end;
 
-method CodeBuilder.BuildCGCodeUnitFomSyntaxNode(const rootnode : TSyntaxNode): CGCodeUnit;
-require
-  (rootnode <> nil) and (rootnode.Typ = TSyntaxNodeType.ntUnit);
-begin
-  fUnit := new CGCodeUnit();
-  fUnit.Namespace :=  new CGNamespaceReference(rootnode.AttribName);
-// Uses Interface
-  for each ltypesec in rootnode.FindNode(TSyntaxNodeType.ntInterface).FindChilds(TSyntaxNodeType.ntUses) do
-    BuildUsesInterfaceClause(ltypesec);
-
-  FillMethods(rootnode.FindNode(TSyntaxNodeType.ntInterface), rootnode.FindNode(TSyntaxNodeType.ntImplementation));
-
-// Interface
-//  var lInterface := rootnode.FindNode(TSyntaxNodeType.ntInterface);
-
-  for each ltypesec in rootnode.FindNode(TSyntaxNodeType.ntInterface).ChildNodes do
-    begin
-    case ltypesec.Typ of
-      TSyntaxNodeType.ntTypeSection : BuildTypesClause(ltypesec);
-      TSyntaxNodeType.ntConstants : BuildConstantsClause(ltypesec, true);
-      TSyntaxNodeType.ntVariables : BuildVariablesClause(ltypesec, true);
-      TSyntaxNodeType.ntMethod : ResolveInterfaceMethod(ltypesec);
-    end;
-  end;
-
-      // Implementation
-  for each ltypesec in rootnode.FindNode(TSyntaxNodeType.ntImplementation).FindChilds(TSyntaxNodeType.ntUses) do
-    BuildUsesImplementationClause(ltypesec);
 
 
-
-  for each ltypesec in rootnode.FindNode(TSyntaxNodeType.ntImplementation).ChildNodes do
-       begin
-       case ltypesec.Typ of
-         TSyntaxNodeType.ntTypeSection : BuildTypesClause(ltypesec);
-         TSyntaxNodeType.ntConstants : BuildConstantsClause(ltypesec, false);
-         TSyntaxNodeType.ntVariables : BuildVariablesClause(ltypesec, false);
-         TSyntaxNodeType.ntMethod : ResolveImplemenationMethod(ltypesec);
-       end;
-     end;
-
-  var lInitalizationStatement := rootnode.FindNode(TSyntaxNodeType.ntInitialization):FindNode(TSyntaxNodeType.ntStatements);
-  if lInitalizationStatement:HasChildren then
-    BuildGlobMethodWithStatements(lInitalizationStatement, 'Initialize_', fUnit.Namespace.Name);
-
-
-  lInitalizationStatement := rootnode.FindNode(TSyntaxNodeType.ntFinalization):FindNode(TSyntaxNodeType.ntStatements);
-  if lInitalizationStatement:HasChildren then
-    BuildGlobMethodWithStatements(lInitalizationStatement, 'Finalize_', fUnit.Namespace.Name);
-
-     result := fUnit;
-   end;
-
-   constructor CodeBuilder();
-   begin
-     fInterfaceMethods := new Dictionary<String, TSyntaxNode>;
-     fImplementationMethods := new Dictionary<String, TSyntaxNode>;
-   end;
 
    method CodeBuilder.getImplementationMethodNodesFor(const name: String): Dictionary<String,TSyntaxNode>;
    begin

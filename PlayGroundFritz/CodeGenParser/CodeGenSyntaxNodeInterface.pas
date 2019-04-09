@@ -4,16 +4,14 @@ interface
 uses ProHolz.Ast;
 
 type
-  prepareNewTypeEnum = (&block, &enum);
+  eNewType = (&block, &enum);
 
   CodeBuilder =  partial class
   private
     method PrepareInitializer(aType: CGTypeReference; node: TSyntaxNode): CGExpression;
 
-    method PrepareDllCallAttribute(const node: TSyntaxNode): CGAttribute;
-    method PrepareCallingConventionAttribute(const value: CGCallingConventionKind): CGAttribute;
-    method isImplementsMethod(const node: TSyntaxNode): CGMethodLikeMemberDefinition;
-    method PrepareClassCreateMethod(const node: TSyntaxNode; const name : not nullable String): CGMethodLikeMemberDefinition;
+
+
     method AddMembers(const res : CGClassOrStructTypeDefinition; const node: TSyntaxNode; const visibility :CGMemberVisibilityKind; const name: not nullable String;
     const methodBodys: Dictionary<String,TSyntaxNode>);
 
@@ -21,14 +19,10 @@ type
 
     method AddAncestors(const Value : CGClassOrStructTypeDefinition; const Types : TSyntaxNode);
 
-    method PrepareArrayType(const node: TSyntaxNode): CGTypeReference;
+
     method PrepareProperty(prop: TSyntaxNode): CGPropertyDefinition;
-    method PrepareVarOrConstant(const node: TSyntaxNode; const isConst: Boolean; const ispublic: Boolean; const newtypename : String = nil): CGGlobalVariableDefinition;
 
-    method PrepareDefaultValue(const paramnode: TSyntaxNode; paramkind : String): CGExpression;
-    method PrepareParam(const node: TSyntaxNode): CGParameterDefinition;
 
-    method PrepareMethod(const methodnode : TSyntaxNode; implnode: TSyntaxNode) : CGMethodLikeMemberDefinition;
 
 
     method BuildInterface(const node : TSyntaxNode; const name : not nullable String): CGInterfaceTypeDefinition;
@@ -37,57 +31,20 @@ type
     method BuildGlobMethod(const methodnode : TSyntaxNode; const ispublic : Boolean) : CGGlobalFunctionDefinition;
 
     method BuildSet(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
-    method BuildVariable(const node : TSyntaxNode; const ispublic : Boolean; const newtypename : String = nil) : CGGlobalVariableDefinition ;
-    method BuildConstant(const node : TSyntaxNode; const ispublic : Boolean) : CGGlobalVariableDefinition;
 
     method BuildArray(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
     method BuildAlias(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
     method BuildClassOf(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
-    method BuildBlockType(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
-
-
 
     method PrepareGenericParameterName(const node: TSyntaxNode): String;
-    method PrepareAttribute(const node: TSyntaxNode): CGAttribute;
-    method isVarWithNewType(const node : TSyntaxNode; out preparetyp : prepareNewTypeEnum) : Boolean;
+
+
 
   public
     class method BuildMethodMangledName(const node: TSyntaxNode): String;
   end;
 
 implementation
-
-method CodeBuilder.PrepareArrayType(const node: TSyntaxNode): CGTypeReference;
-begin
-  var typeNode := node.FindNode(TSyntaxNodeType.ntType);
-  if assigned(typeNode) then
-  begin
-    var lBounds := resolveBounds(node);
-    if lBounds <> nil then
-    begin
-      var lArrayBounds := new List<CGArrayBounds>;
-      for each lbound in lBounds do
-        if lbound is CGArrayBounds then
-          lArrayBounds.Add(lbound as CGArrayBounds);
-
-
-        Var lTempType := PrepareTypeRef(typeNode);
-        if lArrayBounds.Count > 0 then
-        begin
-          result := new CGArrayTypeReference(lTempType, lArrayBounds);
-
-          CGArrayTypeReference( result).ArrayKind := CGArrayKind.Static;
-        end
-        else
-          result := new CGArrayTypeReference(lTempType);
-    end
-    else
-      result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference);
-
-  end
-  else raise new Exception("Array Type Alias not solved");
-
-end;
 
 
 method CodeBuilder.PrepareProperty(prop : TSyntaxNode) : CGPropertyDefinition;
@@ -160,397 +117,11 @@ if lFields.Count > 0 then
 
 end;
 
-method CodeBuilder.PrepareVarOrConstant(const node: TSyntaxnode; const isConst : Boolean; const ispublic : Boolean; const newtypename : string = nil) : CGGlobalVariableDefinition;
-begin
-  Var constName := node.FindNode(TSyntaxNodeType.ntName).AttribName;
-  Var typeNode := node.FindNode(TSyntaxNodeType.ntType);
 
-  if assigned(typeNode) then
-  begin
-    case typeNode.AttribName.ToLower of
-    // Special Handling of Array Constants
-      'array' :
-      exit  new CGGlobalVariableDefinition(PrepareArrayVarOrConstant(node, isConst, ispublic));
-    end;
 
-    case typeNode.AttribType.ToLower of
-   // Special Handling of Array Constants
-      'array' :
-      exit  new CGGlobalVariableDefinition(PrepareArrayVarOrConstant(node, isConst, ispublic));
-      'set' :
-      begin
-          var lset := PrepareSetVarOrConstant(node, isConst, ispublic);
-        //  exit lset;
 
-          exit  new CGGlobalVariableDefinition(lset);
-      end;
-    end;
-  end;
 
-  var typename : String := '';
 
-  if assigned(newtypename) then
-    typename := newtypename
-  else
-  begin
-    typename := typeNode:AttribName;
-    if String.IsNullOrEmpty(typename) then
-      typename := typeNode:AttribType;
-  end;
-
-  var   lGlobalSet := if String.IsNullOrEmpty(typename) then  new CGFieldDefinition(constName)
-else if assigned(newtypename) then
-  new CGFieldDefinition(constName, newtypename.AsTypeReference)
-else
-  new CGFieldDefinition(constName, PrepareTypeRef( typeNode));
-
-  lGlobalSet.Constant := isConst;
-
-  var valuenode := node.FindNode(TSyntaxNodeType.ntValue);
-  if assigned(valuenode) then
-   begin
-     // If there ar ntRecordConstants inside we will solve these
-     var rec := valuenode.FindAllNodes(TSyntaxNodeType.ntRecordConstant);
-     if rec.Length > 0 then
-     begin
-       lGlobalSet.Initializer := PrepareInitializer(lGlobalSet.Type,  valuenode);
-       //lGlobalSet.Constant := false;
-       //lGlobalSet.ReadOnly := true;
-       //lGlobalSet.l
-     end
-    else
-    lGlobalSet.Initializer := PrepareExpressionValue(valuenode);
-   end;
-
-
-
-  if ispublic then
-    lGlobalSet.Visibility := CGMemberVisibilityKind.Public;
-  exit new CGGlobalVariableDefinition(lGlobalSet);
-
-end;
-
-
-method CodeBuilder.PrepareDefaultValue(const paramnode: TSyntaxNode; paramkind : string): CGExpression;
-begin
-  result := nil;
-  var literal := paramnode.FindNode(TSyntaxNodeType.ntExpression):FindNode(TSyntaxNodeType.ntLiteral);
-  if (literal <> nil) then
-    exit PrepareLiteralExpression(literal);
-
-  literal := paramnode.FindNode(TSyntaxNodeType.ntExpression):FindNode(TSyntaxNodeType.ntIdentifier);
-  if (literal <> nil) then
-    exit new CGNamedIdentifierExpression(literal.AttribName);
-
-  literal := paramnode.FindNode(TSyntaxNodeType.ntExpression);
-  if (literal <> nil) and literal.HasChildren then
-    exit PrepareSingleExpressionValue(literal.ChildNodes[0]);
-end;
-
-method CodeBuilder.PrepareParam(const node: TSyntaxNode): CGParameterDefinition;
-begin
-  result := nil;
-  var paramName := node.FindNode(TSyntaxNodeType.ntName):AttribName;
-
-  var Modifier := CGParameterModifierKind.In;
-  case node.AttribKind.ToLower of
-    'const' : Modifier := CGParameterModifierKind.Const;
-    'var' : Modifier := CGParameterModifierKind.Var;
-    'out' : Modifier := CGParameterModifierKind.Out;
-  end;
-
-  var paramTypenode := node.FindNode(TSyntaxNodeType.ntType);
-  if assigned(paramTypenode) then
-  begin
-    var paramKind   := paramTypenode.AttribName;
-    if String.IsNullOrEmpty(paramKind) then
-    begin
-      paramKind := paramTypenode.AttribKind;
-      if String.IsNullOrEmpty(paramKind) then
-        paramKind := paramTypenode.AttribType;
-
-
-      case paramKind.ToLower of
-        'array' : begin
-          var ArrayTyp := paramTypenode.FindNode(TSyntaxNodeType.ntType):AttribName;
-          if String.IsNullOrEmpty(ArrayTyp) then
-            ArrayTyp := paramTypenode.FindNode(TSyntaxNodeType.ntType):AttribKind;
-          var lrefTyp :=
-          // if CodeBuilderDefaultTypes.isDefaultType(ArrayTyp) then
-          CodeBuilderDefaultTypes.GetType(ArrayTyp);
-
-
-
-          var larray := new CGArrayTypeReference(lrefTyp);
-          var DefaultValue :=  PrepareDefaultValue(node, ArrayTyp);
-          exit new CGParameterDefinition(paramName, larray, Modifier := Modifier, DefaultValue := DefaultValue);
-
-        end;
-      end;
-
-
-
-    end;
-  // Is there a Defaultvalue
-    var DefaultValue :=  PrepareDefaultValue(node, paramKind);
-    result := new CGParameterDefinition(paramName, PrepareTypeRef(paramTypenode), Modifier := Modifier, DefaultValue := DefaultValue);
-  end
-  else
-  begin
-    //result := new CGParameterDefinition(paramName, ''.AsTypeReference, Modifier := Modifier);
-    result := new CGParameterDefinition(paramName, Modifier := Modifier);
-  end;
-
-end;
-
-
-
-method CodeBuilder.PrepareClassCreateMethod(const node : TSyntaxNode; const name : not nullable String): CGMethodLikeMemberDefinition;
-begin
-  var lMethod : CGMethodLikeMemberDefinition;
-  var lMethodNameNode := node.FindNode(TSyntaxNodeType.ntName);
-  var lMethodName := lMethodNameNode:AttribName;
-
-
-  lMethod := new CGMethodDefinition(lMethodName);
-  lMethod.Static := true;
-  lMethod.Visibility := CGMemberVisibilityKind.Public;
-  lMethod.ReturnType := name.AsTypeReference() isClassType(true);
-
-  var lParams := new List<CGParameterDefinition>;
-
-  for each &Param in node.FindNode(TSyntaxNodeType.ntParameters):FindChilds(TSyntaxNodeType.ntParameter) do
-    begin
-    var lparam := PrepareParam(&Param);
-    lMethod.Parameters.Add(lparam);
-    lParams.Add(lparam);
-  end;
-
-  lMethod.Statements.add(new CGRawStatement('{$HINT "Check call to constructor"}'));
-
-  var lCall := new CGNewInstanceExpression(name.AsNamedIdentifierExpression);
-
-  for each lparam in lParams do
-    lCall.Parameters.add(new CGCallParameter(lparam.Name.AsNamedIdentifierExpression));
-
-  var lCreate := new CGReturnStatement(lCall);
-  lMethod.Statements.add(lCreate);
-  exit lMethod;
-
-end;
-
-
-method CodeBuilder.PrepareCallingConventionAttribute(const value : CGCallingConventionKind) : CGAttribute;
-begin
-  result :=
-  case value of
-    CGCallingConventionKind.CDecl : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.Cdecl'.AsNamedIdentifierExpression.AsCallParameter);
-    CGCallingConventionKind.StdCall : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.StdCall'.AsNamedIdentifierExpression.AsCallParameter);
-    CGCallingConventionKind.SafeCall : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.SafeCall'.AsNamedIdentifierExpression.AsCallParameter);
-  end;
-end;
-
-
-method CodeBuilder.PrepareDllCallAttribute(const node : TSyntaxNode) : CGAttribute;
-begin
-  var lident := node.FindNode(TSyntaxNodeType.ntIdentifier);
-  if not assigned(lident) then
-    lident := node.FindNode(TSyntaxNodeType.ntLiteral);
-
-
-  var ltype := PrepareSingleExpressionValue(lident);
-//  [DllImport('', EntryPoint := '__island_get_intvalue')]
-//  [DllImport('', EntryPoint := '__island_get_intvalue')]
-  var lextnode := node.FindNode(TSyntaxNodeType.ntExternalName);
-  if assigned(lextnode) then
-  begin
-      //var Lexpressions := PrepareCallExpressions(lextnode);
-      //if Lexpressions.count > 0 then
-      //begin
-        //var lData := new CGCallParameter(Lexpressions.ToList);
-      //end;
-
-    var lexttype := PrepareSingleExpressionValue(lextnode);
-    var lentry := new CGCallParameter(lexttype, 'EntryPoint') as not nullable;
-    exit new CGAttribute('DllImport'.AsTypeReference, ltype.AsCallParameter, lentry);
-  end;
-
-  exit new CGAttribute('DllImport'.AsTypeReference, ltype.AsCallParameter);
-end;
-
-
-
-method CodeBuilder.PrepareMethod(const methodnode : TSyntaxNode; implnode: TSyntaxNode): CGMethodLikeMemberDefinition;
-begin
-  Var MethodType := methodnode.AttribKind;
-  var lMethod : CGMethodLikeMemberDefinition;
-  var lMethodNameNode := methodnode.FindNode(TSyntaxNodeType.ntName);
-  var lMethodName := lMethodNameNode:AttribName;
-  var lGenerics : List<CGGenericParameterDefinition> := nil;
-  var lImplementationName : String;
-  var lChangedDestructor : Boolean := false;
-
-
-  if not assigned(lMethodNameNode) then
-  begin
-    var lResClause := methodnode.FindNode(TSyntaxNodeType.ntResolutionClause);
-    if assigned(lResClause) then
-    begin
-      var lNames := lResClause.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntName).toArray;
-      if lNames.Count = 2 then
-      begin
-        lMethodNameNode := lNames[0];
-        lMethodName := lMethodNameNode:AttribName;
-        lImplementationName := lNames[1].AttribName;
-      end
-      else raise new Exception("Could not resolve ntResolutionClause");
-    end
-    else raise new Exception("Could not resolve Methodname");
-  end;
-
-   // Check for TypeParams
-  // This done with a check for TypeParams in NameNode
-  var lTypeParams := lMethodNameNode.FindNode(TSyntaxNodeType.ntTypeParams);
-  if assigned(lTypeParams) then
-  begin
-    lMethodName := lMethodNameNode.FindNode(TSyntaxNodeType.ntName):AttribName;
-    lGenerics := PrepareGenericParameterDefinition(lMethodNameNode);
-  end;
-
-  case MethodType.ToLower of
-    'destructor' : begin
-      lMethodName := 'destruct_'+lMethodName;
-      lChangedDestructor := true;
-    end;
-  end;
-
-
-
-  case MethodType.ToLower of
-    'constructor' : begin
-      lMethod := new CGConstructorDefinition('');
-    end;
-   // 'destructor' : lMethod := new CGDestructorDefinition(lMethodName);
-    'operator'   : lMethod := new CGCustomOperatorDefinition(lMethodName);
-    else
-      begin
-        lMethod := new CGMethodDefinition(lMethodName);
-        CGMethodDefinition(lMethod).GenericParameters := lGenerics;
-        if not String.IsNullOrEmpty(lImplementationName) then
-        begin
-          exit nil;
-        end;
-      end;
-  end;
-
-
-  lMethod.Visibility := mapVisibility(methodnode.ParentNode.Typ);
-  if methodnode.getAttribute(TAttributeName.anAbstract).ToLower = 'true' then
-    lMethod.Virtuality := CGMemberVirtualityKind.Abstract
-  else
-    if not (lMethod is CGConstructorDefinition) then
-      lMethod.Virtuality := mapBinding(methodnode.GetAttribute(TAttributeName.anMethodBinding));
-     // Class Method?
-  if methodnode.GetAttribute(TAttributeName.anClass).ToLower = 'true' then
-    lMethod.Static := true;
-
-// Reintroduce?
-  if not (lMethod is CGConstructorDefinition) then
-    if methodnode.getAttribute(TAttributeName.anReintroduce).ToLower = 'true' then
-      lMethod.Reintroduced := true;
-
-
-
-
-// Is there an implementation?
-  var lImplnode := if  assigned(implnode) then implnode else methodnode;
-
-  for each ltypesec in lImplnode.ChildNodes do
-    begin
-    if ltypesec.Typ.notSupported  then
-      lMethod.Statements.Add(BuildCommentFromNode('Unsupported', ltypesec, true))
-    else
-      case ltypesec.Typ of
-        TSyntaxNodeType.ntParameters : begin
-          for each &Param in
-            ltypesec.ChildNodes.where(Item-> Item.Typ = TSyntaxNodeType.ntParameter)
-            do
-            lMethod.Parameters.Add(PrepareParam(&Param));
-        end;
-        TSyntaxNodeType.ntReturnType : lMethod.ReturnType := GetReturnType(ltypesec);
-        TSyntaxNodeType.ntTypeSection : BuildTypesMethodClause(ltypesec, lMethod);
-        TSyntaxNodeType.ntConstants : BuildConstantsMethodClause(ltypesec, lMethod);
-        TSyntaxNodeType.ntVariables : BuildVariablesMethod(ltypesec, lMethod);
-        TSyntaxNodeType.ntMethod : BuildLocalMethod(ltypesec, lMethod);
-        TSyntaxNodeType.ntStatements : BuildStatements(ltypesec, lMethod);
-        TSyntaxNodeType.ntExternal : begin
-          lMethod.External := true;
-
-          lMethod.Attributes.Add(PrepareDllCallAttribute(ltypesec));
-
-
-        end;
-      end;
-  end;
-
-  lMethod.CallingConvention := mapCallingConvention(methodnode.GetAttribute(TAttributeName.anCallingConvention));
-
-  if lMethod.External then
-  begin
-    if (lMethod.CallingConvention <> CGCallingConventionKind.Register) then
-      lMethod.Attributes.Add(PrepareCallingConventionAttribute(lMethod.CallingConvention));
-
-  end;
-
- // if we have changed the destructor to a method we
- // Adding a hint do the statements in the method
-  if lChangedDestructor then
-  begin
-    lMethod.Comment := "destructor changed to method".AsBuilderComment;
-    lMethod.Statements.Insert(0, new CGRawStatement('{$HINT "destructor changed to method"}'));
-    lMethod.Virtuality := CGMemberVirtualityKind.None;
-   // lMethod.Comment.Lines.Add('destructor changed');
-  end;
-
-
-  result := lMethod;
-end;
-
-
-method CodeBuilder.isImplementsMethod(const node : TSyntaxNode): CGMethodLikeMemberDefinition;
-begin
-  var lMethod : CGMethodLikeMemberDefinition;
-  var lMethodNameNode := node.FindNode(TSyntaxNodeType.ntName);
-  var lMethodName := lMethodNameNode:AttribName;
-  var lImplementationName : String;
-
-  if not assigned(lMethodNameNode) then
-  begin
-    var lResClause := node.FindNode(TSyntaxNodeType.ntResolutionClause);
-    if assigned(lResClause) then
-    begin
-      var lNames := lResClause.ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntName).toArray;
-      if lNames.Count = 2 then
-      begin
-        lMethodNameNode := lNames[0];
-        lMethodName := lMethodNameNode:AttribName;
-        lImplementationName := lNames[1].AttribName;
-      end
-      else raise new Exception("Could not resolve ntResolutionClause");
-    end
-    else raise new Exception("Could not resolve Methodname");
-
-    lMethod := new CGMethodDefinition(lMethodName);
-
-    if not String.IsNullOrEmpty(lImplementationName) then
-    begin
-      lMethod.ImplementsInterface := lMethodName.AsTypeReference;
-      lMethod.ImplementsInterfaceMember := lImplementationName;
-      exit lMethod;
-    end;
-  end;
-  result := nil;
-end;
 
 
 
@@ -861,18 +432,6 @@ begin
 
   if settings.PublicRecords then
     result.Visibility := CGTypeVisibilityKind.Public;
-
-
-end;
-
-method CodeBuilder.BuildVariable(const node: TSyntaxnode; const ispublic : Boolean; const newtypename : string = nil) : CGGlobalVariableDefinition;
-begin
-  exit PrepareVarOrConstant(node, false, ispublic, newtypename);
-end;
-
-method CodeBuilder.BuildConstant(const node: TSyntaxnode; const ispublic : Boolean) : CGGlobalVariableDefinition;
-begin
-  exit PrepareVarOrConstant(node, true, ispublic);
 end;
 
 
@@ -919,64 +478,9 @@ begin
   else raise new Exception("Type ClassOf not solved");
 end;
 
-method CodeBuilder.BuildBlockType(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
-begin
-  Var typenode := node.FindNode(TSyntaxNodeType.ntType);
-  if assigned(typenode) then
-  begin
 
-    var ltemp := new CGBlockTypeDefinition(name);
-    Var ReturnType :=   GetReturnType(typenode.FindNode(TSyntaxNodeType.ntReturnType));
-    If assigned(ReturnType) then
-      ltemp.ReturnType := ReturnType;
 
-    for each &Param in typenode.FindNode(TSyntaxNodeType.ntParameters):FindChilds(TSyntaxNodeType.ntParameter) do
-      ltemp.Parameters.Add(PrepareParam(&Param));
 
-    if String.IsNullOrEmpty(typenode.AttribKind) then
-      ltemp.IsPlainFunctionPointer := true;
-   if settings.PublicBlocks then
-     ltemp.Visibility := CGTypeVisibilityKind.Public;
 
-    exit ltemp;
-  end
-  else raise new Exception("BuildBlockType not solved");
-end;
-
-method CodeBuilder.PrepareAttribute(const node: TSyntaxNode): CGAttribute;
-begin
-  Var lName := node.FindNode(TSyntaxNodeType.ntName):AttribName;
-  if not String.IsNullOrEmpty(lName) then
-  begin
-    var lparameter := new List<CGCallParameter>;
-    var lArguments := node.FindNode(TSyntaxNodeType.ntArguments);
-
-    for each posarg in lArguments:ChildNodes.Where(Item->Item.Typ = TSyntaxNodeType.ntPositionalArgument) do
-      begin
-      var lattr := PrepareExpressionValue(posarg.FindNode(TSyntaxNodeType.ntValue));
-      if assigned(lattr) then
-        lparameter.Add(new CGCallParameter(lattr));
-    end;
-    if lparameter.Count > 0 then
-      result := new CGAttribute(lName.AsTypeReference, lparameter)
-    else
-      result := new CGAttribute(lName.AsTypeReference);
-  end;
-end;
-
-method CodeBuilder.isVarWithNewType(const node: TSyntaxnode; out preparetyp : prepareNewTypeEnum): Boolean;
-begin
-  case node.FindNode(TSyntaxNodeType.ntType):AttribType.ToLower of
-    'function','procedure' : begin
-        preparetyp := prepareNewTypeEnum.block;
-        exit true;
-    end;
-    'enum' : begin
-      preparetyp := prepareNewTypeEnum.enum;
-      exit true;
-    end;
-  end;
-  exit false;
-end;
 
 end.
