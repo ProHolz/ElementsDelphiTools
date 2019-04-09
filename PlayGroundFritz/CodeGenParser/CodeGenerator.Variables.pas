@@ -81,19 +81,19 @@ else
 
   var valuenode := node.FindNode(TSyntaxNodeType.ntValue);
   if assigned(valuenode) then
-   begin
+  begin
      // If there ar ntRecordConstants inside we will solve these
-     var rec := valuenode.FindAllNodes(TSyntaxNodeType.ntRecordConstant);
-     if rec.Length > 0 then
-     begin
-       lGlobalSet.Initializer := PrepareInitializer(lGlobalSet.Type,  valuenode);
+   var rec := valuenode.FindAllNodes(TSyntaxNodeType.ntRecordConstant);
+   if rec.Length > 0 then
+   begin
+     lGlobalSet.Initializer := PrepareInitializer(lGlobalSet.Type,  valuenode);
        //lGlobalSet.Constant := false;
        //lGlobalSet.ReadOnly := true;
        //lGlobalSet.l
      end
-    else
-    lGlobalSet.Initializer := PrepareExpressionValue(valuenode);
-   end;
+     else
+       lGlobalSet.Initializer := PrepareExpressionValue(valuenode);
+end;
 
 
 
@@ -148,13 +148,13 @@ begin
         var lSet := new CGArrayLiteralExpression();
         for each child in  node.ChildNodes do
           begin
-            if child.Typ = TSyntaxNodeType.ntRecordConstant then
-            begin
-              lSet.Elements.Add(PrepareInitializer(aType, child));
-            end
-            else
+          if child.Typ = TSyntaxNodeType.ntRecordConstant then
+          begin
+            lSet.Elements.Add(PrepareInitializer(aType, child));
+          end
+          else
             lSet.Elements.Add(PrepareSingleExpressionValue(child));
-          end;
+        end;
         result := lSet;
 
       end;
@@ -188,17 +188,17 @@ begin
         if length(resDimensions) = 2 then
         begin
 
-            var temp := new CGArrayBounds(resDimensions[0]) &end(resDimensions[1]);
-            result.Add(temp);//,  end_:= lmax));
+          var temp := new CGArrayBounds(resDimensions[0]) &end(resDimensions[1]);
+          result.Add(temp);//,  end_:= lmax));
 
         end
         else
           if length(resDimensions) = 1 then
           begin
             var temp := new CGArrayBounds(resDimensions[0]);
-              result.Add(temp);
+            result.Add(temp);
           end;
-      end;
+    end;
     end;
   end;
 
@@ -213,16 +213,16 @@ begin
    //PrepareArrayType(typeNode, constName);
   var lArray  := new CGSetTypeReference(typeNode.AttribName.AsTypeReference);
 
-   result := new CGFieldDefinition(constName, lArray);
+  result := new CGFieldDefinition(constName, lArray);
 
-   var valuenode := node.FindNode(TSyntaxNodeType.ntValue);
-   if valuenode <> nil then
-     result.Initializer := PrepareConstArrayExpression(typename.AsTypeReference, valuenode.ChildNodes[0]);
+  var valuenode := node.FindNode(TSyntaxNodeType.ntValue);
+  if valuenode <> nil then
+    result.Initializer := PrepareConstArrayExpression(typename.AsTypeReference, valuenode.ChildNodes[0]);
 
-   result.Constant := isConst;
+  result.Constant := isConst;
 
-   if ispublic then
-     result.Visibility := CGMemberVisibilityKind.Public;
+  if ispublic then
+    result.Visibility := CGMemberVisibilityKind.Public;
 
 end;
 
