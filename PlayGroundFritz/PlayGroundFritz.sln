@@ -1,9 +1,9 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # RemObjects Water
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "CodeGenDelphi", "CodeGenParser\CodeGenDelphi.elements", "{C41BD60E-51BF-4806-8063-0F6F68F78A5A}"
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "CodeGenDelphi", "..\CodeGenfromDelphi\CodeGenDelphi.elements", "{C41BD60E-51BF-4806-8063-0F6F68F78A5A}"
 EndProject
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "CodegGen4 (Shared)", "..\CodeGenerator\Codegenerator.Shared.elements", "{615FC69D-8D8A-4996-9D58-B042CD883951}"
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Codegenerator (Shared)", "..\CodeGenerator\Codegenerator.Shared.elements", "{615FC69D-8D8A-4996-9D58-B042CD883951}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Shared", "..\PascalParser\Source\PascalParse.Shared.elements", "{597FB294-A480-4BC1-9C5B-768828A1D2E5}"
 EndProject
@@ -21,8 +21,6 @@ Global
 		Release|AnyCPU = Release|AnyCPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{615FC69D-8D8A-4996-9D58-B042CD883941}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
-		{615FC69D-8D8A-4996-9D58-B042CD883941}.Release|AnyCPU.Build.0 = Release|AnyCPU
 		{819FA3F5-F808-43DE-B59F-E009A1E26114}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
 		{819FA3F5-F808-43DE-B59F-E009A1E26114}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{819FA3F5-F808-43DE-B59F-E009A1E26114}.Release|AnyCPU.ActiveCfg = Release|AnyCPU

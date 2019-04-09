@@ -3,6 +3,7 @@
   <PropertyGroup>
     <ProjectGuid>{C41BD60E-51BF-4806-8063-0F6F68F78A5A}</ProjectGuid>
     <RootNamespace>ProHolz.CodeGen</RootNamespace>
+	<Name>Codegenerator from Delphi (Shared)</Name>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
   </PropertyGroup>
   <Import Project="CodeGenDelphi.projitems" Label="Shared" />

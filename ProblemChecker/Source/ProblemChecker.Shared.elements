@@ -4,6 +4,7 @@
     <ProjectGuid>{890D978F-D98E-406A-9829-218266347D0D}</ProjectGuid>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
     <RootNamespace>ProHolz.SourceChecker</RootNamespace>
+	<Name>ProblemChecker (Shared)</Name>
   </PropertyGroup>
   <Import Project="ProblemChecker.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.SharedProject.targets" />

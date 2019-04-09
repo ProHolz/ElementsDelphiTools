@@ -92,6 +92,6 @@
     <Folder Include="TestUnits" />
   </ItemGroup>
   <Import Project="..\PascalParser\Source\PascalParse.Shared.projitems" Label="Shared" />
-  <Import Project="CodeGenParser\CodeGenDelphi.projitems" Label="Shared" />
   <Import Project="..\CodeGenerator\Codegenerator.Shared.projitems" Label="Shared" />
+  <Import Project="..\CodeGenfromDelphi\CodeGenDelphi.projitems" Label="Shared" />
 </Project>
