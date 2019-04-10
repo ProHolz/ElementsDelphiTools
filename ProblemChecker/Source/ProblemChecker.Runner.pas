@@ -101,14 +101,12 @@ begin
        SearchPaths.Add(path);
     end;
 
-
-
   Parse(fProjectfile);
 
   if fNotFoundDirectives.Count > 0 then
   if not String.IsNullOrEmpty(NotFoundDirectivesFile) then
     begin
-    File.WriteLines(NotFoundDirectivesFile, fNotFoundDirectives);
+     File.WriteLines(NotFoundDirectivesFile, fNotFoundDirectives);
     end;
 
 

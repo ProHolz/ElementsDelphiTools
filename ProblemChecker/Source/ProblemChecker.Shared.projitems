@@ -17,5 +17,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ProblemChecker.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)ProblemCheckerResults.pas" />
     <Compile Include="$(MSBuildThisFileDirectory)ProblemChecker.Checker.Typecheck.pas" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProblemChecker.Runner.pas" />
   </ItemGroup>
 </Project>

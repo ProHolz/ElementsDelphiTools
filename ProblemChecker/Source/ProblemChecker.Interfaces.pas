@@ -5,7 +5,6 @@ type
 
   IProblemChecker = interface
     method check(const syntaxTree: TSyntaxNode): Boolean;
-    method checkParseit(const aFilename: String): Boolean;
     method FoundProblems: Boolean;
     method GetProblemsText: String;
   end;

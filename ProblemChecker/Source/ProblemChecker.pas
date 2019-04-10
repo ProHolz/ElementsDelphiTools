@@ -15,7 +15,7 @@ type
     fResolver : ISyntaxNodeSolver;
   private // Interface
     method check(const syntaxTree: TSyntaxNode): Boolean;
-    method checkParseit(const aFilename: String): Boolean;
+
     method FoundProblems: Boolean;
     method GetProblemsText: String;
 
@@ -92,11 +92,6 @@ begin
   end;
 end;
 
-
-method TProblemChecker.checkParseit(const aFilename: string): boolean;
-begin
-  exit true;
-end;
 
 
 method TProblemChecker.FoundProblems: boolean;

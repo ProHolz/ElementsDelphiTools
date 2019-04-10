@@ -5,7 +5,7 @@
     <RootNamespace>Problemchecker</RootNamespace>
     <ProjectGuid>{7D40B9FE-B3E1-4AF9-B480-A71AEEE5F130}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AssemblyName>Problemchecker.Net</AssemblyName>
+    <AssemblyName>Problemchecker</AssemblyName>
     <ApplicationIcon>Properties\App.ico</ApplicationIcon>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -63,8 +63,8 @@
       <Generator>SettingsSingleFileGenerator</Generator>
     </None>
     <Compile Include="Properties\Settings.Designer.pas" />
-    <Compile Include="ProblemChecker.Runner.pas" />
     <None Include="todo.txt" />
+    <Compile Include="ProblemcheckerMain.pas" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <Import Project="ProblemChecker.Shared.projitems" Label="Shared" />
