@@ -4,18 +4,113 @@ uses ProHolz.Ast;
 type
   Program = class
   public
+    class var projectname : String;
+    class  actualCompiler := DelphiCompiler.dcDefault;
+    class var showNotfound : Boolean := false;
+    class var Level := 1000;
+
+
+   class method showintro;
+   begin
+    writeLn(
+    "call ProblemChecker [project] [/Compiler:xx] [/ShowNotFound:[true, false]] [/Level:[level]]
+     Project :  Full Path to a Delphi Project, this should be a *.dpr or *.dpk
+     Compiler : one of the following:
+                xe7, xe8, seatle, berlin, tokyo, rio
+                default is xe7
+    ShowNotFound : true or false, default false
+
+    Level:  specify which Test to run
+            1 : Only Critical Tests like types in methods, types in var declarations and Constants
+                Variant Records, With Statements, Assembler parts
+
+            2 : Level 1 plus Enums withot scope and constant records
+
+            3 : Level 2 plus Checks for Global members and Finalizations, Initializations
+                        multible Constructors etc..
+
+            4 : Level 3 plus resourechecks, like *dfm, *.res and Resourcestrings
+
+            default all Tests
+
+    ");
+
+
+   end;
+
+
+   class method getProjectName(args: array of String) : String;
+   begin
+    var cl := new SimpleCommandLineParser(args);
+    for each s  in cl.OtherParameters do
+     writeLn(s);
+
+     for each switch  in cl.Switches do
+      begin
+     //  writeLn($"{switch.Key} {switch.Value}");
+       case  switch.Key.ToLower of
+         'compiler' : case switch.Value.ToLower of
+                       'xe7' : actualCompiler := DelphiCompiler.dcXe7;
+                        'xe8' : actualCompiler := DelphiCompiler.dcXe8;
+                        'seatle' : actualCompiler := DelphiCompiler.dcSeatle;
+                        'berlin' : actualCompiler := DelphiCompiler.dcBerlin;
+                        'tokyo' : actualCompiler := DelphiCompiler.dcTokyo;
+                        'rio' : actualCompiler := DelphiCompiler.dcRio;
+                      end;
+
+         'level' : case switch.Value.ToLower of
+           '1' : Level := 1;
+           '2' : Level := 2;
+           '3' : Level := 3;
+           '4' : Level := 4;
+
+         end;
+
+
+         'shownotfound': case switch.Value.ToLower of
+           'false' : showNotfound := false;
+         'true' : showNotfound := true;
+         else begin
+           writeLn($"Unknown Switch {switch.Key} {switch.Value}");
+          end;
+         end;
+       end;
+      end;
+
+
+
+    if cl.OtherParameters.Count > 0 then
+      exit cl.OtherParameters[0];
+
+    result := '<noFile>';
+   end;
+
+
+
 
     class method Main(args: array of String): Int32;
     begin
-      var showNotfound : Boolean := false;
-      // add your own code here
-      writeLn('The magic happens here.');
 
-      const actualCompiler =  DelphiCompiler.dcXe7;
+      writeLn('Proholz ProblemChecker');
+      writeLn('======================');
 
 
-      var projectname :=
-      "X:\Projekte\pascalscript\Source\PascalScript_Core_D21.dpk";
+      if length(args) = 0 then
+       begin
+         showintro;
+         exit;
+       end;
+
+
+      projectname := getProjectName(args);
+
+      if not File.Exists(projectname) then
+      begin
+        showintro;
+        writeLn($"Could not find {projectname}!!");
+        exit;
+      end;
+
 
       var projectProblems :=  Path.ChangeExtension(projectname, '.Problems.txt');
       var projectPath := Path.GetWindowsParentDirectory(projectname);
@@ -33,7 +128,7 @@ type
       // Add now the wanted checks
 
       // I use here a Level Var
-      Var Level := 1;
+
 
       // First the critical ones we should solve before move to Elements
       // These should always run
@@ -83,6 +178,8 @@ type
       end;
 
       project.Run;
+      writeLn();
+      writeLn();
       if project.Problems.Count > 0 then
       begin
         writeLn('Problems:');
