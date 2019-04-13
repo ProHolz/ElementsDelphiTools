@@ -9,16 +9,17 @@
     <ApplicationIcon>Properties\App.ico</ApplicationIcon>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <DefaultUses>RemObjects.Elements.RTL;TestCodegen</DefaultUses>
+    <KnownConditionalDefines>DEBUG;TRACE</KnownConditionalDefines>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
     <OutputPath>.\Bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;TRACE;</DefineConstants>
     <GeneratePDB>True</GeneratePDB>
     <GenerateMDB>True</GenerateMDB>
     <CpuType>anycpu</CpuType>
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
     <EnableAsserts>True</EnableAsserts>
+    <ConditionalDefines>DEBUG;TRACE</ConditionalDefines>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <OutputPath>.\Bin\Release</OutputPath>

@@ -3,7 +3,7 @@
 uses
   ProHolz.Ast;
 
-method BuildInterfaceTest(const Source : String; const TestName : String) : String;
+method BuildInterfaceTest(const Source : String; const TestName : String; const hd : Boolean = false) : String;
 begin
 
   var  Root := TPasSyntaxTreeBuilder.RunWithString(Source, false);
@@ -23,7 +23,11 @@ begin
   if Environment.OS = OperatingSystem.Windows then
   begin
     var a := Encoding.UTF8.GetBytes(result) includeBOM(true);
-    File.WriteBytes(String.Format('d:\Test\{0}.pas', TestName), a);
+    if not hd then
+    File.WriteBytes($"d:\Test\{TestName}.pas" , a)
+    else
+    File.WriteBytes($"X:\Projekte\Neslib\Neslib.Clang\{TestName}.Elements.pas" , a);
+
   end;
 
 end;
@@ -37,8 +41,9 @@ begin
  // Var s := "D:\sourceProHolz\Abbund170\Synopse\SynCommons.pas";
   //  Var s :=  "D:\sourceProHolz\Abbund170\DachHolz\TypConst.pas";
   //  Var s := "D:\sourceProHolz\Abbund170\Synopse\SynLz.pas";
- // Var s := "D:\sourceProHolz\Abbund170\Cairo\Cairo.Dll.pas";
-    Var s := "D:\sourceProHolz\Abbund170\Cairo\Cairo.Types.pas";
+  Var s := "D:\sourceProHolz\Abbund170\Cairo\Cairo.Dll.pas";
+  //  Var s := "D:\sourceProHolz\Abbund170\Cairo\Cairo.Types.pas";
+ //   Var s := "X:\Projekte\Neslib\Neslib.Clang\Neslib.Clang.pas";
   //  Var s := "D:\sourceProHolz\Abbund170\Cairo\Cairo.Freetype.pas";
 
     var Source : not nullable String;
@@ -46,12 +51,17 @@ begin
     if TProjectIndexer.SafeOpenFileContext(s, out Source, out Error) then
     begin
       var fname := Path.GetFileNameWithoutExtension(s);
-      sb.Append(BuildInterfaceTest(Source, fname));
+      sb.Append(BuildInterfaceTest(Source, fname, false));
       sb.AppendLine.Append('{Next File}').AppendLine;
     end
     else
       sb.Appendline(Error);
   end;
+
+  sb.Append(BuildInterfaceTest(TestRecordHelper, 'TestRecordHelper'));
+  sb.AppendLine.Append('{Next File}').AppendLine;
+
+
 
   sb.Append(BuildInterfaceTest(TestMethodimplementation, 'TestMethodimplementation'));
   sb.AppendLine.Append('{Next File}').AppendLine;
@@ -121,6 +131,8 @@ begin
 
   sb.Append(BuildInterfaceTest(cResStrings, 'TestResStrings'));
   sb.AppendLine.Append('{Next File}').AppendLine;
+
+
 
   result := sb.ToString;
  // File.WriteText(String.Format('d:\Test\{0}.pas','AllinOne'),   result);
