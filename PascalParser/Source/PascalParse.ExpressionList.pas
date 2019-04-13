@@ -48,14 +48,14 @@ namespace ProHolz.Ast;
 
 interface
 type
-  TExpressionTools = class
+  TExpressionTools = static class
   private
-    class method CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
+    method CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
   public
-    class method ExprToReverseNotation(Expr: List<TSyntaxNode>): List<TSyntaxNode>; static;
-    class method NodeListToTree(Expr: List<TSyntaxNode>; Root: TSyntaxNode); static;
-    class method PrepareExpr(ExprNodes: List<TSyntaxNode>): List<TSyntaxNode>; static;
-    class method RawNodeListToTree(RawParentNode: TSyntaxNode; RawNodeList: List<TSyntaxNode>; NewRoot: TSyntaxNode); static;
+    method ExprToReverseNotation(Expr: List<TSyntaxNode>): List<TSyntaxNode>;
+    method NodeListToTree(Expr: List<TSyntaxNode>; Root: TSyntaxNode);
+    method PrepareExpr(ExprNodes: List<TSyntaxNode>): List<TSyntaxNode>;
+    method RawNodeListToTree(RawParentNode: TSyntaxNode; RawNodeList: List<TSyntaxNode>; NewRoot: TSyntaxNode);
   end;
 
 implementation
@@ -73,7 +73,7 @@ end;
 
 
 
-class method TExpressionTools.ExprToReverseNotation(Expr: List<TSyntaxNode>): List<TSyntaxNode>;
+method TExpressionTools.ExprToReverseNotation(Expr: List<TSyntaxNode>): List<TSyntaxNode>;
 var
 Stack: Stack<TSyntaxNode>;
   //Node: TSyntaxNode;
@@ -123,7 +123,7 @@ begin
   end;
 end;
 
-class method TExpressionTools.NodeListToTree(Expr: List<TSyntaxNode>; Root: TSyntaxNode);
+method TExpressionTools.NodeListToTree(Expr: List<TSyntaxNode>; Root: TSyntaxNode);
 var
 Stack: Stack<TSyntaxNode>;
 SecondNode: TSyntaxNode;
@@ -153,7 +153,7 @@ begin
   end;
 end;
 
-class method TExpressionTools.PrepareExpr(ExprNodes: List<TSyntaxNode>): List<TSyntaxNode>;
+method TExpressionTools.PrepareExpr(ExprNodes: List<TSyntaxNode>): List<TSyntaxNode>;
 var
 PrevNode: TSyntaxNode;
 begin
@@ -201,13 +201,13 @@ begin
       end;
 end;
 
-class method TExpressionTools.CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
+method TExpressionTools.CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
 begin
   Result := new TSyntaxNode(NodeType);
   Result.AssignPositionFrom(ParentNode);
 end;
 
-class method TExpressionTools.RawNodeListToTree(RawParentNode: TSyntaxNode; RawNodeList: List<TSyntaxNode>;
+method TExpressionTools.RawNodeListToTree(RawParentNode: TSyntaxNode; RawNodeList: List<TSyntaxNode>;
 NewRoot: TSyntaxNode);
 var
 PreparedNodeList, ReverseNodeList: List<TSyntaxNode>;

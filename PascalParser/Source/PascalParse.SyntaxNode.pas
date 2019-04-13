@@ -60,7 +60,7 @@ type
 
   public
     constructor();
-    constructor(aTyp: TSyntaxNodeType); virtual;
+    constructor(aTyp: TSyntaxNodeType); //virtual;
 
     class method create(aTyp: TSyntaxNodeType) : TSyntaxNode;
 

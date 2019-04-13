@@ -5,76 +5,52 @@
   DelphiCompiler = public enum (dcDefault, dcXe7, dcXe8, dcSeatle, dcBerlin, dcTokyo, dcRio);
 
   DelphiDefines =  public static class
-  protected
-    method &default : Array of  String;
+  private
+    const base : array of  String = ['MSWINDOWS',
+                                     'CONDITIONALEXPRESSIONS',
+                                     'UNICODE',
+                                     'WIN32'];
+
+
+    method prepare(const values : Array of String ): Array of String;
     begin
-      result := ['VER280',
-                 'MSWINDOWS',
-                 'CONDITIONALEXPRESSIONS',
-                 'UNICODE',
-                 'WIN32',
-                 'XE7',
-                 'CPUX86',
-                 'X86ASM'
-                 ];
+      var ltemp := new List<String>(base);
+      ltemp.add(values);
+      result := ltemp.ToArray;
+    end;
+
+  protected
+   method &default : array of  String;
+    begin
+      exit prepare(['VER280','XE7']);
     end;
 
 
     method defXE8 : Array of  String;
     begin
-      result := ['VER290',
-                 'MSWINDOWS',
-                 'CONDITIONALEXPRESSIONS',
-                 'UNICODE',
-                 'WIN32',
-                 'XE8'];
+      exit  prepare(['VER290','XE8']);
     end;
 
     method defSeatle : Array of  String;
     begin
-      result := ['VER300',
-                 'MSWINDOWS',
-                 'CONDITIONALEXPRESSIONS',
-                 'UNICODE',
-                 'WIN32',
-                 'SEATLE'];
+      exit prepare(['VER300','SEATLE']);
     end;
 
 
     method defBerlin : Array of  String;
     begin
-      result := ['VER310',
-                 'MSWINDOWS',
-                 'CONDITIONALEXPRESSIONS',
-                 'UNICODE',
-                 'WIN32',
-                 'BERLIN'];
-
+      exit prepare(['VER310','BERLIN']);
     end;
 
      method defTokyo : Array of  String;
      begin
-       result := ['VER320',
-                  'MSWINDOWS',
-                  'CONDITIONALEXPRESSIONS',
-                  'UNICODE',
-                  'WIN32',
-                  'TOKYO'];
-
+       exit prepare(['VER320','TOKYO']);
      end;
 
 
  method defRio : Array of  String;
      begin
-       result := ['VER330',
-                  'MSWINDOWS',
-                  'CONDITIONALEXPRESSIONS',
-                  'UNICODE',
-                  'WIN32',
-                  'RIO',
-                 'CPUX86'
-                 ];
-
+       exit prepare(['VER330','RIO']);
      end;
 
   public

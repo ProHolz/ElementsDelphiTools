@@ -65,12 +65,12 @@ type
   end;
 
 
-  TOperators = class
+  TOperators = static class
     private
-    class method GetItem(Typ: TSyntaxNodeType): TOperatorInfo; static;
+    method GetItem(Typ: TSyntaxNodeType): TOperatorInfo;
   public
-    class method IsOpName(Typ: TSyntaxNodeType): Boolean;
-    class property Items[Typ: TSyntaxNodeType]: TOperatorInfo read GetItem; default;
+    method IsOpName(Typ: TSyntaxNodeType): Boolean;
+    property Items[Typ: TSyntaxNodeType]: TOperatorInfo read GetItem; default;
   end;
 
 implementation
@@ -112,7 +112,7 @@ implementation
 
 { TOperators }
 
-    class method TOperators.GetItem(Typ: TSyntaxNodeType): TOperatorInfo;
+   method TOperators.GetItem(Typ: TSyntaxNodeType): TOperatorInfo;
     var
     i: Integer;
     begin
@@ -121,7 +121,7 @@ implementation
           Exit(OperatorsInfo[i]);
     end;
 
-    class method TOperators.IsOpName(Typ: TSyntaxNodeType): Boolean;
+   method TOperators.IsOpName(Typ: TSyntaxNodeType): Boolean;
     var
     i: Integer;
     begin
