@@ -1,0 +1,22 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# RemObjects Water
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Delphi Parser (Shared)", "..\PascalParser\Source\PascalParse.Shared.elements", "{597FB294-A480-4BC1-9C5B-768828A1D2E5}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "ProjectBuilder", "ProjectBuilder.elements", "{2A77564C-0388-4728-9054-2014F92AF3A1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AnyCPU = Debug|AnyCPU
+		Release|AnyCPU = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2A77564C-0388-4728-9054-2014F92AF3A1}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{2A77564C-0388-4728-9054-2014F92AF3A1}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{2A77564C-0388-4728-9054-2014F92AF3A1}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{2A77564C-0388-4728-9054-2014F92AF3A1}.Release|AnyCPU.Build.0 = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
