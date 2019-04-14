@@ -22,6 +22,7 @@ type
     FSearchPathRel  : StringList;
     FSearchPaths    : Searchpaths;
     FUnitPaths      : TUnitPathsCache;
+    FProjectPaths   : StringList;
 
   protected
     method AppendUnits(usesNode: TSyntaxNode; const filePath: String; unitList: StringList);
@@ -50,7 +51,10 @@ type
     property IncludeFiles: TIncludeFiles read FIncludeFiles;
     property Problems: TParseProblems read FProblems;
     property NotFoundUnits: StringList read FNotFoundUnits;
-   // property SearchPathRel: StringList read FSearchPathRel write FSearchPathRel;
+    //property UnitPaths      : TUnitPathsCache read FUnitPaths;
+    property ProjectPaths   : StringList read FProjectPaths;
+
+
     property SearchPaths: Searchpaths read FSearchPaths write FSearchPaths;
 
     property OnGetUnitSyntax: TGetUnitSyntaxEvent read FOnGetUnitSyntax write FOnGetUnitSyntax;
@@ -75,6 +79,7 @@ begin
       begin
         var unitPath := childNode.GetAttribute(TAttributeName.anPath);
         if unitPath <> '' then begin
+          FProjectPaths.Add(unitPath);
           if SearchPaths.IsRelativeWinPath(unitPath) then
             unitPath :=  Path.GetFullPath(Path.Combine( filePath , unitPath));
           FUnitPaths.Add(unitName + '.pas', unitPath.ToLower);
@@ -91,6 +96,7 @@ begin
  var fileFolder := Path.GetParentDirectory(fileName);
   if isProject then
   begin
+    FProjectPaths.Add(Path.GetWindowsFileName(fileName));
     usesNode := FindType(unitNode, TSyntaxNodeType.ntUses);
     if assigned(usesNode) then
       AppendUnits(usesNode, fileFolder, unitList);
@@ -190,6 +196,7 @@ begin
 
   FNotFoundUnits.RemoveAll;
   FProblems.RemoveAll;
+  FProjectPaths.RemoveAll;
   var projectName := Path.GetFileName(fileName);
   FUnitPaths.Add(projectName, fileName);
   // Do the work
@@ -212,6 +219,7 @@ begin
   FIncludeFiles :=new TIncludeFiles;
   FNotFoundUnits := new StringList;
   FProblems := new TParseProblems;
+  FProjectPaths := new StringList;
 end;
 
 

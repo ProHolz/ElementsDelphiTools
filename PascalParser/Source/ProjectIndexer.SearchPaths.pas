@@ -10,8 +10,8 @@ type
 
     method setBasePath(const value : not nullable String);
   public
-    class method IsRelativeWinPath(const Path: not nullable String): Boolean;
-    constructor(const base : not nullable String);
+    class method IsRelativeWinPath(const value: not nullable String): Boolean;
+    constructor(const abasepath : not nullable String);
     method Add(const value : not nullable String);
     method getPaths : sequence of  String;
     method Clear;
@@ -21,9 +21,9 @@ type
 
 implementation
 
-constructor Searchpaths(const base : not nullable String);
+constructor Searchpaths(const abasepath : not nullable String);
 begin
-  fBasePath := base;
+  fBasePath := abasepath;
   fPaths := new Dictionary<String, String>;
 end;
 
@@ -59,11 +59,11 @@ begin
 
 end;
 
-class method Searchpaths.IsRelativeWinPath(const Path: not nullable String): Boolean;
+class method Searchpaths.IsRelativeWinPath(const value: not nullable String): Boolean;
 begin
-  var L := Path.Length;
-  Result := ((L = 0) or ((L > 0) and (Path[0] <> '\')))
-  and ( (L <= 1) or (Path[ 1] <> ':') );
+  var L := value.Length;
+  Result := ((L = 0) or ((L > 0) and (value[0] <> '\')))
+  and ( (L <= 1) or (value[ 1] <> ':') );
 end;
 
 method Searchpaths.Clear;
