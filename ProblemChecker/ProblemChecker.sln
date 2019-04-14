@@ -11,10 +11,6 @@ Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "ProblemChecker.Tests", "Tes
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "ProjectBuilder", "..\ProjectBuilder\ProjectBuilder.elements", "{2A77564C-0388-4728-9054-2014F92AF3A1}"
 EndProject
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "TestBuilder", "..\ProjectBuilder\TestBuilder\TestBuilder.elements", "{3EB92B74-A0DA-4EC0-B48A-64BA7756BD0F}"
-EndProject
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "TestSharedProject", "..\ProjectBuilder\TestBuilder\Tests\TestSharedProject.elements", "{CA54E111-843E-46DF-9957-AE0022AEB1B1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AnyCPU = Debug|AnyCPU
@@ -33,10 +29,6 @@ Global
 		{2A77564C-0388-4728-9054-2014F92AF3A1}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{2A77564C-0388-4728-9054-2014F92AF3A1}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
 		{2A77564C-0388-4728-9054-2014F92AF3A1}.Release|AnyCPU.Build.0 = Release|AnyCPU
-		{3EB92B74-A0DA-4EC0-B48A-64BA7756BD0F}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
-		{3EB92B74-A0DA-4EC0-B48A-64BA7756BD0F}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
-		{3EB92B74-A0DA-4EC0-B48A-64BA7756BD0F}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
-		{3EB92B74-A0DA-4EC0-B48A-64BA7756BD0F}.Release|AnyCPU.Build.0 = Release|AnyCPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
