@@ -132,6 +132,8 @@ end;
 
 procedure TestArray(const cintArray : intArray = []);
 var i : integer;
+const b : integer = 2;
+ cnames : Array[0..1] of String = ('Test', 'Test2');
 begin
   for I in cintArray do
    begin

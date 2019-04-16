@@ -20,18 +20,19 @@ begin
 end;
 
 procedure testDirect;
-var val : Integer;
 begin
-  val := 2;
-  TestCall(val,
-  function (var a : Integer) : Integer
-  begin
-    result := a*a;
-  end
-  );
+ Testcall(
+ function (const a : integer) : integer
+ Var c : integer;
+ const b : integer = 2;
+ d = 5;
+ begin
+   c := 2;
+   result := a*a;
+ end
+ );
 
 end;
-
 procedure testinDirect;
 var ltemp : tCallFunc;
     val : Integer;
