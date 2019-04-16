@@ -17,6 +17,7 @@ implementation
 method CodeBuilder.PrepareAnonymousMethod(const node: TSyntaxNode): CGExpression;
 begin
   var lParamList := new List<CGParameterDefinition>;
+  var lLocalvars := new List<CGVariableDeclarationStatement>;
   var lStatements := node.FindNode(TSyntaxNodeType.ntStatements);
   var lStatementList := PrepareStatementList(lStatements);
 
@@ -26,12 +27,30 @@ begin
       lParamList.Add(PrepareParam(&Param));
 
 
+  var lVars := node.FindNode(TSyntaxNodeType.ntVariables);
+  if assigned(lVars) then
+   for each lvar in lVars.ChildNodes do
+     begin
+       lLocalvars.add(PrepareLocalVarOrConstant(lvar, false));
+     end;
+
+  lVars := node.FindNode(TSyntaxNodeType.ntConstants);
+  if assigned(lVars) then
+    for each lvar in lVars.ChildNodes do
+      begin
+      lLocalvars.add(PrepareLocalVarOrConstant(lvar, true));
+    end;
+
+
   var lMethod   := if (lParamList.Count > 0) then
     new CGAnonymousMethodExpression(lParamList,  lStatementList)
 else
   new CGAnonymousMethodExpression(lStatementList);
 //legacy pascal should be false here
   lMethod.Lambda := false;
+
+ if lLocalvars.Count > 0 then
+   lMethod.LocalVariables := lLocalvars;
 
 
   var lReturn :=  GetReturnType(node.FindNode(TSyntaxNodeType.ntReturnType));

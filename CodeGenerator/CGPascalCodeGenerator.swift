@@ -1463,7 +1463,7 @@ public __abstract class CGPascalCodeGenerator : CGCodeGenerator {
 		pascalGenerateSecondHalfOfMethodHeader(method, implementation: implementation, includeVisibility: includeVisibility)
 	}
 
-	internal func pascalGenerateMethodBody(_ method: CGMethodLikeMemberDefinition, type: CGTypeDefinition?, allowLocalVariables: Boolean = true) {
+	internal func pascalGenerateMethodBody(_ method: CGMethodLikeMemberDefinition, type: CGTypeDefinition?, allowLocalVariables: Boolean = false) {
 		if allowLocalVariables {
 			if let localVariables = method.LocalVariables, localVariables.Count > 0 {
 				AppendLine("var")

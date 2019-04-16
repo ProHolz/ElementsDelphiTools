@@ -56,7 +56,7 @@ begin
   if assigned(typeNode) then
     result :=  new CGVariableDeclarationStatement(constName, PrepareTypeRef(typeNode), PrepareExpressionValue(valuenode))
   else
-    result :=  new CGVariableDeclarationStatement(constName, ''.AsTypeReference , PrepareExpressionValue(valuenode));
+    result :=  new CGVariableDeclarationStatement(constName, nil , PrepareExpressionValue(valuenode));
   result.Constant := isConst;
 
 end;

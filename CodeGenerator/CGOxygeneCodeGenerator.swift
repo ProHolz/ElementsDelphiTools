@@ -145,9 +145,14 @@ public class CGOxygeneCodeGenerator : CGPascalCodeGenerator {
 	}
 
 	override func generateVariableDeclarationStatement(_ statement: CGVariableDeclarationStatement) {
-		Append("var ");
+	   if statement.Constant  {
+		Append("const ")} else
+		{
+			Append("var ")
+	   }
 		generateIdentifier(statement.Name)
 		if let type = statement.`Type` {
+		   // if type.Name
 			Append(": ")
 			generateTypeReference(type)
 		}
