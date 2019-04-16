@@ -225,7 +225,7 @@ begin
   Check.IsTrue( lchecker.CheckForProblem(toCheck, FSolver, self));
 
   // There ar 4 possible Problems in the Source
-  Check.AreEqual(FGlobProbs, 3);
+  Check.AreEqual(FGlobProbs, 9);
 end;
 
 

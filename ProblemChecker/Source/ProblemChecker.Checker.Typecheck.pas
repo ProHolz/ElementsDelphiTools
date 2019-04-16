@@ -99,11 +99,11 @@ begin
               begin
                 var varname : String;
                 {$IF LOG}
-                writeLn;
-                writeLn($" ***** {varname} *****");
-                writeLn(TSyntaxTreeWriter.ToXML(lnode, true));
-                writeLn;
-                writeLn($" ===== End ***** {varname} *****");
+                //writeLn;
+               //// writeLn($" ***** {varname} *****");
+                //writeLn(TSyntaxTreeWriter.ToXML(lnode, true));
+                //writeLn;
+               //// writeLn($" ===== End ***** {varname} *****");
                 writeLn;
                {$ENDIF}
 
@@ -120,6 +120,49 @@ begin
                  end;
               end;
             end;
+            'class' : begin
+              if lnode.HasChildren then
+              begin
+                var varname : String;
+               {$IF LOG}
+               writeLn;
+               writeLn(TSyntaxTreeWriter.ToXML(lnode, true));
+               writeLn;
+              {$ENDIF}
+
+                for each field in lnode.ChildNodes do
+                  begin
+                  var lType := field.FindNode(TSyntaxNodeType.ntType);
+                 if assigned(lType) then
+                   if (lType.AttribType <> '') then
+                     if isProblemType(field, lType, out varname) then
+                     begin
+                       ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
+                       result := true;
+                     end;
+
+                 if field.GetAttribute(TAttributeName.anVisibility) <> '' then
+                  begin
+                    for each lfield  in field.ChildNodes do
+                     begin
+                       lType := lfield.FindNode(TSyntaxNodeType.ntType);
+                      if assigned(lType) then
+                        if (lType.AttribType <> '') then
+                          if isProblemType(lfield, lType, out varname) then
+                          begin
+                            ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
+                            result := true;
+                          end;
+                     end;
+                  end;
+
+               end;
+
+
+              end;
+            end;
+
+
             else
               begin
                //{$IF LOG}
@@ -127,8 +170,8 @@ begin
                //writeLn('==========================');
                //writeLn;
                //{$ENDIF}
-                //ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.FindNode(TSyntaxNodeType.ntName).AttribName);
-               //result := true;
+              //  ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.FindNode(TSyntaxNodeType.ntName).AttribName);
+              // result := true;
               end;
           end;
         end;

@@ -262,8 +262,29 @@ interface
     d : array of Integer; // OK
     e : array[0..1] of record f: Integer; end;// fail
     g : array[0..1] of array[2..5] of record h: Integer; end;// fail
-
+    FState: (Initial, InSummary, InCommand, FinishedCommand, InRemarks); // fail
    end;
+
+
+  Ttemp = class
+    FStatenovis: (Initial, InSummary, InCommand, FinishedCommand, InRemarks); // fail
+    private
+      a : integer;
+     FStateprivate: (Initial, InSummary, InCommand, FinishedCommand, InRemarks); // fail
+
+    protected
+      a : integer;
+     FStateprotected: (Initial, InSummary, InCommand, FinishedCommand, InRemarks); // fail
+
+   strict protected
+      a : integer;
+     FStateprotected: (Initial, InSummary, InCommand, FinishedCommand, InRemarks); // fail
+
+    public
+      a : integer;
+     FStatePublic: (Initial, InSummary, InCommand, FinishedCommand, InRemarks); // fail
+
+  end;
 
 implementation
 

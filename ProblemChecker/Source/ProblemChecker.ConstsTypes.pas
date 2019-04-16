@@ -59,6 +59,6 @@ type
     'Variables with defined Types',
     'Type declaration in Method',
     'Assembler is used',
-    'Record with new types Inside');
+    'Record or Class with new types Inside');
 
 end.
