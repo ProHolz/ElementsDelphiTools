@@ -1144,7 +1144,9 @@
 
 	internal func generateGlobal(_ global: CGGlobalDefinition) {
 		if let global = global as? CGGlobalFunctionDefinition {
-			generateTypeMember(global.Function, type: CGGlobalTypeDefinition.GlobalType)
+			if (global.Function.Visibility != CGMemberVisibilityKind.Private){
+				generateTypeMember(global.Function, type: CGGlobalTypeDefinition.GlobalType)
+			}
 		} else if let global = global as? CGGlobalVariableDefinition {
 			generateTypeMember(global.Variable, type: CGGlobalTypeDefinition.GlobalType)
 		} else if let global = global as? CGGlobalPropertyDefinition {

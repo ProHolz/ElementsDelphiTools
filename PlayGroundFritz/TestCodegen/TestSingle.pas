@@ -14,17 +14,54 @@ type
   protected
   public
     method SeconsTest;
+    method testLocalConsts;
   end;
 
 implementation
 
-method TestSingle.TestArray;
-begin
-
-
-end;
 
 method TestSingle.SeconsTest;
+begin
+  var lunit := BuildUnit(tbUnitType.interface ,"
+   type
+     TIntegerHelper = record helper for integer
+       function AddHelper(const a : integer) : integer;
+     end;
+
+     TStringsHelper = class helper for Tstrings
+       function AddHelper(const a : integer) : integer;
+     end;
+
+     TTest = class
+      procedure Testnone;
+      private
+      procedure Testprivate;
+      strict private
+      procedure TestStrictprivate;
+
+      protected
+      procedure Testprotected;
+
+      strict protected
+      procedure TestStrictprotected;
+
+      public
+      procedure testPublic;
+
+      published
+      procedure TestPublished;
+
+     end;
+
+  ");
+  Assert.IsNotNil(lunit);
+  Check.AreEqual(lunit.Globals.Count, 0);
+  Check.AreEqual(lunit.Types.Count, 3);
+  var cg := new CGOxygeneCodeGenerator();
+  writeLn( cg.GenerateUnit(lunit));
+end;
+
+method TestSingle.TestArray;
 begin
   var lunit := BuildUnit(tbUnitType.interface ,"
 type
@@ -79,6 +116,25 @@ const
   end;
 
 
+end;
+
+method TestSingle.testLocalConsts;
+begin
+  var lunit := BuildUnit(tbUnitType.implementation ,"
+
+    procedure Localproc;
+    var i : Integer;
+    const b = 3;
+    var initD : Double = 0.03;
+    begin
+
+    end;
+ ");
+  Assert.IsNotNil(lunit);
+ Check.AreEqual(lunit.Globals.Count, 1);
+ Check.AreEqual(lunit.Types.Count, 0);
+ var cg := new CGOxygeneCodeGenerator();
+ writeLn( cg.GenerateUnit(lunit));
 end;
 
 end.

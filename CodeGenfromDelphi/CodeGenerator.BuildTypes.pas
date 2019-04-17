@@ -20,7 +20,7 @@ type
     method PrepareProperty(node: TSyntaxNode): CGPropertyDefinition;
 
     method BuildInterface(const node : TSyntaxNode; const name : not nullable String): CGInterfaceTypeDefinition;
-    method BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassTypeDefinition;
+    method BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassOrStructTypeDefinition;
     method BuildRecord(const node : TSyntaxNode; const name : not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassOrStructTypeDefinition;
     method BuildGlobMethod(const node : TSyntaxNode; const ispublic : Boolean) : CGGlobalFunctionDefinition;
 
@@ -293,9 +293,21 @@ begin
 end;
 
 
-method CodeBuilder.BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassTypeDefinition;
+method CodeBuilder.BuildClass(const node: TSyntaxNode; const name: not nullable String; const methodBodys : Dictionary<String,TSyntaxNode>): CGClassOrStructTypeDefinition;
 begin
-  //public var GenericParameters = List<CGGenericParameterDefinition>()
+  {$IF LOG}
+  writeLn(TSyntaxTreeWriter.ToXML(node, true ) );
+ {$ENDIF}
+  var Helper := node.FindNode(TSyntaxNodeType.ntHelper);
+
+  if assigned(Helper) then
+  begin
+    result :=  new CGExtensionTypeDefinition(name);
+   AddAncestors( result, Helper);
+
+ end
+ else
+
   result := new CGClassTypeDefinition(name);
   var lGenerics := PrepareGenericParameterDefinition(node.ParentNode).ToArray;
   result.GenericParameters.Add(lGenerics);

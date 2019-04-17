@@ -1506,18 +1506,35 @@ public __abstract class CGPascalCodeGenerator : CGCodeGenerator {
 		if let localVariables = method.LocalVariables, localVariables.Count > 0 {
 			for v in localVariables {
 				if !allowLocalVariables {
-					Append("var ")
+					if v.Constant{
+						Append("const ")
+					}
+					else {
+						Append("var ")
+					}
 					generateIdentifier(v.Name)
 					if let type = v.`Type` {
 						Append(": ")
 						generateTypeReference(type)
 						if let val = v.Value {
-							generateIdentifier(v.Name)
 							Append(" := ")
 							generateExpressionStatement(val)
 						}
+						else {
+							generateStatementTerminator()
+						}
 					}
-					generateStatementTerminator()
+					else {
+						if let val = v.Value {
+							generateIdentifier(v.Name)
+							Append(" := ")
+							generateExpressionStatement(val)
+
+						}
+						else {
+							generateStatementTerminator()
+						}
+					}
 				} else {
 					if let val = v.Value {
 						generateIdentifier(v.Name)
