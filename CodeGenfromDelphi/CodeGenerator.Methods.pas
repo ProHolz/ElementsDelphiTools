@@ -294,7 +294,7 @@ begin
 
   lMethod.CallingConvention := mapCallingConvention(node.GetAttribute(TAttributeName.anCallingConvention));
 
-  if lMethod.External then
+//  if lMethod.External then
   begin
     if (lMethod.CallingConvention <> CGCallingConventionKind.Register) then
       lMethod.Attributes.Add(PrepareCallingConventionAttribute(lMethod.CallingConvention));

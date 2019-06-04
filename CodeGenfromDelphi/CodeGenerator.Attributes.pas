@@ -41,8 +41,10 @@ begin
   result :=
   case value of
     CGCallingConventionKind.CDecl : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.Cdecl'.AsNamedIdentifierExpression.AsCallParameter);
-    CGCallingConventionKind.StdCall : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.StdCall'.AsNamedIdentifierExpression.AsCallParameter);
+    CGCallingConventionKind.StdCall : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.Stdcall'.AsNamedIdentifierExpression.AsCallParameter);
     CGCallingConventionKind.SafeCall : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.SafeCall'.AsNamedIdentifierExpression.AsCallParameter);
+    CGCallingConventionKind.FastCall : new CGAttribute('CallingConvention'.AsTypeReference, 'CallingConvention.Fastcall'.AsNamedIdentifierExpression.AsCallParameter);
+
   end;
 end;
 

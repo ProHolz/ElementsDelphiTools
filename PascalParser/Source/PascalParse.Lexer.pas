@@ -47,10 +47,16 @@ Known Issues:
 namespace ProHolz.Ast;
 
 interface
+type
+  {$IF ECHOES}
+   TptTokenKindSet = set of TptTokenKind;
+  {$ELSE}
+   TptTokenKindSet = &Set<TptTokenKind>;
+  {$ENDIF}
 
 
 const
-  ClassMethodDirectiveEnum : set of TptTokenKind = [
+  ClassMethodDirectiveEnum : TptTokenKindSet = [
   TptTokenKind.ptAbstract,
     TptTokenKind.ptCdecl,
   TptTokenKind.ptDynamic,

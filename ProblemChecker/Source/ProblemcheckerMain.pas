@@ -146,7 +146,7 @@ begin
     project.AddCheck(eEleCheck.eTypesInMethods);  // Type declaration in Methods
     project.AddCheck(eEleCheck.eAsm);  // Asm Statements in Methods
     project.AddCheck(eEleCheck.eTypeinType);  // nested Type declaration
-     project.AddCheck(eEleCheck.eWith); // with clause in source
+    project.AddCheck(eEleCheck.eWith); // with clause in source
    end;
 
   // now  the critical ones we can  solve after move to Elements

@@ -56,8 +56,7 @@ interface
 
   type
     {$SCOPEDENUMS ON}
-
-  TEnum = (first, second);
+    TEnum = (first, second);
 
     testRecord = record
        x,y : integer;
@@ -244,7 +243,7 @@ interface
 
  implementation
 
- function ReturnAddress: Pointer;
+function ReturnAddress: Pointer;
 asm
   mov eax,[ebp+4]
 end;

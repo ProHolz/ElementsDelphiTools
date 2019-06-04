@@ -6,10 +6,10 @@ uses ProHolz.Ast;
 type
   // This part is used for ntTypes
   CodeBuilder =  partial class
-   private
+  private
     method PrepareArrayType(const node: TSyntaxNode): CGTypeReference;
-    method PrepareTypeRef(const node: TSyntaxNode): CGTypeReference;
-  end;
+   method PrepareTypeRef(const node: TSyntaxNode): CGTypeReference;
+ end;
 
 implementation
 method CodeBuilder.PrepareArrayType(const node: TSyntaxNode): CGTypeReference;
@@ -26,15 +26,15 @@ begin
           lArrayBounds.Add(lbound as CGArrayBounds);
 
 
-        Var lTempType := PrepareTypeRef(typeNode);
-        if lArrayBounds.Count > 0 then
-        begin
-          result := new CGArrayTypeReference(lTempType, lArrayBounds);
+      Var lTempType := PrepareTypeRef(typeNode);
+      if lArrayBounds.Count > 0 then
+      begin
+        result := new CGArrayTypeReference(lTempType, lArrayBounds);
 
-          CGArrayTypeReference( result).ArrayKind := CGArrayKind.Static;
-        end
-        else
-          result := new CGArrayTypeReference(lTempType);
+        CGArrayTypeReference( result).ArrayKind := CGArrayKind.Static;
+      end
+      else
+        result := new CGArrayTypeReference(lTempType);
     end
     else
       result := new CGArrayTypeReference(typeNode.AttribName.AsTypeReference);
@@ -50,34 +50,34 @@ method CodeBuilder.PrepareTypeRef(const node: TSyntaxNode): CGTypeReference;
 var lTemp : CGTypeReference;
 begin
   if isDefaultType(node.AttribName) then
-   lTemp := GetDefaultType(node.AttribName)
-else
+    lTemp := GetDefaultType(node.AttribName)
+  else
   begin
-    case node.AttribName.ToLower of
-      'subrange' : begin
-          if node.ChildNodes.Count = 2 then
-           begin
-             var lstart := PrepareSingleExpressionValue(node.ChildNodes[0]);
-             var lEnd := PrepareSingleExpressionValue(node.ChildNodes[1]);
-             exit new CGRangeTypeReference(lstart, lEnd);
-           end;
-        end;
-    end;
-
-
-    case node.AttribType.ToLower of
-      'array' : begin
-          var la := PrepareArrayType(node);
-          exit la;
-
-      end;
+     case node.AttribName.ToLower of
+       'subrange' : begin
+         if node.ChildNodes.Count = 2 then
+         begin
+           var lstart := PrepareSingleExpressionValue(node.ChildNodes[0]);
+           var lEnd := PrepareSingleExpressionValue(node.ChildNodes[1]);
+           exit new CGRangeTypeReference(lstart, lEnd);
+         end;
+       end;
      end;
 
 
-     lTemp := node.AttribName.AsTypeReference;
-  end;
+     case node.AttribType.ToLower of
+       'array' : begin
+         var la := PrepareArrayType(node);
+         exit la;
 
-  // if it is a named reference check further.....
+       end;
+     end;
+
+
+      lTemp := node.AttribName.AsTypeReference;
+    end;
+
+    // if it is a named reference check further.....
   if lTemp is CGNamedTypeReference then
   begin
     var typeArgs := node.FindNode(TSyntaxNodeType.ntTypeArgs);
@@ -91,7 +91,7 @@ else
         CGNamedTypeReference(lTemp).GenericArguments := largs;
     end;
   end;
-  exit lTemp;
+exit lTemp;
 end;
 
 end.

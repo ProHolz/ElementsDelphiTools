@@ -5,32 +5,32 @@ uses ProHolz.Ast;
 type
   // This part is used for Statements
   CGStatementList = class
-    protected
+  protected
     property data : List<CGStatement>;
-     public
-       constructor (const value : CGStatement);
-       begin
-         data := new List<CGStatement>;
-         &Add(value);
-       end;
+public
+  constructor (const value : CGStatement);
+  begin
+    data := new List<CGStatement>;
+    &Add(value);
+  end;
 
-      method First : not nullable CGStatement;
-      begin
-        exit data.First as not nullable;
-      end;
+  method First : not nullable CGStatement;
+  begin
+    exit data.First as not nullable;
+  end;
 
-    method &Add(const value : CGStatement);
-    begin
-      if assigned(value) then
-        data.Add(value);
-    end;
+  method &Add(const value : CGStatement);
+  begin
+    if assigned(value) then
+      data.Add(value);
+  end;
 
-    method asList: List<CGStatement>;
-    begin
-      exit data;
-    end;
+  method asList: List<CGStatement>;
+  begin
+    exit data;
+  end;
 
-    end;
+end;
 
   CodeBuilder =  partial class
   private
@@ -164,32 +164,32 @@ end;
 method CodeBuilder.PrepareCallStatement(const node: TSyntaxNode): CGStatementList;
 begin
   if node.ChildCount = 1 then
-    begin
-     var lexpression := PrepareSingleExpressionValue(node.ChildNodes[0]);
+  begin
+    var lexpression := PrepareSingleExpressionValue(node.ChildNodes[0]);
 
 
-      var lres := new  CGStatementList(lexpression);
+    var lres := new  CGStatementList(lexpression);
     if lexpression is CGNamedIdentifierExpression then
-       begin
+    begin
       if CGNamedIdentifierExpression(lexpression).Name.ToLower = 'exit'
         then
-          lres := new CGStatementList(''.AsNamedIdentifierExpression.AsReturnStatement);
-       end;
+        lres := new CGStatementList(''.AsNamedIdentifierExpression.AsReturnStatement);
+    end;
     if lexpression is CGMethodCallExpression then
     begin
       if CGMethodCallExpression(lexpression).CallSite is CGNamedIdentifierExpression then
         if CGNamedIdentifierExpression(CGMethodCallExpression(lexpression).CallSite).Name.ToLower = 'exit'
-        then
-         begin
-          //var lexit := new CGReturnStatement(lexpression);
-          //lres := new CGStatementList(lexit);
-         end;
-      end;
+          then
+        begin
+         //var lexit := new CGReturnStatement(lexpression);
+         //lres := new CGStatementList(lexit);
+        end;
+    end;
 
-      exit lres;
-    end
+    exit lres;
+  end
   else
-    exit new  CGStatementList(BuildCommentFromNode('Call Statement Childcount <> 1', node, true));
+ exit new  CGStatementList(BuildCommentFromNode('Call Statement Childcount <> 1', node, true));
 end;
 
 
@@ -307,21 +307,21 @@ begin
   begin
     var lCall := PrepareSingleExpressionValue(node.ChildNodes[0]);
     if lCall is CGMethodCallExpression  then
-     begin
+    begin
       if isConstructor then
       begin
         var lTemp := new CGConstructorCallStatement(new CGInheritedExpression(), CGMethodCallExpression(lCall).Parameters);
         exit new  CGStatementList(lTemp);
       end
       else
-      CGMethodCallExpression(lCall).CallSite := new CGInheritedExpression();
+        CGMethodCallExpression(lCall).CallSite := new CGInheritedExpression();
       exit new  CGStatementList(lCall);
-     end
+    end
     else
       if lCall is CGNamedIdentifierExpression  then
         if isConstructor then
           exit new  CGStatementList( new CGConstructorCallStatement(new CGInheritedExpression()))
-          else
+        else
           exit new  CGStatementList(new CGMethodCallExpression(new CGInheritedExpression(), CGNamedIdentifierExpression(lCall).Name));
 
     raise new Exception($"Inherited Statement not solved for Line {node.Line}");
@@ -408,7 +408,7 @@ begin
       if  (lFinally.Count > 0) then
         lTemp.FinallyStatements.Add(lFinally)
       else
-          lTemp.FinallyStatements.Add(new CGRawStatement('{$HINT "Empty Finally ?"}'));
+        lTemp.FinallyStatements.Add(new CGRawStatement('{$HINT "Empty Finally ?"}'));
       exit new  CGStatementList(lTemp);
     end
     else
@@ -428,10 +428,10 @@ begin
           if lExceptStatements.Count > 0 then
             ltempBlock.Statements.Add(lExceptStatements)
           else ltempBlock.Statements.add(new CGRawStatement('{$HINT "Empty Except ?"}'));
-            lTemp.CatchBlocks.Add(ltempBlock);
+          lTemp.CatchBlocks.Add(ltempBlock);
           exit new  CGStatementList(lTemp);
-          end;
-    end
+        end;
+  end
 
 end;
 
@@ -459,9 +459,9 @@ begin
 
     if assigned(lExpressions) and assigned(lStatement) then
     begin
-     var ltempWith := new CGWithStatement(lEx, lStatement.First);
-     var lres := new CGStatementList(ltempWith);
-     exit lres;
+      var ltempWith := new CGWithStatement(lEx, lStatement.First);
+      var lres := new CGStatementList(ltempWith);
+      exit lres;
 
     end
   end
@@ -513,35 +513,35 @@ begin
         else raise new Exception($"=======Unknown type [{node.Typ.ToString}] in PrepareStatement =======");
 
       end;
-     finally
-       if result:First is CGNamedIdentifierExpression then
-       begin
-         var lres := result.First as CGNamedIdentifierExpression;
-         case lres.Name.ToLower of
-           'break' : result := new  CGStatementList( new CGBreakStatement());
-           'continue' : result := new  CGStatementList(new CGContinueStatement());
-         end;
-       end;
-     end;
-    end
-    else
-      if node.Typ.notSupported then
-        exit new  CGStatementList(BuildCommentFromNode('Unsupported', node, true))
-      else
-        exit new  CGStatementList(new CGCodeCommentStatement(new CGRawStatement(node.Typ.ToString+  '======= Typ not in Statement Enum =======')));
-  end;
-
-  method CodeBuilder.BuildStatements(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
-  begin
-    for each child in node.ChildNodes do //.Where(Item->Item.Typ = TSyntaxNodeType.ntStatement) do
+    finally
+      if result:First is CGNamedIdentifierExpression then
       begin
-      var Statement := PrepareStatement(child, (lMethod is CGConstructorDefinition));
-      if assigned(Statement)  then
-       begin
-        lMethod.Statements.Add(Statement.asList);
-       end;
+        var lres := result.First as CGNamedIdentifierExpression;
+        case lres.Name.ToLower of
+          'break' : result := new  CGStatementList( new CGBreakStatement());
+          'continue' : result := new  CGStatementList(new CGContinueStatement());
+        end;
+      end;
     end;
+  end
+  else
+    if node.Typ.notSupported then
+      exit new  CGStatementList(BuildCommentFromNode('Unsupported', node, true))
+    else
+      exit new  CGStatementList(new CGCodeCommentStatement(new CGRawStatement(node.Typ.ToString+  '======= Typ not in Statement Enum =======')));
+end;
 
+method CodeBuilder.BuildStatements(const node: TSyntaxNode; const lMethod: CGMethodLikeMemberDefinition);
+begin
+  for each child in node.ChildNodes do //.Where(Item->Item.Typ = TSyntaxNodeType.ntStatement) do
+    begin
+    var Statement := PrepareStatement(child, (lMethod is CGConstructorDefinition));
+    if assigned(Statement)  then
+    begin
+      lMethod.Statements.Add(Statement.asList);
+    end;
   end;
+
+end;
 
 end.

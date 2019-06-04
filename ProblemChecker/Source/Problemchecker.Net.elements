@@ -12,6 +12,8 @@
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
     <TestProject>ProblemChecker.Tests</TestProject>
     <KnownConditionalDefines>DEBUG;NEW_DEFINE;RELEASE;TRACE</KnownConditionalDefines>
+    <XmlDoc>False</XmlDoc>
+    <XmlDocAllMembers>False</XmlDocAllMembers>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>

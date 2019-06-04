@@ -1,11 +1,11 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
-# RemObjects Water
+# RemObjects Fire
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Delphi Parser (Shared)", "Source\PascalParse.Shared.elements", "{597FB294-A480-4BC1-9C5B-768828A1D2E5}"
+EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Echoes", "PascalParse.Echoes.elements", "{EB3FE727-6C8E-4784-9830-060E25385427}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Island.Windows", "PascalParse.Island.Windows.elements", "{CEB60BEA-46F8-411E-96E8-758636139A45}"
-EndProject
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Shared", "Source\PascalParse.Shared.elements", "{597FB294-A480-4BC1-9C5B-768828A1D2E5}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Test.Echoes", "EUnit\PascalParse.Test.Echoes.elements", "{C931CB13-B583-41A3-8860-57BC1CDFEBD8}"
 EndProject

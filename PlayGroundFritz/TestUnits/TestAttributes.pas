@@ -23,7 +23,7 @@ interface
     [Name ('Test2')]
     fid : Integer;
     [Name ('Test3')]
-    procedure Test;
+    procedure Test; stdcall;
 
   end;
 

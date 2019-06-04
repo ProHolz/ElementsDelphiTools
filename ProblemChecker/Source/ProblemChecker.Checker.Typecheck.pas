@@ -6,11 +6,11 @@ type
 
   TProblem_VarTypes = class( ISingleProbSolver)
   protected
-   method isProblemType(const master, node : TSyntaxNode; out varname : String ) : Boolean;
- public
-   method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean; virtual;
-   property CheckTyp : eEleCheck read eEleCheck.eVarsWithTypes; virtual;
- end;
+    method isProblemType(const master, node : TSyntaxNode; out varname : String ) : Boolean;
+  public
+    method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean; virtual;
+    property CheckTyp : eEleCheck read eEleCheck.eVarsWithTypes; virtual;
+  end;
 
 
   TProblem_TypeInTypes = class(TProblem_VarTypes, ISingleProbSolver)
@@ -95,30 +95,30 @@ begin
         begin
           case lnode.AttribType.ToLower of
             'record' : begin
-            if lnode.HasChildren then
+              if lnode.HasChildren then
               begin
-                var varname : String;
-                {$IF LOG}
-                //writeLn;
-               //// writeLn($" ***** {varname} *****");
-                //writeLn(TSyntaxTreeWriter.ToXML(lnode, true));
-                //writeLn;
-               //// writeLn($" ===== End ***** {varname} *****");
-                writeLn;
-               {$ENDIF}
+              var varname : String;
+              {$IF LOG}
+              //writeLn;
+             //// writeLn($" ***** {varname} *****");
+              //writeLn(TSyntaxTreeWriter.ToXML(lnode, true));
+              //writeLn;
+             //// writeLn($" ===== End ***** {varname} *****");
+              writeLn;
+             {$ENDIF}
 
-                for each field in lnode.ChildNodes do
-                 begin
-                  var lType := field.FindNode(TSyntaxNodeType.ntType);
-                  if assigned(lType) then
+              for each field in lnode.ChildNodes do
+                begin
+                var lType := field.FindNode(TSyntaxNodeType.ntType);
+                if assigned(lType) then
                   if (lType.AttribType <> '') then
-                  if isProblemType(field, lType, out varname) then
-                  begin
-                    ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
-                    result := true;
-                  end;
-                 end;
-              end;
+                    if isProblemType(field, lType, out varname) then
+                    begin
+                      ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
+                      result := true;
+                    end;
+               end;
+            end;
             end;
             'class' : begin
               if lnode.HasChildren then
@@ -133,19 +133,19 @@ begin
                 for each field in lnode.ChildNodes do
                   begin
                   var lType := field.FindNode(TSyntaxNodeType.ntType);
-                 if assigned(lType) then
-                   if (lType.AttribType <> '') then
-                     if isProblemType(field, lType, out varname) then
-                     begin
-                       ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
-                       result := true;
-                     end;
+                  if assigned(lType) then
+                    if (lType.AttribType <> '') then
+                      if isProblemType(field, lType, out varname) then
+                      begin
+                        ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
+                        result := true;
+                      end;
 
-                 if field.GetAttribute(TAttributeName.anVisibility) <> '' then
+                  if field.GetAttribute(TAttributeName.anVisibility) <> '' then
                   begin
-                    for each lfield  in field.ChildNodes do
+                   for each lfield  in field.ChildNodes do
                      begin
-                       lType := lfield.FindNode(TSyntaxNodeType.ntType);
+                      lType := lfield.FindNode(TSyntaxNodeType.ntType);
                       if assigned(lType) then
                         if (lType.AttribType <> '') then
                           if isProblemType(lfield, lType, out varname) then
@@ -153,31 +153,31 @@ begin
                             ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
                             result := true;
                           end;
-                     end;
-                  end;
+                    end;
+                 end;
 
-               end;
+                 end;
 
 
               end;
             end;
 
 
-            else
-              begin
-               //{$IF LOG}
-               //writeLn(TSyntaxTreeWriter.ToXML(lnode, true));
-               //writeLn('==========================');
-               //writeLn;
-               //{$ENDIF}
-              //  ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.FindNode(TSyntaxNodeType.ntName).AttribName);
-              // result := true;
-              end;
+          else
+            begin
+             //{$IF LOG}
+             //writeLn(TSyntaxTreeWriter.ToXML(lnode, true));
+             //writeLn('==========================');
+             //writeLn;
+             //{$ENDIF}
+            //  ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, child.FindNode(TSyntaxNodeType.ntName).AttribName);
+            // result := true;
+            end;
+        end;
           end;
         end;
-      end;
-    end;
   end;
+ end;
 end;
 
 end.

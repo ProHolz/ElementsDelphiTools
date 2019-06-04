@@ -11,10 +11,11 @@ type
     method RangeTest;
 
     method TestArray;
+    method testLocalConsts;
   protected
   public
     method SeconsTest;
-    method testLocalConsts;
+
   end;
 
 implementation
@@ -46,7 +47,7 @@ begin
       procedure TestStrictprotected;
 
       public
-      procedure testPublic;
+      procedure testPublic; stdcall;
 
       published
       procedure TestPublished;
@@ -57,6 +58,55 @@ begin
   Assert.IsNotNil(lunit);
   Check.AreEqual(lunit.Globals.Count, 0);
   Check.AreEqual(lunit.Types.Count, 3);
+
+  var lclass := lunit.Types.Item[2];
+  if lclass is CGClassTypeDefinition then
+  if lclass.Name = 'TTest' then
+    begin
+    for each matching m : CGMethodLikeMemberDefinition in lclass.Members index i do
+      begin
+       case i of
+         0 : begin
+           //Check.IsTrue(m is CGConstructorDefinition);
+           //Check.AreEqual(m.Name, '');
+           //Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
+           //Check.IsFalse( m.Static);
+           //Check.isFalse(m.Virtuality = CGMemberVirtualityKind.Override);
+         end;
+         1 : begin
+           //Check.IsTrue(m is CGMethodDefinition);
+           //Check.AreEqual(m.Name, 'Create');
+           //Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
+          //Check.IsTrue( m.Static);
+        end;
+
+         2 : begin
+           //Check.IsFalse(m is CGDestructorDefinition);
+           //Check.IsTrue(m is CGMethodDefinition);
+           //Check.Contains('Destroy', m.Name);
+           //Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
+           //Check.IsFalse( m.Static);
+           //// Should not be virtual
+           //Check.AreNotEqual( m.Virtuality, CGMemberVirtualityKind.Virtual);
+           //Check.AreEqual(m.Statements.Count, 1);
+         end;
+
+         5 : begin
+         Check.IsTrue(m is CGMethodDefinition);
+           Check.AreEqual(m.Name, 'testPublic');
+         Check.AreEqual( m.Visibility, CGMemberVisibilityKind.Public);
+        Check.IsFalse( m.Static);
+           Check.IsTrue(m.CallingConvention = CGCallingConventionKind.StdCall);
+         end;
+
+       end;
+      end;
+    end;
+
+
+
+
+
   var cg := new CGOxygeneCodeGenerator();
   writeLn( cg.GenerateUnit(lunit));
 end;

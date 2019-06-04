@@ -31,6 +31,7 @@ begin
  if File.Exists(fProjectFileName) then
   begin
    var Parser := new TProjectIndexer(Compiler);
+ //  Parser.SearchPaths.Add('..\Sources');
    Parser.OnGetUnitSyntax := @UnitSyntaxEvent;
    Parser.Parse(fProjectFileName);
    exit Parser.ProjectPaths.ToArray;

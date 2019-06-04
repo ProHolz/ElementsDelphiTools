@@ -83,7 +83,19 @@ begin
           if SearchPaths.IsRelativeWinPath(unitPath) then
             unitPath :=  Path.GetFullPath(Path.Combine( filePath , unitPath));
           FUnitPaths.Add(unitName + '.pas', unitPath.ToLower);
-        end;
+        end
+        else
+          begin
+
+          FindFile(unitName+ '.pas', '', var unitPath);
+
+          if unitPath <> '' then begin
+            FProjectPaths.Add(unitPath);
+            if SearchPaths.IsRelativeWinPath(unitPath) then
+              unitPath :=  Path.GetFullPath(Path.Combine( filePath , unitPath));
+            FUnitPaths.Add(unitName + '.pas', unitPath.ToLower);
+          end
+          end;
       end;
     end;
 end;

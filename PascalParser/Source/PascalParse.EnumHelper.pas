@@ -1,9 +1,17 @@
 ﻿namespace ProHolz.Ast;
 
+type
+  {$IF ECHOES}
+   TsyntaxNodeTypeSet = set of TSyntaxNodeType;
+  {$ELSE}
+  TsyntaxNodeTypeSet = &Set<TSyntaxNodeType>;
+  {$ENDIF}
+
 //  TSyntaxNodeType
   const
     // Binary Operators
-    TSyntaxnodeTypeBinaryOperator : set of TSyntaxNodeType =[
+
+    TSyntaxnodeTypeBinaryOperator : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntAdd,
     TSyntaxNodeType.ntSub,
     TSyntaxNodeType.ntMul,
@@ -26,7 +34,7 @@
     ];
 
   // UNary Operators
-    TSyntaxnodeTypeUnaryOperator : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeUnaryOperator : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntAddr,
     TSyntaxNodeType.ntNot,
     TSyntaxNodeType.ntUnaryMinus
@@ -34,7 +42,7 @@
 
 
 // Statement
-    TSyntaxnodeTypeStatement : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeStatement : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntCall,
     TSyntaxNodeType.ntAssign,
     TSyntaxNodeType.ntIf,
@@ -57,7 +65,7 @@
 
 
 // Expressions
-    TSyntaxnodeTypeExpression : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeExpression : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntIndexed,
     TSyntaxNodeType.ntExpression,
     TSyntaxNodeType.ntExpressions,
@@ -96,7 +104,7 @@
 
     // FileFlow
 
-    TSyntaxnodeTypeFileFlow : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeFileFlow : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntCompilerDirective,
     TSyntaxNodeType.ntContains,
     TSyntaxNodeType.ntDependency,
@@ -115,14 +123,14 @@
 
 // Anonym Methods
 
-    TSyntaxnodeTypeAnonymous : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeAnonymous : TsyntaxNodeTypeSet =[
 
     TSyntaxNodeType.ntAnonymousMethodType
     ];
 
 
 // Attributes
-    TSyntaxnodeTypeAttribs : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeAttribs : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntArguments,
     TSyntaxNodeType.ntAttribute,
     TSyntaxNodeType.ntAttributes
@@ -130,14 +138,14 @@
 
 
 // Asm
-    TSyntaxnodeTypeAsm : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeAsm : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntAsmFragment,
     TSyntaxNodeType.ntAsmStatement
     ];
 
 
 // Type decl
-    TSyntaxnodeTypeTypeDecl : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeTypeDecl : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntConstant,
     TSyntaxNodeType.ntConstants,
     TSyntaxNodeType.ntField,
@@ -154,21 +162,21 @@
     ];
 
 // Type specifier
-    TSyntaxnodeTypeTypeSpec : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeTypeSpec : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntDefault,
     TSyntaxNodeType.ntPlatform
     ];
 
 
 // Comment
-    TSyntaxnodeTypeComments : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeComments : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntAnsiComment,
     TSyntaxNodeType.ntBorComment,
     TSyntaxNodeType.ntSlashesComment
     ];
 
 // Not Supported
-    TSyntaxnodeTypeNotSupported : set of TSyntaxNodeType =[
+    TSyntaxnodeTypeNotSupported : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntLabel
 
     ];

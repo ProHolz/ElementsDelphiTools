@@ -206,7 +206,7 @@ type
     ntBorComment, // Comment
     ntSlashesComment // Comment
 
-  );
+  ) of Int64;
 
   TAttributeName = public enum (
     anType,

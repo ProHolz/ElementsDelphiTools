@@ -9,6 +9,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
+    <Architecture>i386</Architecture>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
