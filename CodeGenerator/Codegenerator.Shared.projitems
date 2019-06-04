@@ -41,6 +41,12 @@
       <VirtualFolder>Code Generation</VirtualFolder>
     </Compile>
     <None Include="$(MSBuildThisFileDirectory)LICENSE.md" />
+    <Compile Include="$(MSBuildThisFileDirectory)CGSwiftCodeGenerator.swift">
+      <VirtualFolder>Code Generation</VirtualFolder>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)CGCStyleCodeGenerator.swift">
+      <VirtualFolder>Code Generation</VirtualFolder>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Code Generation — Pascal">
