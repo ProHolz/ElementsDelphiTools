@@ -1,13 +1,19 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # RemObjects Water
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "CodeGenDelphi", "..\CodeGenfromDelphi\CodeGenDelphi.elements", "{C41BD60E-51BF-4806-8063-0F6F68F78A5A}"
-EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Codegenerator (Shared)", "..\CodeGenerator\Codegenerator.Shared.elements", "{615FC69D-8D8A-4996-9D58-B042CD883951}"
 EndProject
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Shared", "..\PascalParser\Source\PascalParse.Shared.elements", "{597FB294-A480-4BC1-9C5B-768828A1D2E5}"
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Codegenerator from Delphi (Shared)", "..\CodeGenfromDelphi\CodeGenDelphi.elements", "{C41BD60E-51BF-4806-8063-0F6F68F78A5A}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "CodeTypes.Shared", "..\CodeTypes\CodeTypes.Shared.elements", "{FCF1E098-8036-47EE-8273-AAC1F2540DC8}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Delphi Parser (Shared)", "..\PascalParser\Source\PascalParse.Shared.elements", "{597FB294-A480-4BC1-9C5B-768828A1D2E5}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PlayGroundFritz", "PlayGroundFritz.elements", "{819FA3F5-F808-43DE-B59F-E009A1E26114}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "ProjectBuilder", "..\ProjectBuilder\ProjectBuilder.elements", "{2A77564C-0388-4728-9054-2014F92AF3A1}"
+EndProject
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "SimpleConvert", "..\SimpleConvert\SimpleConvert.elements", "{0A664665-40D9-4F38-AA3A-53A3E669D263}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "TestCodegen", "TestCodegen\TestCodegen.elements", "{6B1D0EA9-E8B3-40C9-89A7-BC70A375C79E}"
 EndProject
@@ -25,6 +31,14 @@ Global
 		{819FA3F5-F808-43DE-B59F-E009A1E26114}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{819FA3F5-F808-43DE-B59F-E009A1E26114}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
 		{819FA3F5-F808-43DE-B59F-E009A1E26114}.Release|AnyCPU.Build.0 = Release|AnyCPU
+		{2A77564C-0388-4728-9054-2014F92AF3A1}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{2A77564C-0388-4728-9054-2014F92AF3A1}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{2A77564C-0388-4728-9054-2014F92AF3A1}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{2A77564C-0388-4728-9054-2014F92AF3A1}.Release|AnyCPU.Build.0 = Release|AnyCPU
+		{0A664665-40D9-4F38-AA3A-53A3E669D263}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{0A664665-40D9-4F38-AA3A-53A3E669D263}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{0A664665-40D9-4F38-AA3A-53A3E669D263}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{0A664665-40D9-4F38-AA3A-53A3E669D263}.Release|AnyCPU.Build.0 = Release|AnyCPU
 		{6B1D0EA9-E8B3-40C9-89A7-BC70A375C79E}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
 		{6B1D0EA9-E8B3-40C9-89A7-BC70A375C79E}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{6B1D0EA9-E8B3-40C9-89A7-BC70A375C79E}.Release|AnyCPU.ActiveCfg = Release|AnyCPU

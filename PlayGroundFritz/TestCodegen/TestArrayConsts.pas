@@ -20,6 +20,9 @@ type
     method TestArray;
     method SeconsTest;
     method RangeTest;
+
+    method TestCairoArrayType;
+
   end;
 
 implementation
@@ -160,6 +163,8 @@ type
 var
   TwoDigitLookup : packed array[0..99] of array[1..2] of AnsiChar;
 
+
+
 ");
 
   Assert.IsNotNil(lunit);
@@ -171,16 +176,16 @@ var
     begin
     case i of
       0 :  begin
-             Check.AreEqual(GT.Name, 'TwoLevelArray');
-             Assert.IsTrue(GT.ActualType is CGArrayTypeReference);
-             var lBounds := GT.ActualType as CGArrayTypeReference;
-             Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
-             Check.IsTrue(lBounds.Type is CGArrayTypeReference);
-             lBounds := lBounds.Type as CGArrayTypeReference;
-              Check.IsTrue(lBounds.Type is CGArrayTypeReference);
-             lBounds := lBounds.Type as CGArrayTypeReference;
-             Check.IsTrue(lBounds.Type is CGPredefinedTypeReference);
-           end;
+        Check.AreEqual(GT.Name, 'TwoLevelArray');
+        Assert.IsTrue(GT.ActualType is CGArrayTypeReference);
+        var lBounds := GT.ActualType as CGArrayTypeReference;
+        Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
+        Check.IsTrue(lBounds.Type is CGArrayTypeReference);
+        lBounds := lBounds.Type as CGArrayTypeReference;
+        Check.IsTrue(lBounds.Type is CGArrayTypeReference);
+        lBounds := lBounds.Type as CGArrayTypeReference;
+        Check.IsTrue(lBounds.Type is CGPredefinedTypeReference);
+      end;
     end;
   end;
 
@@ -188,9 +193,10 @@ var
   for each matching GV : CGGlobalVariableDefinition in lunit.Globals index i  do
     begin
     var f := GV.Variable;
-    Check.IsFalse(f.Constant);
+
     case i of
       0 : begin
+          Check.IsFalse(f.Constant);
           Check.AreEqual(f.Name, 'TwoDigitLookup');
 
         Assert.IsTrue(f.Type is CGArrayTypeReference);
@@ -201,6 +207,20 @@ var
         Check.IsTrue(lBounds.Type is CGPredefinedTypeReference);
 
       end;
+
+      1 : begin
+          Check.IsTrue(f.Constant);
+        Check.AreEqual(f.Name, 'coeffsHigh');
+
+         Assert.IsTrue(f.Type is CGArrayTypeReference);
+         var lBounds := f.Type as CGArrayTypeReference;
+         Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
+         Check.IsTrue(lBounds.Type is CGArrayTypeReference);
+         lBounds := lBounds.Type as CGArrayTypeReference;
+         Check.IsTrue(lBounds.Type is CGPredefinedTypeReference);
+
+       end;
+
     end;
   end;
 end;
@@ -369,6 +389,85 @@ type
 
 
 end;
+
+
+method TestArrayConsts.TestCairoArrayType;
+begin
+  var lunit := BuildUnit(tbUnitType.interface ,"
+
+type
+  TCoeff = array[0..3] of Double;
+  TCoeffArray = array [0 .. 1, 0 .. 3] of TCoeff;
+
+
+  const
+  coeffsHigh: TCoeffArray = (((0.0899116, - 19.2349, - 4.11711, 0.183362), (0.138148, - 1.45804, 1.32044, 1.38474), (0.230903, - 0.450262, 0.219963, 0.414038),
+    (0.0590565, - 0.101062, 0.0430592, 0.0204699)), ((0.0164649, 9.89394, 0.0919496, 0.00760802), (0.0191603, - 0.0322058, 0.0134667, - 0.0825018),
+    (0.0156192, - 0.017535, 0.00326508, - 0.228157), ( - 0.0236752, 0.0405821, - 0.0173086, 0.176187)));
+
+
+");
+
+  Assert.IsNotNil(lunit);
+  Assert.AreEqual(lunit.Globals.Count, 1);
+  Assert.AreEqual(lunit.Types.Count, 2);
+
+
+  for each matching GT: CGTypeAliasDefinition  in lunit.Types index i do
+    begin
+    case i of
+      0 :  begin
+        Check.AreEqual(GT.Name, 'TCoeff');
+        Assert.IsTrue(GT.ActualType is CGArrayTypeReference);
+        var lBounds := GT.ActualType as CGArrayTypeReference;
+        Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
+        Assert.IsTrue(lBounds.Type is CGPredefinedTypeReference);
+        //lBounds := lBounds.Type as CGArrayTypeReference;
+        //Check.IsTrue(lBounds.Type is CGArrayTypeReference);
+        //lBounds := lBounds.Type as CGArrayTypeReference;
+
+      end;
+
+      1 :  begin
+        Check.AreEqual(GT.Name, 'TCoeffArray');
+        Assert.IsTrue(GT.ActualType is CGArrayTypeReference);
+        var lBounds := GT.ActualType as CGArrayTypeReference;
+        Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
+        Assert.IsTrue(lBounds.Type is CGPredefinedTypeReference);
+        //lBounds := lBounds.Type as CGArrayTypeReference;
+        //Check.IsTrue(lBounds.Type is CGArrayTypeReference);
+        //lBounds := lBounds.Type as CGArrayTypeReference;
+
+      end;
+
+
+    end;
+  end;
+
+
+  for each matching GV : CGGlobalVariableDefinition in lunit.Globals index i  do
+    begin
+    var f := GV.Variable;
+
+    case i of
+      0 : begin
+          Check.IsTrue(f.Constant);
+         Check.AreEqual(f.Name, 'coeffsHigh');
+
+        Assert.IsTrue(f.Type is CGArrayTypeReference);
+        var lBounds := f.Type as CGArrayTypeReference;
+        Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
+        Check.IsTrue(lBounds.Type is CGArrayTypeReference);
+        lBounds := lBounds.Type as CGArrayTypeReference;
+        Check.IsTrue(lBounds.Type is CGPredefinedTypeReference);
+
+      end;
+
+    end;
+  end;
+end;
+
+
 
 
 end.

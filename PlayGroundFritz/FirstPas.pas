@@ -26,7 +26,7 @@ uses
       if not hd then
         File.WriteBytes($"d:\Test\{TestName}.pas" , a)
       else
-        File.WriteBytes($"X:\Elements\ElementsDelphiTools\CtoElements\Chet\Classes\{TestName}.pas" , a);
+        File.WriteBytes($"X:\Elements\Cairo\Classes\{TestName}.pas" , a);
 
     end;
 
@@ -43,9 +43,9 @@ uses
     //  Var s :=  "D:\sourceProHolz\Abbund170\DachHolz\TypConst.pas";
     //  Var s := "D:\sourceProHolz\Abbund170\Synopse\SynLz.pas";
     // "D:\sourceProHolz\Abbund170\Cairo\Cairo.Dll.pas";
-      "D:\sourceProHolz\Abbund170\Cairo\Cairo.Types.pas";
+    //  "D:\sourceProHolz\Abbund170\Cairo\Cairo.Types.pas";
    //   Var s := "X:\Projekte\Neslib\Neslib.Clang\Neslib.Clang.pas";
-    //  "D:\sourceProHolz\Abbund170\Cairo\Cairo.Freetype.pas";
+   //   "D:\sourceProHolz\Abbund170\Cairo\Cairo.Freetype.pas";
 
 
    //   "X:\Elements\ElementsDelphiTools\CtoElements\Chet\Classes\Chet.SourceWriter.pas";
@@ -56,19 +56,26 @@ uses
      // "D:\sourceProHolz\Abbund170\bool\cppWrapperTypes.pas";
     //  "X:\Opencascade\OCC-Island\srcDelphi\OCCTypes.pas";
 
+    // Cairo
+
+    //  "X:\Elements\Cairo\Cairoimpl\Cairo.Base.pas";
+     // "X:\Elements\Cairo\Cairoimpl\Cairo.Interfaces.pas";
+     // "X:\Elements\Cairo\Cairoimpl\Cairo.Stream.pas";
+     // "X:\Elements\Cairo\Cairoimpl\Cairo.Surface.pas";
+      "X:\Elements\Cairo\Cairoimpl\Cairo.Context.pas";
 
       var Source : not nullable String;
       var Error : not nullable String;
       if TProjectIndexer.SafeOpenFileContext(s, out Source, out Error) then
       begin
         var fname := Path.GetFileNameWithoutExtension(s);
-        sb.Append(BuildInterfaceTest(Source, fname, false));
+        sb.Append(BuildInterfaceTest(Source, fname, true));
         sb.AppendLine.Append('{Next File}').AppendLine;
       end
       else
         sb.Appendline(Error);
     end;
-
+(*
     sb.Append(BuildInterfaceTest(TestRecordHelper, 'TestRecordHelper'));
     sb.AppendLine.Append('{Next File}').AppendLine;
 
@@ -143,7 +150,7 @@ uses
     sb.Append(BuildInterfaceTest(cResStrings, 'TestResStrings'));
     sb.AppendLine.Append('{Next File}').AppendLine;
 
-
+*)
 
     result := sb.ToString;
    // File.WriteText(String.Format('d:\Test\{0}.pas','AllinOne'),   result);

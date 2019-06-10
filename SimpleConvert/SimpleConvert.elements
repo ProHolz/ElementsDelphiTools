@@ -3,15 +3,13 @@
   <PropertyGroup>
     <ProductVersion>3.5</ProductVersion>
     <RootNamespace>ProHolz.CodeGen</RootNamespace>
-    <ProjectGuid>{819FA3F5-F808-43DE-B59F-E009A1E26114}</ProjectGuid>
+    <ProjectGuid>{0A664665-40D9-4F38-AA3A-53A3E669D263}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AssemblyName>PlayGroundFritz</AssemblyName>
+    <AssemblyName>SimpleConvert</AssemblyName>
     <ApplicationIcon>Properties\App.ico</ApplicationIcon>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFramework>.NETFramework4.5</TargetFramework>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
-    <TestProject>TestSingle</TestProject>
-    <KnownConditionalDefines>DEBUG;NEW_DEFINE;TRACE</KnownConditionalDefines>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>False</Optimize>
@@ -48,45 +46,23 @@
     <Reference Include="Echoes">
       <Private>True</Private>
     </Reference>
-    <Reference Include="Swift">
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
     <Content Include="Properties\App.ico" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.pas" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
     <Compile Include="Properties\Settings.Designer.pas" />
-    <Compile Include="FirstPas.pas" />
-    <Compile Include="TestUnits\TestConstArray.pas" />
-    <Compile Include="TestUnits\Test2.pas" />
-    <Compile Include="TestUnits\Marc.pas" />
-    <Compile Include="TestUnits\TestMethods.pas" />
-    <Compile Include="TestUnits\TestAll.pas" />
-    <Compile Include="TestUnits\TestRecord.pas" />
-    <Compile Include="TestUnits\TestMethodResolve.pas" />
-    <Compile Include="TestUnits\TestSetAndEnums.pas" />
-    <Compile Include="TestUnits\TestLoops.pas" />
-    <Compile Include="TestUnits\TestExceptions.pas" />
-    <Compile Include="TestUnits\TestTypes.pas" />
-    <Compile Include="TestUnits\TestAnonymous.pas" />
-    <Compile Include="TestUnits\TestGeneric.pas" />
-    <Compile Include="TestUnits\testInterfaceImpl.pas" />
-    <Compile Include="TestUnits\TestAttributes.pas" />
-    <Compile Include="TestUnits\TestIdentifier.pas" />
-    <Compile Include="TestUnits\TestWithClause.pas" />
-    <Compile Include="TestUnits\TestDllfunc.pas" />
-    <Compile Include="TestUnits\TestResourceStrings.pas" />
-    <None Include="Todo.txt" />
-    <Compile Include="TestUnits\TestRecordhelper.pas" />
+    <Compile Include="SimpleConverter.pas" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
-  <ItemGroup>
-    <Folder Include="TestUnits" />
-  </ItemGroup>
   <Import Project="..\PascalParser\Source\PascalParse.Shared.projitems" Label="Shared" />
   <Import Project="..\CodeGenerator\Codegenerator.Shared.projitems" Label="Shared" />
   <Import Project="..\CodeGenfromDelphi\CodeGenDelphi.projitems" Label="Shared" />
-  <Import Project="..\CodeTypes\CodeTypes.Shared.projitems" Label="Shared" />
 </Project>
