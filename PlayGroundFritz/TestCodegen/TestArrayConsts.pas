@@ -433,7 +433,7 @@ type
         Assert.IsTrue(GT.ActualType is CGArrayTypeReference);
         var lBounds := GT.ActualType as CGArrayTypeReference;
         Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
-        Assert.IsTrue(lBounds.Type is CGPredefinedTypeReference);
+        Assert.IsTrue(lBounds.Type is CGNamedTypeReference);
         //lBounds := lBounds.Type as CGArrayTypeReference;
         //Check.IsTrue(lBounds.Type is CGArrayTypeReference);
         //lBounds := lBounds.Type as CGArrayTypeReference;
@@ -454,12 +454,12 @@ type
           Check.IsTrue(f.Constant);
          Check.AreEqual(f.Name, 'coeffsHigh');
 
-        Assert.IsTrue(f.Type is CGArrayTypeReference);
-        var lBounds := f.Type as CGArrayTypeReference;
-        Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Static);
-        Check.IsTrue(lBounds.Type is CGArrayTypeReference);
-        lBounds := lBounds.Type as CGArrayTypeReference;
-        Check.IsTrue(lBounds.Type is CGPredefinedTypeReference);
+        Assert.IsTrue(f.Type is CGNamedTypeReference);
+        Assert.IsTrue(f.Initializer is CGArrayLiteralExpression);
+        var lBounds := f.Initializer as CGArrayLiteralExpression;
+        Check.AreEqual( lBounds.ArrayKind, CGArrayKind.Dynamic);
+        Check.AreEqual( lBounds.Elements.Count, 2);
+
 
       end;
 
