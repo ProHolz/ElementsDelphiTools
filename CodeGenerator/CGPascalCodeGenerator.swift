@@ -1496,7 +1496,7 @@ public __abstract class CGPascalCodeGenerator : CGCodeGenerator {
 				AppendLine()
 				for m in localMethods {
 					pascalGenerateMethodHeader(m, type: nil, methodKeyword: pascalKeywordForMethod(m), implementation: false)
-					pascalGenerateMethodBody(m, type: nil)
+					pascalGenerateMethodBody(m, type: nil, allowLocalVariables: true)
 				}
 				decIndent()
 			}
@@ -1567,7 +1567,7 @@ public __abstract class CGPascalCodeGenerator : CGCodeGenerator {
 	func pascalGenerateMethodImplementation(_ method: CGMethodDefinition, type: CGTypeDefinition) {
 		if (method.Virtuality != CGMemberVirtualityKind.Abstract) && !method.External && !method.Empty {
 			pascalGenerateMethodHeader(method, type: type, methodKeyword: pascalKeywordForMethod(method), implementation: true)
-			pascalGenerateMethodBody(method, type: type)
+			pascalGenerateMethodBody(method, type: type, allowLocalVariables: true)
 		}
 	}
 
