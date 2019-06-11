@@ -131,7 +131,11 @@ begin
     var lTemp := new List<CGExpression>;
     for each expression in node.ChildNodes do
       if expression.HasChildren then
-        lTemp.add(PrepareSingleExpressionValue(expression.ChildNodes[0]))
+        begin
+
+       // for each child in expression.ChildNodes do
+        lTemp.add(PrepareSingleExpressionValue(expression));
+        end
       else
         if expression.Typ = TSyntaxNodeType.ntType then
         lTemp.add(new CGNamedIdentifierExpression(expression.AttribName));
