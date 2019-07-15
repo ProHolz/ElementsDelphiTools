@@ -21,8 +21,8 @@ procedure TMyTestObject.Test1;
 begin
   Check.AreEqual(TptTokenKind.ptAbort.EnumName, 'Abort');
   Check.AreEqual(TptTokenKind.ptXor.EnumName, 'Xor');
-  Check.IsTrue(TptTokenKind.ptAnsiComment.isJunk);
-  Check.IsTrue(TptTokenKind.ptUndefDirect.isJunk);
+  Check.IsTrue(TptTokenKind.ptAnsiComment.IsJunk);
+  Check.IsTrue(TptTokenKind.ptUndefDirect.IsJunk);
 
 end;
 

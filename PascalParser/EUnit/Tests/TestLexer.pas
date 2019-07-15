@@ -10,12 +10,13 @@ type
   private
 
    fLexer : TmwBasePasLex;
-    method TestElements;
+
   public
     method Setup; override;
     procedure Teardown; override;
 
     method Test;
+    method TestElements;
 
   end;
 
@@ -72,7 +73,7 @@ end;
 
 method LexerTest.Setup;
 begin
-   fLexer := new TmwBasePasLex(DelphiCompiler.dcDefault);
+   fLexer := new TmwBasePasLex(DelphiCompiler.Default);
 end;
 
 method LexerTest.Teardown;

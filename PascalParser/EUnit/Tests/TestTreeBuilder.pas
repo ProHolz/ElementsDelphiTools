@@ -31,7 +31,7 @@ implementation
 
 method TestTreeBuilder.FirstTest;
 begin
- var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+ var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Xe7);
  try
   Builder.RunWithString(cBinaryXml);
  except
@@ -44,14 +44,14 @@ end;
 
 method TestTreeBuilder.TestCompilerVersions;
 begin
- var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+ var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Xe7);
 //
 
  Check.DoesNotThrows(->Builder.RunwithString(cCompilerVersions28));
  // Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
  Check.DoesNotThrows(->Builder.RunWithString(cCompilerVersionsGreater28));
 
- Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcRio);
+ Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Rio);
  Check.Throws(->Builder.RunWithString(cCompilerVersions28));
  Check.Throws(->Builder.RunWithString(cCompilerVersionsGreater28));
 
@@ -59,7 +59,7 @@ end;
 
 method TestTreeBuilder.TestCompilerDirectives;
 begin
-  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Xe7);
 
  try
   Builder.RunWithString(cTestCompilerDirectives );
@@ -71,7 +71,7 @@ end;
 
 method TestTreeBuilder.TestSynEditUnit;
 begin
-  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Xe7);
 
   try
     Builder.RunWithString(ctestSyn );
@@ -83,7 +83,7 @@ end;
 
 method TestTreeBuilder.TestSynEditUnitFromFile;
 begin
-  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Xe7);
   var Source : String;
   if Environment.OS = OperatingSystem.macOS then
     Source := File.ReadText("/Volumes/HD2/Projekte/SynEdit/Source/SynUsp10.pas")
@@ -100,7 +100,7 @@ end;
 
 method TestTreeBuilder.TestVariantRecord;
 begin
-  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Xe7);
 
   try
     Builder.RunWithString(ctestVariantRecord );
@@ -112,7 +112,7 @@ end;
 
 method TestTreeBuilder.TestConstArrays;
 begin
-  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Xe7);
   Var Root := Builder.RunWithString(cTestArray );
 
   Var lConsts := Root.FindNode(TSyntaxNodeType.ntInterface):FindChilds(TSyntaxNodeType.ntConstants);
@@ -126,7 +126,7 @@ end;
 
 method TestTreeBuilder.TestNames;
 begin
-  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Xe7);
   Var Root := Builder.RunWithString(cTestClassMethodNames );
   var node := Root.FindNode(TSyntaxNodeType.ntInterface):FindNode(TSyntaxNodeType.ntTypeSection);
   Assert.IsnotNil(node);
@@ -150,7 +150,7 @@ begin
 
 method TestTreeBuilder.TestAsm;
 begin
-  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcXe7);
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Xe7);
   Var Root := Builder.RunWithString(cTestAsm );
   Check.AreEqual(Root.Typ, TSyntaxNodeType.ntUnit);
   //var Xml2 := TSyntaxTreeWriter.ToXML(Root, true);
@@ -159,7 +159,7 @@ end;
 
 method TestTreeBuilder.TestNameSpace;
 begin
-  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.dcDefault);
+  var Builder := new TPasSyntaxTreeBuilder(DelphiCompiler.Default);
   Var Root := Builder.RunWithString(cTestNamespace );
   Check.AreEqual(Root.Typ, TSyntaxNodeType.ntNamespace);
 

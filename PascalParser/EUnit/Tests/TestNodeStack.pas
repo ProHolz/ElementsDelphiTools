@@ -18,7 +18,7 @@ Procedure NodeStackTest.Test;
 Var lNodeStack : TNodeStack;
     lLexer : TPasLexer;
 begin
-    lLexer := new TPasLexer(new TmwPasLex(DelphiCompiler.dcDefault), @onStringEvent);
+    lLexer := new TPasLexer(new TmwPasLex(DelphiCompiler.Default), @onStringEvent);
    lNodeStack := new TNodeStack(lLexer);
 
    Assert.AreEqual(0, lNodeStack.Count);

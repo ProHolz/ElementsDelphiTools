@@ -109,10 +109,10 @@ end;
 
 procedure LexerPasTest.Setup;
 begin
-   fLexer := new TmwPasLex(DelphiCompiler.dcDefault);
+   fLexer := new TmwPasLex(DelphiCompiler.Default);
 end;
 
-procedure LexerPasTest.TearDown;
+procedure LexerPasTest.Teardown;
 begin
 
 end;
