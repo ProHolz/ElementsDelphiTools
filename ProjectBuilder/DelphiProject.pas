@@ -8,7 +8,7 @@ interface
     DelphiProject = class
     private
       fProjectFileName : String;
-      Compiler : DelphiCompiler := DelphiCompiler.dcDefault;
+      Compiler : DelphiCompiler := DelphiCompiler.Default;
       method UnitSyntaxEvent(Sender: Object; const fileName: String; var syntaxTree: TSyntaxNode; var doParseUnit: Boolean; var doAbort: Boolean);
       method GetContainingFiles : Array of String;
     public
