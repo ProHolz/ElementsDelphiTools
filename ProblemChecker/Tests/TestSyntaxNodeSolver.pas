@@ -15,9 +15,9 @@ type
   protected
     method PrepareSimpleUnit : TSyntaxNode;
     method PrepareSimpleUnitWithUses: TSyntaxNode;
-    method prepareUnitWithType : TSyntaxNode;
+    method PrepareUnitWithType : TSyntaxNode;
   public
-   method Setup; override;
+    method Setup; override;
     method SimpleUnit;
     method SimpleUnitWithUses;
     method SimpleUnitWithUsesArray;
@@ -38,7 +38,7 @@ end;
 method TestSyntaxNodeSolver.PrepareSimpleUnit: TSyntaxNode;
 begin
   const simple = 'Unit Test; interface implementation end.';
- result := TPasSyntaxTreeBuilder.RunWithString(simple, false);
+  result := TPasSyntaxTreeBuilder.RunWithString(simple, false);
 end;
 
 method TestSyntaxNodeSolver.PrepareSimpleUnitWithUses: TSyntaxNode;
@@ -48,7 +48,7 @@ begin
 end;
 
 
-method TestSyntaxNodeSolver.prepareUnitWithType: TSyntaxNode;
+method TestSyntaxNodeSolver.PrepareUnitWithType: TSyntaxNode;
 begin
   result := TPasSyntaxTreeBuilder.RunWithString(cTest1, false);
 end;
@@ -90,7 +90,7 @@ begin
   Assert.IsNotNil(lnodes);
   Check.AreEqual(lnodes.Count, 2);
 
-   lnodes := FSolver.getNodeArrayAll([SNT.ntImplementation, SNT.ntUses, SNT.ntUnit], node);
+  lnodes := FSolver.getNodeArrayAll([SNT.ntImplementation, SNT.ntUses, SNT.ntUnit], node);
   Assert.IsNotNil(lnodes);
   Check.AreEqual(lnodes.Count, 3);
 end;
@@ -99,7 +99,7 @@ end;
 method TestSyntaxNodeSolver.UnitWithGlobalTypes;
 begin
   Assert.IsNotNil(FSolver);
-  var node := prepareUnitWithType;
+  var node := PrepareUnitWithType;
   Assert.IsNotNil(node);
   Assert.AreEqual(node.Typ, TSyntaxNodeType.ntUnit);
   var lnodes := FSolver.getNodeArrayAll([SNT.ntInterface, SNT.ntUses, SNT.ntUnit], node);
@@ -122,13 +122,13 @@ method TestSyntaxNodeSolver.TestGetPublicClass;
 begin
 
 // const  lPublicTypesInterface = [SNT.ntInterface, SNT.ntTypeSection ]; //
-  var node := prepareUnitWithType;
+  var node := PrepareUnitWithType;
   var lClasses := FSolver.getPublicClass(node);
   Assert.AreEqual(lClasses.Count,2);
 
-var lnodes := FSolver.getPublicTypes(node, 'class');
+  var lnodes := FSolver.getPublicTypes(node, 'class');
 
-Check.AreEqual(lnodes:Count, 2);
+  Check.AreEqual(lnodes:Count, 2);
 
 end;
 
