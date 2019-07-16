@@ -51,11 +51,11 @@ type
 
   TProjectIncludeHandler = public class(IIncludeHandler)
   private
-    FIncludeCache: TIncludeCache;
-    FIndexer     : TProjectIndexer;
-    FProblems    : TParseProblems;
+    fIncludeCache: TIncludeCache;
+    fIndexer     : TProjectIndexer;
+    fProblems    : TParseProblems;
   //  FUnitFile           : String;
-    FUnitFileFolder     : String;
+    fUnitFileFolder     : String;
   public
     constructor (indexer: TProjectIndexer; includeCache: TIncludeCache; problemList: TParseProblems; const currentFile: String);
     method  GetIncludeFileContent(const fileName: not nullable String): not nullable String;
@@ -67,10 +67,10 @@ implementation
 
 constructor TProjectIncludeHandler(indexer: TProjectIndexer; includeCache: TIncludeCache; problemList: TParseProblems; const currentFile: String);
 begin
-  FIndexer := indexer;
-  FIncludeCache := includeCache;
-  FProblems := problemList;
-  FUnitFileFolder :=   Path.GetParentDirectory(currentFile);
+  fIndexer := indexer;
+  fIncludeCache := includeCache;
+  fProblems := problemList;
+  fUnitFileFolder :=   Path.GetParentDirectory(currentFile);
 //  FUnitFile := Path.GetFileNameWithoutExtension(currentFile);
 end;
 
@@ -84,35 +84,35 @@ begin
 
   var  fName := fileName.ToLower;
 
-  key := fName + #13 + FUnitFileFolder;
-  if FIncludeCache.ContainsKey(key) then
-    exit FIncludeCache[key].Content as not nullable;
+  key := fName + #13 + fUnitFileFolder;
+  if fIncludeCache.ContainsKey(key) then
+    exit fIncludeCache[key].Content as not nullable;
     //Exit(includeInfo.Content);
 
-  if not FIndexer.FindFile(fName, FUnitFileFolder, var  filePath) then
+  if not fIndexer.FindFile(fName, fUnitFileFolder, var  filePath) then
   begin
-    FProblems.LogProblem(TParseProblemType.ptCantFindFile, fName, 'Source folder: ' + FUnitFileFolder);
+    fProblems.LogProblem(TParseProblemType.ptCantFindFile, fName, 'Source folder: ' + fUnitFileFolder);
     includeInfo.FileName := '';
     includeInfo.Content := '';
-    FIncludeCache.Add(key, includeInfo);
+    fIncludeCache.Add(key, includeInfo);
     Exit('');
   end;
 
-  if FIncludeCache.ContainsKey(filePath) then
-    exit FIncludeCache[filePath].Content as not nullable;
+  if fIncludeCache.ContainsKey(filePath) then
+    exit fIncludeCache[filePath].Content as not nullable;
 
 
   if not TProjectIndexer.SafeOpenFileContext(filePath, out result, out errorMsg) then
   begin
-    FProblems.LogProblem(TParseProblemType.ptCantOpenFile, filePath, errorMsg);
+    fProblems.LogProblem(TParseProblemType.ptCantOpenFile, filePath, errorMsg);
     Result := ''
   end
   else
   begin
     includeInfo.FileName := filePath;
     includeInfo.Content := Result;
-    FIncludeCache.Add(fName + #13 + FUnitFileFolder, includeInfo);
-    FIncludeCache.Add(filePath, includeInfo);
+    fIncludeCache.Add(fName + #13 + fUnitFileFolder, includeInfo);
+    fIncludeCache.Add(filePath, includeInfo);
   end;
 end;
 

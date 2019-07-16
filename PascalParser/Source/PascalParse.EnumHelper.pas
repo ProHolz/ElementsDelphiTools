@@ -2,8 +2,8 @@
 
 type
   {$IF ECHOES}
-   TsyntaxNodeTypeSet = set of TSyntaxNodeType;
-  {$ELSE}
+  TsyntaxNodeTypeSet = set of TSyntaxNodeType;
+ {$ELSE}
   TsyntaxNodeTypeSet = &Set<TSyntaxNodeType>;
   {$ENDIF}
 
@@ -61,10 +61,10 @@ type
     TSyntaxNodeType.ntExpression,
     TSyntaxNodeType.ntRaise,
     TSyntaxNodeType.ntLabeledStatement
-  ];
+    ];
 
 
-// Expressions
+  // Expressions
     TSyntaxnodeTypeExpression : TsyntaxNodeTypeSet =[
     TSyntaxNodeType.ntIndexed,
     TSyntaxNodeType.ntExpression,
@@ -81,7 +81,7 @@ type
     TSyntaxNodeType.ntAnonymousMethod,
 
     TSyntaxNodeType.ntLHS,
-     TSyntaxNodeType.ntLiteral,
+    TSyntaxNodeType.ntLiteral,
     TSyntaxNodeType.ntName,
     TSyntaxNodeType.ntParameter,
     TSyntaxNodeType.ntParameters,
@@ -190,34 +190,34 @@ type
       exit Self.ToString.Substring(2);
     end;
 
-    method isOperator : Boolean;
+    method IsOperator : Boolean;
     begin
       result := isBinaryOperator
                 or isUnaryOperator;
     end;
 
-    method isBinaryOperator : Boolean;
+    method IsBinaryOperator : Boolean;
     begin
       exit self in TSyntaxnodeTypeBinaryOperator;
     end;
 
-    method isUnaryOperator : Boolean;
+    method IsUnaryOperator : Boolean;
     begin
       exit self in TSyntaxnodeTypeUnaryOperator;
     end;
 
 
-    method isStatement : Boolean;
+    method IsStatement : Boolean;
     begin
       exit self in TSyntaxnodeTypeStatement;
     end;
 
-    method isExpression : Boolean;
+    method IsExpression : Boolean;
     begin
       exit self in TSyntaxnodeTypeExpression;
     end;
 
-    method notSupported : Boolean;
+    method NotSupported : Boolean;
     begin
       exit self in TSyntaxnodeTypeNotSupported;
     end;

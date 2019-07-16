@@ -4,7 +4,6 @@ interface
 type
   TUnitParsedEvent = public block (Sender: Object; const unitName: String; const fileName: String; var syntaxTree: TSyntaxNode; syntaxTreeFromParser: Boolean; var doAbort: Boolean);
 
-
   TUnitInfo = public record
   public
     Name: not nullable String := '';
@@ -12,35 +11,30 @@ type
     SyntaxTree: TSyntaxNode;
   end;
 
-
   TParsedUnits = public class(List<TUnitInfo>)
   public
     constructor; empty;
-    method Initialize(parsedUnits: TParsedUnitsCache; unitPaths: TUnitPathsCache);
+    method Initialize(ParsedUnits: TParsedUnitsCache; UnitPaths: TUnitPathsCache);
   end;
 
 implementation
 { TProjectIndexer.TParsedUnits }
 
-method TParsedUnits.Initialize(parsedUnits: TParsedUnitsCache; unitPaths: TUnitPathsCache);
-var
-info    : TUnitInfo;
-unitPath: String;
+method TParsedUnits.Initialize(ParsedUnits: TParsedUnitsCache; UnitPaths: TUnitPathsCache);
 begin
   RemoveAll;
-  for kv in parsedUnits.Keys do
+  for kv in ParsedUnits.Keys do
   begin
-    if  parsedUnits[kv] = nil then
+    if  ParsedUnits[kv] = nil then
       continue; //for kv
+    var  info    : TUnitInfo;
     info.Name := kv as not nullable;
-    info.SyntaxTree := parsedUnits[kv];
-    if unitPaths.ContainsKey(kv+'.pas')
-    then unitPath :=  unitPaths[kv+'.pas']
-    else unitPath := '';
-            //or unitPaths.TryGetValue(kv.Key + '.dpr', unitPath))
-
-    info.Path := unitPath as not nullable;
-
+    info.SyntaxTree := ParsedUnits[kv];
+    var unitpath :=
+    if UnitPaths.ContainsKey(kv+'.pas')
+    then   UnitPaths[kv+'.pas']
+    else   '';
+    info.Path := unitpath as not nullable;
     Add(info);
   end;
 

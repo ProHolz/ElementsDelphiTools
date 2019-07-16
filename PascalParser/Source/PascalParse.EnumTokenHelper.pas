@@ -25,7 +25,7 @@ type
         TptTokenKind.ptUndefDirect];
     end;
 
-    method isJunk : Boolean; inline;
+    method IsJunk : Boolean; inline;
     begin
       exit IsTokenIDJunk(self);
     end;

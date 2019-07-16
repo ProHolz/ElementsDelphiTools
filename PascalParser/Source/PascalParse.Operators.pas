@@ -60,7 +60,6 @@ type
     begin
       result := new TOperatorInfo();
       result.Typ := aTyp;
-
     end;
   end;
 

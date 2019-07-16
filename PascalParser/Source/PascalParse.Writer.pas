@@ -27,24 +27,24 @@ begin
 end;
 
 begin
-if Data = nil  then exit '';
+  if Data = nil  then exit '';
 
   res := new Char[ Data.Length * 6];
-  n := 0;
-  for i := 0 to Data.Length-1 do
-    case Data[i] of
-      '<': Encode('&lt;');
-      '>': Encode('&gt;');
-      '&': Encode('&amp;');
-      '"': Encode('&quot;');
-      '''': Encode('&apos;');
-      else
-        res[n] := Data[i];
-        inc(n);
-    end;
-  Result := new String(res, 0, n) as not nullable;
+    n := 0;
+    for i := 0 to Data.Length-1 do
+      case Data[i] of
+        '<': Encode('&lt;');
+        '>': Encode('&gt;');
+        '&': Encode('&amp;');
+        '"': Encode('&quot;');
+        '''': Encode('&apos;');
+        else
+          res[n] := Data[i];
+          inc(n);
+      end;
+    Result := new String(res, 0, n) as not nullable;
 
-end;
+  end;
 
 
   method NodeToXMLInternal(const Node: TSyntaxNode; const Indent: not nullable  String);
@@ -112,7 +112,7 @@ class method TSyntaxTreeWriter.ToXML(const Root: TSyntaxNode;  Formatted: Boolea
 var
 Builder: StringBuilder;
 begin
-Builder := new StringBuilder;
+  Builder := new StringBuilder;
   NodeToXML(Builder, Root, Formatted);
   Result := '<?xml version="1.0"?>' +   Environment.LineBreak + Builder.ToString;
 

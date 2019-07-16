@@ -6,9 +6,9 @@ type
 
   TBinarySerializer =public class
   private
-    FStream     : BinaryStream;
-    FStringList : List<not nullable String>;
-    FStringTable: Dictionary<not nullable String,Integer>;
+    fStream     : BinaryStream;
+    fStringList : List<not nullable String>;
+    fStringTable: Dictionary<not nullable String,Integer>;
   protected
     method CheckSignature: Boolean;
     method CheckVersion: Boolean;
@@ -32,13 +32,13 @@ const
 
   method TBinarySerializer.CheckSignature: Boolean;
   begin
-    var sig := FStream.ReadString(CSignature.Length);
+    var sig := fStream.ReadString(CSignature.Length);
     result := sig = CSignature;
   end;
 
   method TBinarySerializer.CheckVersion: Boolean;
   begin
-    var Version := FStream.ReadInt32;
+    var Version := fStream.ReadInt32;
     result := Version = $01000000;
   end;
 
@@ -142,7 +142,7 @@ const
     shift := 0;
     num := 0;
     repeat
-      lowPart := FStream.ReadByte;
+      lowPart := fStream.ReadByte;
 
       num := num OR ((lowPart AND $7F) SHL shift);
       inc(shift, 7);
@@ -163,15 +163,15 @@ const
       Exit;
     if (len SHR 24) = $FF then begin
       id := len AND $00FFFFFF;
-      if id >= FStringList.Count then
+      if id >= fStringList.Count then
         Exit;
-      str := FStringList[id];
+      str := fStringList[id];
     end
     else begin
-      str := FStream.ReadString(len) as not nullable String;
+      str := fStream.ReadString(len) as not nullable String;
 
       if length(str) > 4 then
-        FStringList.Add(str);
+        fStringList.Add(str);
     end;
 
     Result := true;
@@ -234,7 +234,7 @@ const
       Num := Num SHR 7;
       if Num <> 0 then
         lowPart := lowPart OR $80;
-      FStream.WriteByte (lowPart)
+      fStream.WriteByte (lowPart)
 
       until Num = 0;
 
@@ -249,16 +249,16 @@ const
   begin
     Result := false;
 
-    if (S.Length > 4) and FStringTable.ContainsKey(S) then begin
-      id := FStringTable[S];
+    if (S.Length > 4) and fStringTable.ContainsKey(S) then begin
+      id := fStringTable[S];
       if not WriteNumber(Cardinal(id) OR $FF000000) then
         Exit;
     end
     else begin
       if  (S.Length > 4) then
       begin
-        FStringTable.Add(S, FStringTable.Count);
-        if FStringTable.Count > $FFFFFF then
+        fStringTable.Add(S, fStringTable.Count);
+        if fStringTable.Count > $FFFFFF then
           raise new Exception('BinarySerializer.WriteString: Too many strings!');
       end;
 
@@ -266,7 +266,7 @@ const
       if not WriteNumber(i) then
         Exit;
       if i > 0 then
-        FStream.WriteString(S);
+        fStream.WriteString(S);
     end;
 
     Result := true;
@@ -275,9 +275,9 @@ const
   method TBinarySerializer.Read(Stream: Stream; var Root: TSyntaxNode): Boolean;
   begin
     Result := false;
-    FStringList := new List<not nullable String>;
+    fStringList := new List<not nullable String>;
 
-    FStream :=  new BinaryStream( Stream);
+    fStream :=  new BinaryStream( Stream);
     if not CheckSignature then
       Exit;
     if not CheckVersion then
@@ -293,13 +293,13 @@ const
   method TBinarySerializer.Write(Stream: Stream; Root: TSyntaxNode): Boolean;
   begin
     try
-      FStringTable := new Dictionary<not nullable String,Integer>;
+      fStringTable := new Dictionary<not nullable String,Integer>;
 
-      FStream :=  new BinaryStream(Stream);
-      FStream.WriteString(CSignature);
+      fStream :=  new BinaryStream(Stream);
+      fStream.WriteString(CSignature);
 
       var version :Integer := $01000000;
-      FStream.WriteInt32(version);
+      fStream.WriteInt32(version);
 
       if not WriteNode(Root) then
         Exit false;

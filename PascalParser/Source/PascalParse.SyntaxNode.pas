@@ -53,8 +53,8 @@ type
     method GetHasChildren: Boolean;
     method GetHasAttributes: Boolean;
   protected
-    FAttributes: Dictionary<TAttributeName, String>;
-    FChildNodes: List<TSyntaxNode>;
+    fAttributes: Dictionary<TAttributeName, String>;
+    fChildNodes: List<TSyntaxNode>;
     method NewNode: TSyntaxNode; virtual;
     method InitFields;
 
@@ -91,8 +91,8 @@ type
 
     property Typ: TSyntaxNodeType read  protected write;
 
-    property Attributes: Dictionary<TAttributeName, String> read FAttributes;
-    property ChildNodes: List<TSyntaxNode> read FChildNodes;
+    property Attributes: Dictionary<TAttributeName, String> read fAttributes;
+    property ChildNodes: List<TSyntaxNode> read fChildNodes;
     property HasAttributes: Boolean read GetHasAttributes;
     property HasChildren: Boolean read GetHasChildren;
 
@@ -137,137 +137,137 @@ end;
 // Instance Methods
 method TSyntaxNode.SetAttribute(const Key: TAttributeName; const Value: not nullable string);
 begin
-  if not FAttributes.ContainsKey(Key)  then
-    FAttributes.Add(Key, Value)
+  if not fAttributes.ContainsKey(Key)  then
+    fAttributes.Add(Key, Value)
   else
-    FAttributes[Key] := Value;
+    fAttributes[Key] := Value;
 end;
 
 
 method TSyntaxNode.AddChild(Node: TSyntaxNode): TSyntaxNode;
 require
   Node <> nil;
-  begin
-    FChildNodes.Add(Node);
-    Node.ParentNode := Self;
-    Result := Node;
+begin
+  fChildNodes.Add(Node);
+  Node.ParentNode := Self;
+  Result := Node;
+end;
+
+method TSyntaxNode.AddChild(aTyp: TSyntaxNodeType): TSyntaxNode;
+begin
+  Result := AddChild(new TSyntaxNode(aTyp));
+end;
+
+method TSyntaxNode.InitFields;
+begin
+  fAttributes := new Dictionary<TAttributeName, String>();
+  fChildNodes:= new List<TSyntaxNode>();
+end;
+
+method TSyntaxNode.Clone: TSyntaxNode;
+
+begin
+  result := NewNode;
+  for item in fChildNodes  do
+    result.AddChild(item.Clone);
+  result.fAttributes.Add(fAttributes);
+  result.AssignPositionFrom(Self);
+
+end;
+
+
+method TSyntaxNode.ExtractChild(Node: TSyntaxNode) : TSyntaxNode;
+begin
+  if fChildNodes.Contains(Node) then
+    fChildNodes.Remove(Node);
+  result := Node;
+end;
+
+method TSyntaxNode.DeleteChild(Node: TSyntaxNode);
+begin
+  ExtractChild(Node);
+end;
+
+
+method TSyntaxNode.FindNode(aTyp: TSyntaxNodeType): TSyntaxNode;
+begin
+  exit  fChildNodes.FirstOrDefault((Item)->(Item.Typ = aTyp));
+end;
+
+method TSyntaxNode.FindAllNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
+begin
+  var ltemp := new List<TSyntaxNode>();
+  for lNode in ChildNodes do
+    begin
+    if lNode.Typ = aTyp then
+      ltemp.Add(lNode);
+    ltemp.Add(lNode.FindAllNodes(aTyp));
   end;
+  result := ltemp.ToArray;
+end;
 
-  method TSyntaxNode.AddChild(aTyp: TSyntaxNodeType): TSyntaxNode;
-  begin
-    Result := AddChild(new TSyntaxNode(aTyp));
-  end;
-
-  method TSyntaxNode.InitFields;
-  begin
-    FAttributes := new Dictionary<TAttributeName, String>();
-    FChildNodes:= new List<TSyntaxNode>();
-  end;
-
-  method TSyntaxNode.Clone: TSyntaxNode;
-
-  begin
-    result := NewNode;
-    for item in FChildNodes  do
-      result.AddChild(item.Clone);
-    result.FAttributes.Add(FAttributes);
-    result.AssignPositionFrom(Self);
-
-  end;
+method TSyntaxNode.FindChilds(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
+begin
+  var ltemp := new List<TSyntaxNode>();
+  for each lNode in ChildNodes.Where(Item->Item.Typ = aTyp) do
+    ltemp.Add(lNode);
+  result := ltemp.ToArray;
+end;
 
 
-  method TSyntaxNode.ExtractChild(Node: TSyntaxNode) : TSyntaxNode;
-  begin
-    if FChildNodes.Contains(Node) then
-      FChildNodes.Remove(Node);
-      result := Node;
-  end;
+method TSyntaxNode.GetAttribute(const Key: TAttributeName): not nullable string;
+begin
+  if fAttributes.ContainsKey(Key) then
+    exit fAttributes.Item[Key] as not nullable
+  else
+    exit '';
+end;
 
-  method TSyntaxNode.DeleteChild(Node: TSyntaxNode);
-  begin
-    ExtractChild(Node);
-  end;
+method TSyntaxNode.GetHasAttributes: Boolean;
+begin
+  Result := fAttributes.Count > 0;
+end;
 
+method TSyntaxNode.GetHasChildren: Boolean;
+begin
+  Result := fChildNodes.Count > 0;
+end;
 
-  method TSyntaxNode.FindNode(aTyp: TSyntaxNodeType): TSyntaxNode;
-  begin
-    exit  FChildNodes.FirstOrDefault((Item)->(Item.Typ = aTyp));
-  end;
+method TSyntaxNode.HasAttribute(const Key: TAttributeName): Boolean;
+begin
+  exit fAttributes.ContainsKey(Key)
+end;
 
-  method TSyntaxNode.FindAllNodes(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
-  begin
-    var ltemp := new List<TSyntaxNode>();
-    for lNode in ChildNodes do
-      begin
-      if lNode.Typ = aTyp then
-        ltemp.Add(lNode);
-      ltemp.Add(lNode.FindAllNodes(aTyp));
-    end;
-    result := ltemp.ToArray;
-  end;
+method TSyntaxNode.ClearAttributes;
+begin
+  fAttributes.RemoveAll;
+end;
 
-  method TSyntaxNode.FindChilds(aTyp: TSyntaxNodeType): Array of TSyntaxNode;
-  begin
-    var ltemp := new List<TSyntaxNode>();
-    for each lNode in ChildNodes.Where(Item->Item.Typ = aTyp) do
-     ltemp.Add(lNode);
-    result := ltemp.ToArray;
-  end;
+method TSyntaxNode.AssignPositionFrom(const Node: TSyntaxNode);
+begin
+  Col := Node.Col;
+  Line := Node.Line;
+  FileName := Node.FileName;
+end;
 
+method TSyntaxNode.AttribName: not nullable String;
+begin
+  result := GetAttribute(TAttributeName.anName);
+end;
 
-  method TSyntaxNode.GetAttribute(const Key: TAttributeName): not nullable string;
-  begin
-    if FAttributes.ContainsKey(Key) then
-      exit FAttributes.Item[Key] as not nullable
-    else
-      exit '';
-  end;
+method TSyntaxNode.AttribKind: not nullable String;
+begin
+  result := GetAttribute(TAttributeName.anKind);
+end;
 
-  method TSyntaxNode.GetHasAttributes: Boolean;
-  begin
-    Result := FAttributes.Count > 0;
-  end;
-
-  method TSyntaxNode.GetHasChildren: Boolean;
-  begin
-    Result := FChildNodes.Count > 0;
-  end;
-
-  method TSyntaxNode.HasAttribute(const Key: TAttributeName): Boolean;
-  begin
-    exit FAttributes.ContainsKey(Key)
-  end;
-
-  method TSyntaxNode.ClearAttributes;
-  begin
-    FAttributes.RemoveAll;
-  end;
-
-  method TSyntaxNode.AssignPositionFrom(const Node: TSyntaxNode);
-  begin
-    Col := Node.Col;
-    Line := Node.Line;
-    FileName := Node.FileName;
-  end;
-
-  method TSyntaxNode.AttribName: not nullable String;
-  begin
-    result := GetAttribute(TAttributeName.anName);
-  end;
-
-  method TSyntaxNode.AttribKind: not nullable String;
-  begin
-    result := GetAttribute(TAttributeName.anKind);
-  end;
-
-  method TSyntaxNode.AttribType: not nullable String;
-  begin
-    result := GetAttribute(TAttributeName.anType);
-  end;
+method TSyntaxNode.AttribType: not nullable String;
+begin
+  result := GetAttribute(TAttributeName.anType);
+end;
 
 method TSyntaxNode.ChildCount: Integer;
 begin
- result := ChildNodes.Count;
+  result := ChildNodes.Count;
 end;
 
 

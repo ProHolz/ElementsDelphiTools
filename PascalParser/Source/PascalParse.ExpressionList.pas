@@ -50,6 +50,8 @@ interface
 type
   TExpressionTools = static class
   private
+    class method IsRoundClose(Typ: TSyntaxNodeType): Boolean; inline;
+    class method IsRoundOpen(Typ: TSyntaxNodeType): Boolean; inline;
     method CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
   public
     method ExprToReverseNotation(Expr: List<TSyntaxNode>): List<TSyntaxNode>;
@@ -60,23 +62,25 @@ type
 
 implementation
 
-
-method IsRoundClose(Typ: TSyntaxNodeType): Boolean; inline;
+class method TExpressionTools.IsRoundClose(Typ: TSyntaxNodeType): Boolean; inline;
 begin
   Result := Typ = TSyntaxNodeType.ntRoundClose;
 end;
 
-method IsRoundOpen(Typ: TSyntaxNodeType): Boolean; inline;
+class method TExpressionTools.IsRoundOpen(Typ: TSyntaxNodeType): Boolean; inline;
 begin
   Result := Typ = TSyntaxNodeType.ntRoundOpen;
 end;
 
-
+method TExpressionTools.CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
+begin
+  Result := new TSyntaxNode(NodeType);
+  Result.AssignPositionFrom(ParentNode);
+end;
 
 method TExpressionTools.ExprToReverseNotation(Expr: List<TSyntaxNode>): List<TSyntaxNode>;
 var
 Stack: Stack<TSyntaxNode>;
-  //Node: TSyntaxNode;
 begin
   Result := new List<TSyntaxNode>();
   try
@@ -159,56 +163,47 @@ PrevNode: TSyntaxNode;
 begin
   Result := new List<TSyntaxNode>;
   try
-    //Result.Capacity := ExprNodes.Count * 2;
+    PrevNode := nil;
+    for Node in ExprNodes do
+      begin
+      if Node.Typ = TSyntaxNodeType.ntCall then
+        Continue;
 
-        PrevNode := nil;
-        for Node in ExprNodes do
-          begin
-          if Node.Typ = TSyntaxNodeType.ntCall then
-            Continue;
+      if assigned(PrevNode) and IsRoundOpen(Node.Typ) then
+      begin
+        if not TOperators.IsOpName(PrevNode.Typ) and not IsRoundOpen(PrevNode.Typ) then
+          Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntCall, Node.ParentNode));
 
-          if assigned(PrevNode) and IsRoundOpen(Node.Typ) then
-          begin
-            if not TOperators.IsOpName(PrevNode.Typ) and not IsRoundOpen(PrevNode.Typ) then
-              Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntCall, Node.ParentNode));
-
-            if TOperators.IsOpName(PrevNode.Typ)
-            and (TOperators.Items[PrevNode.Typ].Kind = TOperatorKind.okUnary)
-            and (TOperators.Items[PrevNode.Typ].AssocType = TOperatorAssocType.atLeft)
-              then
-              Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntCall, Node.ParentNode));
-          end;
-
-          if assigned(PrevNode) and (Node.Typ = TSyntaxNodeType.ntTypeArgs) then
-          begin
-            if not TOperators.IsOpName(PrevNode.Typ) and (PrevNode.Typ <> TSyntaxNodeType.ntTypeArgs) then
-              Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntGeneric, Node.ParentNode));
-
-            if TOperators.IsOpName(PrevNode.Typ)
-            and (TOperators.Items[PrevNode.Typ].Kind = TOperatorKind.okUnary)
-            and (TOperators.Items[PrevNode.Typ].AssocType = TOperatorAssocType.atLeft)
-              then
-              Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntGeneric, Node.ParentNode));
-          end;
-
-          if Node.Typ <> TSyntaxNodeType.ntAlignmentParam then
-            Result.Add(Node.Clone);
-          PrevNode := Node;
-        end;
-      except
-        Result := nil;
-          raise;
+        if TOperators.IsOpName(PrevNode.Typ)
+        and (TOperators.Items[PrevNode.Typ].Kind = TOperatorKind.okUnary)
+        and (TOperators.Items[PrevNode.Typ].AssocType = TOperatorAssocType.atLeft)
+          then
+          Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntCall, Node.ParentNode));
       end;
+
+      if assigned(PrevNode) and (Node.Typ = TSyntaxNodeType.ntTypeArgs) then
+      begin
+        if not TOperators.IsOpName(PrevNode.Typ) and (PrevNode.Typ <> TSyntaxNodeType.ntTypeArgs) then
+          Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntGeneric, Node.ParentNode));
+
+        if TOperators.IsOpName(PrevNode.Typ)
+        and (TOperators.Items[PrevNode.Typ].Kind = TOperatorKind.okUnary)
+        and (TOperators.Items[PrevNode.Typ].AssocType = TOperatorAssocType.atLeft)
+          then
+          Result.Add(CreateNodeWithParentsPosition(TSyntaxNodeType.ntGeneric, Node.ParentNode));
+      end;
+
+      if Node.Typ <> TSyntaxNodeType.ntAlignmentParam then
+        Result.Add(Node.Clone);
+      PrevNode := Node;
+    end;
+  except
+    Result := nil;
+      raise;
+  end;
 end;
 
-method TExpressionTools.CreateNodeWithParentsPosition(NodeType: TSyntaxNodeType; ParentNode: TSyntaxNode): TSyntaxNode;
-begin
-  Result := new TSyntaxNode(NodeType);
-  Result.AssignPositionFrom(ParentNode);
-end;
-
-method TExpressionTools.RawNodeListToTree(RawParentNode: TSyntaxNode; RawNodeList: List<TSyntaxNode>;
-NewRoot: TSyntaxNode);
+method TExpressionTools.RawNodeListToTree(RawParentNode: TSyntaxNode; RawNodeList: List<TSyntaxNode>; NewRoot: TSyntaxNode);
 var
 PreparedNodeList, ReverseNodeList: List<TSyntaxNode>;
 begin

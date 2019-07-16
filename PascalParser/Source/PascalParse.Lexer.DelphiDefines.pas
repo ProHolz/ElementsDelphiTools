@@ -1,18 +1,17 @@
 ﻿namespace ProHolz.Ast;
 
- type
-
-  DelphiCompiler = public enum (dcDefault, dcXe7, dcXe8, dcSeatle, dcBerlin, dcTokyo, dcRio);
+type
+  DelphiCompiler = public enum (&Default, Xe7, Xe8, Seatle, Berlin, Tokyo, Rio);
 
   DelphiDefines =  public static class
   private
     const base : array of  String = ['MSWINDOWS',
-                                     'CONDITIONALEXPRESSIONS',
-                                     'UNICODE',
-                                     'WIN32'];
+    'CONDITIONALEXPRESSIONS',
+    'UNICODE',
+    'WIN32'];
 
 
-    method prepare(const values : Array of String ): Array of String;
+    method Prepare(const values : Array of String ): Array of String;
     begin
       var ltemp := new List<String>(base);
       ltemp.add(values);
@@ -20,89 +19,86 @@
     end;
 
   protected
-   method &default : array of  String;
+    method &Default : array of  String;
     begin
-      exit prepare(['VER280','XE7']);
+      exit Prepare(['VER280','XE7']);
     end;
 
 
-    method defXE8 : Array of  String;
+    method DefXE8 : Array of  String;
     begin
-      exit  prepare(['VER290','XE8']);
+      exit  Prepare(['VER290','XE8']);
     end;
 
     method defSeatle : Array of  String;
     begin
-      exit prepare(['VER300','SEATLE']);
+      exit Prepare(['VER300','SEATLE']);
     end;
 
 
-    method defBerlin : Array of  String;
+    method DefBerlin : Array of  String;
     begin
-      exit prepare(['VER310','BERLIN']);
+      exit Prepare(['VER310','BERLIN']);
     end;
 
-     method defTokyo : Array of  String;
-     begin
-       exit prepare(['VER320','TOKYO']);
-     end;
+    method DefTokyo : Array of  String;
+    begin
+      exit Prepare(['VER320','TOKYO']);
+    end;
 
 
- method defRio : Array of  String;
-     begin
-       exit prepare(['VER330','RIO']);
-     end;
+    method DefRio : Array of  String;
+    begin
+      exit Prepare(['VER330','RIO']);
+    end;
 
   public
 
-  method getDefinesFor(const compiler : DelphiCompiler) : sequence of String;
-    begin
-      case compiler of
-        DelphiCompiler.dcDefault : result := &default;
-        DelphiCompiler.dcXe7 : result := &default;
-        DelphiCompiler.dcXe8 : result := defXE8;
-        DelphiCompiler.dcSeatle : result := defSeatle;
-        DelphiCompiler.dcBerlin : result := defBerlin;
-        DelphiCompiler.dcTokyo : result := defTokyo;
-        DelphiCompiler.dcRio : result := defRio;
-        else
-          result := &default;
-      end;
+     method GetDefinesFor(const compiler : DelphiCompiler) : sequence of String;
+     begin
+       case compiler of
+         DelphiCompiler.Default : result := &Default;
+         DelphiCompiler.Xe7 : result := &Default;
+         DelphiCompiler.Xe8 : result := DefXE8;
+         DelphiCompiler.Seatle : result := defSeatle;
+         DelphiCompiler.Berlin : result := DefBerlin;
+         DelphiCompiler.Tokyo : result := DefTokyo;
+         DelphiCompiler.Rio : result := DefRio;
+         else
+           result := &Default;
+       end;
 
-    end;
+     end;
 
 
-   method getCompilerVersion(const compiler : DelphiCompiler) : Integer;
-   begin
-      case compiler of
-        DelphiCompiler.dcDefault : result := 28;
-        DelphiCompiler.dcXe7 : result := 28;
-        DelphiCompiler.dcXe8 : result := 29;
-        DelphiCompiler.dcSeatle : result := 30;
-        DelphiCompiler.dcBerlin : result := 31;
-        DelphiCompiler.dcTokyo : result := 32;
-        DelphiCompiler.dcRio : result := 33;
-        else
-          result := 28;
-      end;
+     method GetCompilerVersion(const compiler : DelphiCompiler) : Integer;
+     begin
+       case compiler of
+         DelphiCompiler.Default : result := 28;
+         DelphiCompiler.Xe7 : result := 28;
+         DelphiCompiler.Xe8 : result := 29;
+         DelphiCompiler.Seatle : result := 30;
+         DelphiCompiler.Berlin : result := 31;
+         DelphiCompiler.Tokyo : result := 32;
+         DelphiCompiler.Rio : result := 33;
+         else
+           result := 28;
+       end;
+     end;
+
+     method GetRtlVersion(const compiler : DelphiCompiler) : Integer;
+     begin
+       case compiler of
+         DelphiCompiler.Default : result := 28;
+         DelphiCompiler.Xe7 : result := 28;
+         DelphiCompiler.Xe8 : result := 29;
+         DelphiCompiler.Seatle : result := 30;
+         DelphiCompiler.Berlin : result := 31;
+         DelphiCompiler.Tokyo : result := 32;
+         DelphiCompiler.Rio : result := 33;
+         else
+           result := 28;
+       end;
+     end;
    end;
-
-  method getRtlVersion(const compiler : DelphiCompiler) : Integer;
-   begin
-      case compiler of
-        DelphiCompiler.dcDefault : result := 28;
-        DelphiCompiler.dcXe7 : result := 28;
-        DelphiCompiler.dcXe8 : result := 29;
-        DelphiCompiler.dcSeatle : result := 30;
-        DelphiCompiler.dcBerlin : result := 31;
-        DelphiCompiler.dcTokyo : result := 32;
-        DelphiCompiler.dcRio : result := 33;
-        else
-          result := 28;
-      end;
-
-   end;
-
-  end;
-
 end.

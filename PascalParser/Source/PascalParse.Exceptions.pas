@@ -46,7 +46,6 @@ Known Issues:
 -----------------------------------------------------------------------------}
 namespace ProHolz.Ast;
 
-interface
 
 const
   rsExpected = '"{0}" expected found "{1}"';
@@ -73,6 +72,11 @@ type
   ESyntaxTreeException = public  class(EParserException)
   public
     constructor (Line, Col: Integer; const FileName, Msg: String; aSyntaxTree: TSyntaxNode); reintroduce;
+    begin
+      inherited (Line, Col, FileName, Msg);
+      SyntaxTree := aSyntaxTree;
+    end;
+
     property SyntaxTree: TSyntaxNode read;
   end;
 
@@ -81,48 +85,31 @@ type
 
   ESyntaxError = public class(RTLException)
   private
-     FPosXY: TTokenPoint;
-   public
-     constructor (const Msg: String);
-     constructor (const Msg: String; const Args: array of Object);
-     constructor (const Msg: String; aPosXY: TTokenPoint);
-     property PosXY: TTokenPoint read FPosXY write FPosXY;
-   end;
+    fPosXY: TTokenPoint;
+  public
+    constructor (const Msg: String);
+    begin
+      fPosXY.X := -1;
+      fPosXY.Y := -1;
+      inherited constructor(Msg);//, Args);
+    end;
 
 
+    constructor (const Msg: String; const Args: array of Object);
+    begin
+      fPosXY.X := -1;
+      fPosXY.Y := -1;
+      inherited constructor(Msg);//, Args);
+    end;
 
-implementation
-{ ESyntaxTreeException }
+    constructor (const Msg: String; aPosXY: TTokenPoint);
+    begin
+      fPosXY := aPosXY;
+      inherited Constructor(String.Format('{0} {1} {2}',  [Msg, fPosXY.X, fPosXY.Y ]));
+    end;
 
-constructor ESyntaxTreeException(Line, Col: Integer; const FileName, Msg: string;
-aSyntaxTree: TSyntaxNode);
-begin
-  inherited (Line, Col, FileName, Msg);
-  SyntaxTree := aSyntaxTree;
-end;
+    property PosXY: TTokenPoint read fPosXY write fPosXY;
+  end;
 
-
-{ ESyntaxError }
-
-constructor ESyntaxError.Create(const Msg: string);
-begin
-  FPosXY.X := -1;
-  FPosXY.Y := -1;
- inherited constructor(Msg);
- end;
-
-constructor ESyntaxError(const Msg: string; const Args: array of object);
-begin
-  FPosXY.X := -1;
-  FPosXY.Y := -1;
-  inherited constructor(Msg);//, Args);
-end;
-
-constructor ESyntaxError.Create(const Msg: string; aPosXY: TTokenPoint);
-begin
-  FPosXY := aPosXY;
-  inherited Constructor(String.Format('{0} {1} {2}',  [Msg, FPosXY.X, FPosXY.Y ]));
-
-end;
 
 end.

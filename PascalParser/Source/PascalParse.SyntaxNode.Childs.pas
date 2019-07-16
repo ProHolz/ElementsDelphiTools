@@ -53,16 +53,16 @@ type
       result := new TCompoundSyntaxNode(Typ);
     end;
 
-   method Clone: TSyntaxNode; override;
-   begin
-     Result := inherited;
-     TCompoundSyntaxNode(Result).EndLine := Self.EndLine;
-     TCompoundSyntaxNode(Result).EndCol := Self.EndCol;
-   end;
+    method Clone: TSyntaxNode; override;
+    begin
+      result := inherited;
+      TCompoundSyntaxNode(result).EndLine := Self.EndLine;
+      TCompoundSyntaxNode(result).EndCol := Self.EndCol;
+    end;
 
-   property EndCol: Integer read  write ;
-   property EndLine: Integer read  write ;
- end;
+    property EndCol: Integer read  write ;
+    property EndLine: Integer read  write ;
+  end;
 
   TValuedSyntaxNode = public class(TSyntaxNode)
 
@@ -86,7 +86,7 @@ type
 
     method NewNode: TSyntaxNode; override;
     begin
-     result := new TCommentNode(Typ);
+      result := new TCommentNode(Typ);
     end;
 
     method Clone: TSyntaxNode; override;

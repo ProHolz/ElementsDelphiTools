@@ -6,23 +6,23 @@ type
   private
    FDefinesList    : StringList;   // For all Directives not resolved
   public
-    FAborting       : Boolean;
+    fAborting       : Boolean;
 
-    FIncludeCache   : TIncludeCache;
-    FIncludeFiles   : TIncludeFiles;
-    FNotFoundUnits  : StringList;
-    FOnGetUnitSyntax: TGetUnitSyntaxEvent;
-    FOnUnitParsed   : TUnitParsedEvent;
-    FonParseCompilerDirective : TParseCompilerDirectiveEvent;
+    fIncludeCache   : TIncludeCache;
+    fIncludeFiles   : TIncludeFiles;
+    fNotFoundUnits  : StringList;
+    fOnGetUnitSyntax: TGetUnitSyntaxEvent;
+    fOnUnitParsed   : TUnitParsedEvent;
+    fonParseCompilerDirective : TParseCompilerDirectiveEvent;
 
-    FParsedUnits    : TParsedUnitsCache;
-    FParsedUnitsInfo: TParsedUnits;
-    FProblems       : TParseProblems;
-    FProjectFolder  : String;
-    FSearchPathRel  : StringList;
-    FSearchPaths    : Searchpaths;
-    FUnitPaths      : TUnitPathsCache;
-    FProjectPaths   : StringList;
+    fParsedUnits    : TParsedUnitsCache;
+    fParsedUnitsInfo: TParsedUnits;
+    fProblems       : TParseProblems;
+    fProjectFolder  : String;
+    fSearchPathRel  : StringList;
+    fSearchPaths    : Searchpaths;
+    fUnitPaths      : TUnitPathsCache;
+    fProjectPaths   : StringList;
 
   protected
     method AppendUnits(usesNode: TSyntaxNode; const filePath: String; unitList: StringList);
@@ -47,25 +47,23 @@ type
 
     property Compiler : DelphiCompiler read protected write;
     property Defines: StringList read FDefinesList write FDefinesList;
-    property ParsedUnits: TParsedUnits read FParsedUnitsInfo;
-    property IncludeFiles: TIncludeFiles read FIncludeFiles;
-    property Problems: TParseProblems read FProblems;
-    property NotFoundUnits: StringList read FNotFoundUnits;
+    property ParsedUnits: TParsedUnits read fParsedUnitsInfo;
+    property IncludeFiles: TIncludeFiles read fIncludeFiles;
+    property Problems: TParseProblems read fProblems;
+    property NotFoundUnits: StringList read fNotFoundUnits;
     //property UnitPaths      : TUnitPathsCache read FUnitPaths;
-    property ProjectPaths   : StringList read FProjectPaths;
+    property ProjectPaths   : StringList read fProjectPaths;
 
 
-    property SearchPaths: Searchpaths read FSearchPaths write FSearchPaths;
+    property SearchPaths: Searchpaths read fSearchPaths write fSearchPaths;
 
-    property OnGetUnitSyntax: TGetUnitSyntaxEvent read FOnGetUnitSyntax write FOnGetUnitSyntax;
-    property OnUnitParsed: TUnitParsedEvent read FOnUnitParsed write FOnUnitParsed;
-    property OnParseCompilerDirective : TParseCompilerDirectiveEvent read FonParseCompilerDirective write FonParseCompilerDirective;
+    property OnGetUnitSyntax: TGetUnitSyntaxEvent read fOnGetUnitSyntax write fOnGetUnitSyntax;
+    property OnUnitParsed: TUnitParsedEvent read fOnUnitParsed write fOnUnitParsed;
+    property OnParseCompilerDirective : TParseCompilerDirectiveEvent read fonParseCompilerDirective write fonParseCompilerDirective;
 
   end;
 
 implementation
-
-
 
 
 method TProjectIndexer.AppendUnits(usesNode: TSyntaxNode; const filePath: String; unitList: StringList);
@@ -75,14 +73,14 @@ begin
     begin
       var unitName := childNode.AttribName.ToLower;
       unitList.Add(unitName);
-      if not FUnitPaths.ContainsKey(unitName) then
+      if not fUnitPaths.ContainsKey(unitName) then
       begin
         var unitPath := childNode.GetAttribute(TAttributeName.anPath);
         if unitPath <> '' then begin
-          FProjectPaths.Add(unitPath);
+          fProjectPaths.Add(unitPath);
           if SearchPaths.IsRelativeWinPath(unitPath) then
             unitPath :=  Path.GetFullPath(Path.Combine( filePath , unitPath));
-          FUnitPaths.Add(unitName + '.pas', unitPath.ToLower);
+          fUnitPaths.Add(unitName + '.pas', unitPath.ToLower);
         end
         else
           begin
@@ -90,10 +88,10 @@ begin
           FindFile(unitName+ '.pas', '', var unitPath);
 
           if unitPath <> '' then begin
-            FProjectPaths.Add(unitPath);
+            fProjectPaths.Add(unitPath);
             if SearchPaths.IsRelativeWinPath(unitPath) then
               unitPath :=  Path.GetFullPath(Path.Combine( filePath , unitPath));
-            FUnitPaths.Add(unitName + '.pas', unitPath.ToLower);
+            fUnitPaths.Add(unitName + '.pas', unitPath.ToLower);
           end
           end;
       end;
@@ -108,7 +106,7 @@ begin
  var fileFolder := Path.GetParentDirectory(fileName);
   if isProject then
   begin
-    FProjectPaths.Add(Path.GetWindowsFileName(fileName));
+    fProjectPaths.Add(Path.GetWindowsFileName(fileName));
     usesNode := FindType(unitNode, TSyntaxNodeType.ntUses);
     if assigned(usesNode) then
       AppendUnits(usesNode, fileFolder, unitList);
@@ -154,7 +152,7 @@ begin
   begin
     OnGetUnitSyntax(Self, fileName, var syntaxTree, var doParseUnit, var doAbort);
     if doAbort then
-      FAborting := true;
+      fAborting := true;
   end;
 end;
 
@@ -165,7 +163,7 @@ begin
     var doAbort := false;
     OnUnitParsed(Self, unitName, fileName,  var syntaxTree, syntaxTreeFromParser,  var doAbort);
     if doAbort then
-      FAborting := true;
+      fAborting := true;
   end;
 end;
 
@@ -175,23 +173,23 @@ var
 doParseUnit: Boolean;
 syntaxTree : TSyntaxNode;
 begin
-  if FAborting then  Exit;
+  if fAborting then  Exit;
   GetUnitSyntax(fileName, var syntaxTree, var doParseUnit);
-  if FAborting then Exit;
+  if fAborting then Exit;
 
   if doParseUnit then
     RunParserOnUnit(fileName, var  syntaxTree);
 
-  FParsedUnits.Add(unitName.ToLower, syntaxTree);
+  fParsedUnits.Add(unitName.ToLower, syntaxTree);
 
-  if (not FAborting) and assigned(syntaxTree) then
+  if (not fAborting) and assigned(syntaxTree) then
     ScanUsedUnits(unitName, fileName, isProject, syntaxTree, doParseUnit);
 end;
 
 method TProjectIndexer.PrepareSearchPath;
 begin
-  for iPath in FSearchPathRel do begin
-    FSearchPaths.Add(iPath as not nullable);
+  for iPath in fSearchPathRel do begin
+    fSearchPaths.Add(iPath as not nullable);
   end;
 end;
 
@@ -199,22 +197,22 @@ end;
 
 method TProjectIndexer.Parse(const fileName: string);
 begin
-  FAborting := false;
-  FParsedUnits.RemoveAll;
-  FProjectFolder :=   Path.GetParentDirectory(fileName);
-  FIncludeCache := new TIncludeCache;
-  FUnitPaths := new TUnitPathsCache();
-  FSearchPaths.BasePath := FProjectFolder;
+  fAborting := false;
+  fParsedUnits.RemoveAll;
+  fProjectFolder :=   Path.GetParentDirectory(fileName);
+  fIncludeCache := new TIncludeCache;
+  fUnitPaths := new TUnitPathsCache();
+  fSearchPaths.BasePath := fProjectFolder;
 
-  FNotFoundUnits.RemoveAll;
-  FProblems.RemoveAll;
-  FProjectPaths.RemoveAll;
+  fNotFoundUnits.RemoveAll;
+  fProblems.RemoveAll;
+  fProjectPaths.RemoveAll;
   var projectName := Path.GetFileName(fileName);
-  FUnitPaths.Add(projectName, fileName);
+  fUnitPaths.Add(projectName, fileName);
   // Do the work
   ParseUnit(projectName, fileName, true);
   // Fill Results
-  FParsedUnitsInfo.Initialize(FParsedUnits, FUnitPaths);
+  fParsedUnitsInfo.Initialize(fParsedUnits, fUnitPaths);
         //FIncludeFiles.Initialize(FIncludeCache);
 
 end;
@@ -224,14 +222,14 @@ constructor TProjectIndexer(const aCompiler : DelphiCompiler);
 begin
   inherited constructor;
   Compiler := aCompiler;
-  FSearchPaths := new Searchpaths('');
+  fSearchPaths := new Searchpaths('');
   FDefinesList := new StringList;
-  FParsedUnits :=  new TParsedUnitsCache;
-  FParsedUnitsInfo := new TParsedUnits;
-  FIncludeFiles :=new TIncludeFiles;
-  FNotFoundUnits := new StringList;
-  FProblems := new TParseProblems;
-  FProjectPaths := new StringList;
+  fParsedUnits :=  new TParsedUnitsCache;
+  fParsedUnitsInfo := new TParsedUnits;
+  fIncludeFiles :=new TIncludeFiles;
+  fNotFoundUnits := new StringList;
+  fProblems := new TParseProblems;
+  fProjectPaths := new StringList;
 end;
 
 
@@ -244,7 +242,7 @@ begin
   if Result then
   begin
     filePath := Path.GetFullPath(testFile);
-    FUnitPaths.Add(name, filePath);
+    fUnitPaths.Add(name, filePath);
   end;
 end;
 
@@ -252,23 +250,23 @@ begin
   Result := false;
   var fName :=   StrHelper.AnsiDequotedStr(fileName, Char("'")).ToLower;
 
-  if FUnitPaths.ContainsKey(fName) then
+  if fUnitPaths.ContainsKey(fName) then
   begin
-    filePath := FUnitPaths[fName];
+    filePath := fUnitPaths[fName];
     Exit true;
   end;
 
-  if FNotFoundUnits.Contains(fName) then
+  if fNotFoundUnits.Contains(fName) then
     exit false;
 
     if relativeToFolder <> '' then
       if FilePresent(Path.Combine(relativeToFolder , fName), fName) then
         Exit true;
 
-    if FilePresent(Path.Combine(FProjectFolder ,fName), fName) then
+    if FilePresent(Path.Combine(fProjectFolder ,fName), fName) then
       Exit true;
 
-    for lsearch in FSearchPaths.getPaths do
+    for lsearch in fSearchPaths.getPaths do
       if FilePresent(Path.Combine( lsearch , fName), fName) then
         Exit true;
 
@@ -278,8 +276,8 @@ begin
     //Result := FindFile(fileName + '.pas', relativeToFolder, var var filePath);
 
     if (not Result) and (relativeToFolder = '') {ignore include files} then
-      if not FNotFoundUnits.Contains(fName) then
-        FNotFoundUnits.Add(fName);
+      if not fNotFoundUnits.Contains(fName) then
+        fNotFoundUnits.Add(fName);
   end;
 
 
@@ -315,13 +313,13 @@ begin
   fileContext : String;
   begin
     if not SafeOpenFileContext(fileName, out fileContext, out errorMsg) then
-      FProblems.LogProblem(TParseProblemType.ptCantOpenFile, fileName, errorMsg)
+      fProblems.LogProblem(TParseProblemType.ptCantOpenFile, fileName, errorMsg)
     else begin
       builder := new TPasSyntaxTreeBuilder(Compiler);
 
-      builder.IncludeHandler := new TProjectIncludeHandler(Self, FIncludeCache, FProblems, fileName);
+      builder.IncludeHandler := new TProjectIncludeHandler(Self, fIncludeCache, fProblems, fileName);
 
-      TmwSimplePasPar(builder).Lexer.OnParseCompilerDirectiveEvent := FonParseCompilerDirective;
+      TmwSimplePasPar(builder).Lexer.OnParseCompilerDirectiveEvent := fonParseCompilerDirective;
 
       for define in FDefinesList do
         TmwSimplePasPar(builder).Lexer.AddDefine(define);
@@ -329,7 +327,7 @@ begin
         syntaxTree := builder.RunWithString(File.ReadText(fileName));
       except
         on E: ESyntaxTreeException do begin
-          FProblems.LogProblem(TParseProblemType.ptCantParseFile, fileName,
+          fProblems.LogProblem(TParseProblemType.ptCantParseFile, fileName,
           String.Format('Line {0}, Column: {1} {2}', [E.Line, E.Col, E.Message]));
         end;
       end;
@@ -354,13 +352,13 @@ begin
 
     for usesName in unitList do
       begin
-      if FAborting then Exit;
-      if not FParsedUnits.ContainsKey(usesName) then
+      if fAborting then Exit;
+      if not fParsedUnits.ContainsKey(usesName) then
       begin
         if FindFile(usesName + '.pas', '', var usesPath) then
           ParseUnit(usesName, usesPath, false)
         else
-          FParsedUnits.Add(usesName, nil);
+          fParsedUnits.Add(usesName, nil);
       end;
     end;
 
