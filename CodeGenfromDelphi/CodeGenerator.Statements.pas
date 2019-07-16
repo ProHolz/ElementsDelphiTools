@@ -113,7 +113,7 @@ end;
 
 method CodeBuilder.PrepareStatementBlockOrSingle(const node: TSyntaxNode): CGStatementList;
 begin
-  if node.Typ.isStatement then
+  if node.Typ.IsStatement then
     exit new  CGStatementList(PrepareStatement(node).First);
   var temp := PrepareStatementList(node);
   if temp.Count = 1 then
@@ -244,7 +244,7 @@ begin
       TSyntaxNodeType.ntIn : lin := PrepareSingleExpressionValue(child.ChildNodes[0]);
     end;
      // The lastone will win
-    if child.Typ.isStatement then
+    if child.Typ.IsStatement then
       lStatement := PrepareStatement(child).First;
 
   end;
@@ -489,7 +489,7 @@ method CodeBuilder.PrepareStatement(const node: TSyntaxNode; const isConstructor
 begin
   result := nil;
   if not assigned(node) then exit nil;
-  if node.Typ.isStatement then
+  if node.Typ.IsStatement then
   begin
     try
       case node.Typ of
@@ -525,7 +525,7 @@ begin
     end;
   end
   else
-    if node.Typ.notSupported then
+    if node.Typ.NotSupported then
       exit new  CGStatementList(BuildCommentFromNode('Unsupported', node, true))
     else
       exit new  CGStatementList(new CGCodeCommentStatement(new CGRawStatement(node.Typ.ToString+  '======= Typ not in Statement Enum =======')));

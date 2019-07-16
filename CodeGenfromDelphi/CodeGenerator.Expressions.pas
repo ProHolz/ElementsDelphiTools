@@ -49,7 +49,7 @@ end;
 
 method CodeBuilder.PrepareBinaryOp(const left, right: TSyntaxNode; aType : TsyntaxnodeType): CGExpression;
 require
-  aType.isBinaryOperator;
+  aType.IsBinaryOperator;
 begin
   var lOperator : CGBinaryOperatorKind := mapSyntaxnodeToOperatorKind(aType);
 
@@ -340,9 +340,9 @@ method CodeBuilder.PrepareSingleExpressionValue(const node: TSyntaxNode): CGExpr
 begin
   if node = nil then exit nil;
   // Operators
-  if node.Typ.isOperator then
+  if node.Typ.IsOperator then
   begin
-    if node.Typ.isBinaryOperator then
+    if node.Typ.IsBinaryOperator then
     begin
       if node.ChildNodes.Count = 2 then
         exit PrepareBinaryOp(node.ChildNodes[0], node.ChildNodes[1], node.Typ)
@@ -350,12 +350,12 @@ begin
       else raise new Exception(node.Typ.ToString+  ' Binary Operator WITH CHILDNOTES <> 2 NOT SUPPORTED');
     end
     else
-      if node.Typ.isUnaryOperator then
+      if node.Typ.IsUnaryOperator then
         exit PrepareUnaryOp(node);
 
   end
   else
-   if node.Typ.isExpression then
+   if node.Typ.IsExpression then
    begin
     case node.Typ of
       TSyntaxNodeType.ntCall : exit PrepareCallExpression(node);

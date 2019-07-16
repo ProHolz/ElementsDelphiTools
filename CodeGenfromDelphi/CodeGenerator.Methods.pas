@@ -266,7 +266,7 @@ begin
 
   for each ltypesec in lImplnode.ChildNodes do
     begin
-    if ltypesec.Typ.notSupported  then
+    if ltypesec.Typ.NotSupported  then
       lMethod.Statements.Add(BuildCommentFromNode('Unsupported', ltypesec, true))
     else
       case ltypesec.Typ of
