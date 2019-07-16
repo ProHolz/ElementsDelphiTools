@@ -1,76 +1,6 @@
 ﻿namespace ProHolz.Ast;
 
 const
-  cBinaryXml =
-  " unit TestPublic;
-
-interface
- uses
-   Windows,
-   Sysutils,
-   Classes;
-
-  type
-    testRecord = record
-       x,y : integer;
-    end;
-
-{$IFDEF UNICODE}
-
-{$ELSE}
-  bla
-{$ENDIF}
-
-{$IFDEF TOKYO}
-bla
-{$ELSE}
-
-{$ENDIF}
-
-
-   testRecord2 = record
-       x,y : integer;
-    end;
-
-   const T : testrecord = (X:1; y:2);
-
-  type
-   testclass = class
-   public
-     destructor Done;
-   end;
-
-   Itest = interface
-   end;
-
-    testclass2 = class(ITest)
-    public
-    constructor one;
-    constructor two;
-
-   end;
-
-implementation
- uses
-  System.Math;
-type
-  implclass = class
-  end;
-
-
-procedure TestWidth;
-begin
- with a do
-   begin
-    end;
-end;
-
-end.
-";
-
-
-
-const
   cCompilerVersions28 =
   " unit TestPublic;
 
@@ -154,48 +84,6 @@ end.
 "
 ;
 
-ctestVariantRecord ="
-unit Test;
-interface
-type
-  TSQLVar = record
-    case VType: STQLDBFieldType of
-    ftInt64: (
-      VInt64: Int64);
-    ftDouble: (
-      VDouble: double);
-    ftDate: (
-      VDateTime: TDateTime);
-    ftCurrency: (
-      VCurrency: Currency);
-    ftUTF8: (
-      VText: PUTF8Char);
-    ftBlob: (
-      VBlob: pointer;
-      VBlobLen: Integer)
-  end;
-
- TSQLVarVType = record
-  VSingle : TSQLDBFieldType;
-   case TSQLDBFieldType of
-    ftInt64: (
-      VInt64: Int64);
-    ftDouble: (
-      VDouble: double);
-    ftDate: (
-      VDateTime: TDateTime);
-    ftCurrency: (
-      VCurrency: Currency);
-    ftUTF8: (
-      VText: PUTF8Char);
-    ftBlob: (
-      VBlob: pointer;
-      VBlobLen: Integer)
-  end;
-
- implementation
-end.
-";
 
 cTestArray = "
 unit Test;
@@ -251,11 +139,13 @@ interface
 end.
 ";
 
-cTestAsm ="
-unit Test;
+cTestAsm =
+"unit Test;
 interface
+
 implementation
-procedure Handler(Params: Pointer);
+
+ procedure Handler(Params: Pointer);
 asm
         .NOFRAME
         SUB     RSP, 28H
@@ -266,6 +156,7 @@ asm
 end;
 end.
 ";
+
 
 
 end.

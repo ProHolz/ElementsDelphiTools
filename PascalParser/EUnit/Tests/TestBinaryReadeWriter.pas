@@ -48,6 +48,74 @@ end;
 
 method TestBinaryReadeWriter.testBinaryXML;
 begin
+  const
+  cBinaryXml =
+  " unit TestPublic;
+
+interface
+ uses
+   Windows,
+   Sysutils,
+   Classes;
+
+  type
+    testRecord = record
+       x,y : integer;
+    end;
+
+{$IFDEF UNICODE}
+
+{$ELSE}
+  bla
+{$ENDIF}
+
+{$IFDEF TOKYO}
+bla
+{$ELSE}
+
+{$ENDIF}
+
+
+   testRecord2 = record
+       x,y : integer;
+    end;
+
+   const T : testrecord = (X:1; y:2);
+
+  type
+   testclass = class
+   public
+     destructor Done;
+   end;
+
+   Itest = interface
+   end;
+
+    testclass2 = class(ITest)
+    public
+    constructor one;
+    constructor two;
+
+   end;
+
+implementation
+ uses
+  System.Math;
+type
+  implclass = class
+  end;
+
+
+procedure TestWidth;
+begin
+ with a do
+   begin
+    end;
+end;
+
+end.
+";
+
   var  Root := TPasSyntaxTreeBuilder.RunWithString(cBinaryXml, false);
   var Xml := TSyntaxTreeWriter.ToXML(Root, true);
   var Stream := new MemoryStream();
