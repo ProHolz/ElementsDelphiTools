@@ -7,7 +7,7 @@ type
   SourceChecker = class
   private
     projectname : String;
-    actualCompiler := DelphiCompiler.dcDefault;
+    actualCompiler := DelphiCompiler.Default;
     showNotfound : Boolean := false;
     Level := 1000;
 
@@ -51,20 +51,23 @@ end;
 method SourceChecker.getProjectName(args: array of String): String;
 begin
  var cl := new SimpleCommandLineParser(args);
+ writeLn('Params');
  for each s  in cl.OtherParameters do
   writeLn(s);
-
+  writeLn('Switches');
   for each switch  in cl.Switches do
    begin
-  //  writeLn($"{switch.Key} {switch.Value}");
+  //  if String.IsNullOrEmpty then continue;
+
+    writeLn($"{switch.Key} {switch.Value}");
     case  switch.Key.ToLower of
       'compiler' : case switch.Value.ToLower of
-                    'xe7' : actualCompiler := DelphiCompiler.dcXe7;
-                     'xe8' : actualCompiler := DelphiCompiler.dcXe8;
-                     'seatle' : actualCompiler := DelphiCompiler.dcSeatle;
-                     'berlin' : actualCompiler := DelphiCompiler.dcBerlin;
-                     'tokyo' : actualCompiler := DelphiCompiler.dcTokyo;
-                     'rio' : actualCompiler := DelphiCompiler.dcRio;
+                    'xe7' : actualCompiler := DelphiCompiler.Xe7;
+                     'xe8' : actualCompiler := DelphiCompiler.Xe8;
+                     'seatle' : actualCompiler := DelphiCompiler.Seatle;
+                     'berlin' : actualCompiler := DelphiCompiler.Berlin;
+                     'tokyo' : actualCompiler := DelphiCompiler.Tokyo;
+                     'rio' : actualCompiler := DelphiCompiler.Rio;
                    end;
 
       'level' : case switch.Value.ToLower of

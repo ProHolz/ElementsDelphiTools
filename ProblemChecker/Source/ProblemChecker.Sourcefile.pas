@@ -16,7 +16,7 @@ type
       Name := aName;
     end;
 
-    method getProbEntry : String;
+    method GetProbEntry : String;
     begin
       exit $"{Name:Trim} [{Line}, {Pos}]".Trim;
     end;
@@ -72,7 +72,7 @@ type
       fData[aCheck].Add(ltemp);
     end;
 
-    method getProblemsPos(aCheck : eEleCheck) : String;
+    method GetProblemsPos(aCheck : eEleCheck) : String;
     begin
       result := nil;
       if fData.ContainsKey(aCheck) then
@@ -85,7 +85,7 @@ type
          for each pos in fData[aCheck] do
           begin
              ls.Append( comma);
-             ls.Append(pos.getProbEntry);
+             ls.Append(pos.GetProbEntry);
             comma := ' ,';
           end;
         exit ls.ToString;

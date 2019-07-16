@@ -11,7 +11,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
     <TestProject>ProblemChecker.Tests</TestProject>
-    <KnownConditionalDefines>DEBUG;NEW_DEFINE;RELEASE;TRACE</KnownConditionalDefines>
+    <KnownConditionalDefines>DEBUG;RELEASE;TRACE</KnownConditionalDefines>
     <XmlDoc>False</XmlDoc>
     <XmlDocAllMembers>False</XmlDocAllMembers>
   </PropertyGroup>
@@ -23,7 +23,7 @@
     <EnableAsserts>True</EnableAsserts>
     <CpuType>anycpu</CpuType>
     <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
-    <ConditionalDefines>DEBUG;NEW_DEFINE</ConditionalDefines>
+    <ConditionalDefines>DEBUG;TRACE</ConditionalDefines>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <OutputPath>.\Bin\Release</OutputPath>

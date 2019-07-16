@@ -4,25 +4,25 @@ type
   //tcheckProblems = reference to function(const syntaxTree: TSyntaxNode): boolean;
 
   IProblemChecker = interface
-    method check(const syntaxTree: TSyntaxNode): Boolean;
+    method Check(const syntaxTree: TSyntaxNode): Boolean;
     method FoundProblems: Boolean;
     method GetProblemsText: String;
   end;
 
   ISyntaxNodeSolver = interface
   // Defaults
-   method getNode(aNodetype: TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNode;
-   method getNodeArray(aNodetype: TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNodeList;
-   method getNodeArrayAll(aNodetypes: array of TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNodeList;
-   method getNodeGlobArray(aNodetype: TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNodeList;
+   method GetNode(aNodetype: TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNode;
+   method GetNodeArray(aNodetype: TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNodeList;
+   method GetNodeArrayAll(aNodetypes: array of TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNodeList;
+   method GetNodeGlobArray(aNodetype: TSyntaxNodeType; const aNode: TSyntaxNode): TSyntaxNodeList;
 
   // Helper
-    method getPublicTypes(const aNode: TSyntaxNode; const aTypename : String; const amatchname : Boolean = false):TSyntaxNodeList;
-    method getImplTypes(const aNode: TSyntaxNode; const aTypename : String; const amatchname : Boolean = false): TSyntaxNodeList;
+    method GetPublicTypes(const aNode: TSyntaxNode; const aTypename : String; const amatchname : Boolean = false):TSyntaxNodeList;
+    method GetImplTypes(const aNode: TSyntaxNode; const aTypename : String; const amatchname : Boolean = false): TSyntaxNodeList;
 
-    method getPublicClass(const aNode: TSyntaxNode): TSyntaxNodeList;
-    method getPublicRecord(const aNode: TSyntaxNode): TSyntaxNodeList;
-    method getImplClass(const aNode: TSyntaxNode): TSyntaxNodeList;
+    method GetPublicClass(const aNode: TSyntaxNode): TSyntaxNodeList;
+    method GetPublicRecord(const aNode: TSyntaxNode): TSyntaxNodeList;
+    method GetImplClass(const aNode: TSyntaxNode): TSyntaxNodeList;
 
   end;
 

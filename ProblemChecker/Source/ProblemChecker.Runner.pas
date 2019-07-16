@@ -44,7 +44,7 @@ begin
   fCheckProblems := new List<eEleCheck>;
 
   fProjectfile := projectfile;
-  FSearchPaths.BasePath := Path.GetParentDirectory(fProjectfile);
+  fSearchPaths.BasePath := Path.GetParentDirectory(fProjectfile);
   OnGetUnitSyntax := @UnitSyntaxEvent;
   OnUnitParsed := @UnitParsedEvent;
   OnParseCompilerDirective := @ResolveCompilerDirective;

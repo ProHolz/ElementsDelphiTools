@@ -6,23 +6,23 @@ type
 
   TProblem_VarTypes = class( ISingleProbSolver)
   protected
-    method isProblemType(const master, node : TSyntaxNode; out varname : String ) : Boolean;
+    method IsProblemType(const master, node : TSyntaxNode; out varname : String ) : Boolean;
   public
-    method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean; virtual;
+    method CheckForProblem(const syntaxTree: TSyntaxNode; nodeSolver : ISyntaxNodeSolver; problemLog : IProblem_Log): Boolean; virtual;
     property CheckTyp : eEleCheck read eEleCheck.eVarsWithTypes; virtual;
   end;
 
 
   TProblem_TypeInTypes = class(TProblem_VarTypes, ISingleProbSolver)
   public
-    method CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver : ISyntaxNodeSolver; ProblemLog : IProblem_Log): Boolean; override;
+    method CheckForProblem(const syntaxTree: TSyntaxNode; nodeSolver : ISyntaxNodeSolver; problemLog : IProblem_Log): Boolean; override;
     property CheckTyp : eEleCheck read eEleCheck.eTypeinType; override;
   end;
 
 implementation
 
 
-method TProblem_VarTypes.isProblemType(const master, node: TSyntaxnode; out varname : String ): Boolean;
+method TProblem_VarTypes.IsProblemType(const master, node: TSyntaxnode; out varname : String ): Boolean;
 begin
   Var lnode := node;
   case lnode.AttribType.ToLower of
@@ -50,7 +50,7 @@ begin
   end;
 end;
 
-method TProblem_VarTypes.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
+method TProblem_VarTypes.CheckForProblem(const syntaxTree: TSyntaxNode; nodeSolver: ISyntaxNodeSolver; problemLog: IProblem_Log): Boolean;
 begin
   result := false;
   var Nodes := syntaxTree.FindAllNodes(SNT.ntVariable);
@@ -66,9 +66,9 @@ begin
         if (lnode.AttribType <> '') {and (lnode.AttribType.ToLower <> 'array')} then
         begin
           var varname : String;
-          if isProblemType(child, lnode, out varname) then
+          if IsProblemType(child, lnode, out varname) then
           begin
-            ProblemLog.Problem_At(CheckTyp, child.Line, child.Col, varname);
+            problemLog.Problem_At(CheckTyp, child.Line, child.Col, varname);
             result := true;
           end;
         end;
@@ -78,7 +78,7 @@ begin
 end;
 
 
-method TProblem_TypeInTypes.CheckForProblem(const syntaxTree: TSyntaxNode; NodeSolver: ISyntaxNodeSolver; ProblemLog: IProblem_Log): Boolean;
+method TProblem_TypeInTypes.CheckForProblem(const syntaxTree: TSyntaxNode; nodeSolver: ISyntaxNodeSolver; problemLog: IProblem_Log): Boolean;
 begin
   result := false;
   var Nodes := syntaxTree.FindAllNodes(SNT.ntTypeDecl);
@@ -112,9 +112,9 @@ begin
                 var lType := field.FindNode(TSyntaxNodeType.ntType);
                 if assigned(lType) then
                   if (lType.AttribType <> '') then
-                    if isProblemType(field, lType, out varname) then
+                    if IsProblemType(field, lType, out varname) then
                     begin
-                      ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
+                      problemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
                       result := true;
                     end;
                end;
@@ -135,9 +135,9 @@ begin
                   var lType := field.FindNode(TSyntaxNodeType.ntType);
                   if assigned(lType) then
                     if (lType.AttribType <> '') then
-                      if isProblemType(field, lType, out varname) then
+                      if IsProblemType(field, lType, out varname) then
                       begin
-                        ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
+                        problemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
                         result := true;
                       end;
 
@@ -148,9 +148,9 @@ begin
                       lType := lfield.FindNode(TSyntaxNodeType.ntType);
                       if assigned(lType) then
                         if (lType.AttribType <> '') then
-                          if isProblemType(lfield, lType, out varname) then
+                          if IsProblemType(lfield, lType, out varname) then
                           begin
-                            ProblemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
+                            problemLog.Problem_At(CheckTyp, lnode.Line, lnode.Col, varname);
                             result := true;
                           end;
                     end;
