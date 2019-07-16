@@ -13,8 +13,8 @@ type
     method TestSimpleAssign;
     method TestFor;
 
-    method testBreakContinue;
-    method testDotAssign;
+    method TestBreakContinue;
+    method TestDotAssign;
   end;
 
 implementation
@@ -103,7 +103,7 @@ end;
   end;
 end;
 
-method TestSimpleStatements.testFor;
+method TestSimpleStatements.TestFor;
 begin
   var lunit := BuildUnit(tbUnitType.implementation ,"
 
@@ -146,7 +146,7 @@ end;
 end;
 
 
-method TestSimpleStatements.testBreakContinue;
+method TestSimpleStatements.TestBreakContinue;
 begin
   var lunit := BuildUnit(tbUnitType.implementation ,"
 
@@ -197,7 +197,7 @@ end;
 end;
 
 
-method TestSimpleStatements.testDotAssign;
+method TestSimpleStatements.TestDotAssign;
 begin
   var lunit := BuildUnit(tbUnitType.implementation ,"
 

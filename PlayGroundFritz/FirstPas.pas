@@ -9,15 +9,12 @@ uses
     var  Root := TPasSyntaxTreeBuilder.RunWithString(Source, false);
     if Environment.OS = OperatingSystem.Windows then
       File.WriteText(String.Format('d:\Test\{0}.xml', TestName),   TSyntaxTreeWriter.ToXML(Root, true));
-    //  CodeBuilderMethods.FileData := Source.Split(Environment.LineBreak);
+
     var lUnit := new CodeBuilder().BuildCGCodeUnitFomSyntaxNode(Root);
-  //  CodeBuilderMethods.FileData := nil;
-   // var cg2 := new CGDelphiCodeGenerator();
+
     var cg := new CGOxygeneCodeGenerator();
-  // var cg3 := new CGCSharpCodeGenerator();
-   //var cg := new CGCPlusPlusCPPCodeGenerator();
+
   // var cg := new CGSwiftCodeGenerator();
-   //var cg := new CGGoCodeGenerator();
 
     result := cg.GenerateUnit(lUnit);
     if Environment.OS = OperatingSystem.Windows then
@@ -44,7 +41,7 @@ uses
     //  Var s := "D:\sourceProHolz\Abbund170\Synopse\SynLz.pas";
     // "D:\sourceProHolz\Abbund170\Cairo\Cairo.Dll.pas";
     //  "D:\sourceProHolz\Abbund170\Cairo\Cairo.Types.pas";
-   //   Var s := "X:\Projekte\Neslib\Neslib.Clang\Neslib.Clang.pas";
+   "X:\Projekte\Neslib\Neslib.Clang\Neslib.Clang.pas";
    //   "D:\sourceProHolz\Abbund170\Cairo\Cairo.Freetype.pas";
 
 
@@ -62,14 +59,14 @@ uses
      // "X:\Elements\Cairo\Cairoimpl\Cairo.Interfaces.pas";
      // "X:\Elements\Cairo\Cairoimpl\Cairo.Stream.pas";
      // "X:\Elements\Cairo\Cairoimpl\Cairo.Surface.pas";
-      "X:\Elements\Cairo\Cairoimpl\Cairo.Context.pas";
+   //   "X:\Elements\Cairo\Cairoimpl\Cairo.Context.pas";
 
       var Source : not nullable String;
       var Error : not nullable String;
       if TProjectIndexer.SafeOpenFileContext(s, out Source, out Error) then
       begin
         var fname := Path.GetFileNameWithoutExtension(s);
-        sb.Append(BuildInterfaceTest(Source, fname, true));
+        sb.Append(BuildInterfaceTest(Source, fname, false));
         sb.AppendLine.Append('{Next File}').AppendLine;
       end
       else
@@ -78,10 +75,11 @@ uses
 (*
     sb.Append(BuildInterfaceTest(TestRecordHelper, 'TestRecordHelper'));
     sb.AppendLine.Append('{Next File}').AppendLine;
-
+*)
 
 
     sb.Append(BuildInterfaceTest(TestMethodimplementation, 'TestMethodimplementation'));
+  (*
     sb.AppendLine.Append('{Next File}').AppendLine;
     sb.Append(BuildInterfaceTest(TestDll, 'TestDll'));
     sb.AppendLine.Append('{Next File}').AppendLine;

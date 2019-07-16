@@ -4,7 +4,7 @@ const TestConstArray = "
 unit ConstArray;
 
 interface
-
+(*
 type
  // Pointer Type
   PmyInteger = ^Integer;
@@ -81,12 +81,31 @@ const
 (offset: $82082080;  minimum: $04000000),
 (offset: $00000000;  minimum: $04000000));
 
+*)
+type
+  TCoeff = array[0..3] of Double;
+  TCoeffArray = array [0 .. 1, 0 .. 3] of TCoeff;
+
+
+  const
+  coeffsHigh: TCoeffArray = (((0.0899116, - 19.2349, - 4.11711, 0.183362), (0.138148, - 1.45804, 1.32044, 1.38474), (0.230903, - 0.450262, 0.219963, 0.414038),
+    (0.0590565, - 0.101062, 0.0430592, 0.0204699)), ((0.0164649, 9.89394, 0.0919496, 0.00760802), (0.0191603, - 0.0322058, 0.0134667, - 0.0825018),
+    (0.0156192, - 0.017535, 0.00326508, - 0.228157), ( - 0.0236752, 0.0405821, - 0.0173086, 0.176187)));
+
+
+
+
 
 implementation
-const
+(* const
 SimpleIntArray2 : Array[0..2] of Integer = (1 shl 2 -1, 1,2);
 
 var f : Double = 0.0;
+*)
+
+
+
+
 
 end.
 

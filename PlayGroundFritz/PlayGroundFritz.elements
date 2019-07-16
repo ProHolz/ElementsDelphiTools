@@ -10,7 +10,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefaultUses>RemObjects.Elements.RTL</DefaultUses>
-    <TestProject>TestSingle</TestProject>
+    <TestProject>TestCodegen</TestProject>
     <KnownConditionalDefines>DEBUG;NEW_DEFINE;TRACE</KnownConditionalDefines>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
