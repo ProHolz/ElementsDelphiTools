@@ -1,15 +1,11 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
-# RemObjects Fire
+# RemObjects Water
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "Delphi Parser (Shared)", "Source\PascalParse.Shared.elements", "{597FB294-A480-4BC1-9C5B-768828A1D2E5}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Echoes", "PascalParse.Echoes.elements", "{EB3FE727-6C8E-4784-9830-060E25385427}"
 EndProject
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Island.Windows", "PascalParse.Island.Windows.elements", "{CEB60BEA-46F8-411E-96E8-758636139A45}"
-EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Test.Echoes", "EUnit\PascalParse.Test.Echoes.elements", "{C931CB13-B583-41A3-8860-57BC1CDFEBD8}"
-EndProject
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Test.Island.Windows", "EUnit\PascalParse.Test.Island.Windows.elements", "{BEE0A26D-74EE-42E4-9BC6-F3F174AACA6F}"
 EndProject
 Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "PascalParse.Test.Shared", "EUnit\PascalParse.Test.Shared.elements", "{F3FF91A4-94A4-4098-8B6D-3352C05D142C}"
 EndProject
@@ -23,18 +19,10 @@ Global
 		{EB3FE727-6C8E-4784-9830-060E25385427}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{EB3FE727-6C8E-4784-9830-060E25385427}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
 		{EB3FE727-6C8E-4784-9830-060E25385427}.Release|AnyCPU.Build.0 = Release|AnyCPU
-		{CEB60BEA-46F8-411E-96E8-758636139A45}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
-		{CEB60BEA-46F8-411E-96E8-758636139A45}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
-		{CEB60BEA-46F8-411E-96E8-758636139A45}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
-		{CEB60BEA-46F8-411E-96E8-758636139A45}.Release|AnyCPU.Build.0 = Release|AnyCPU
 		{C931CB13-B583-41A3-8860-57BC1CDFEBD8}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
 		{C931CB13-B583-41A3-8860-57BC1CDFEBD8}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{C931CB13-B583-41A3-8860-57BC1CDFEBD8}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
 		{C931CB13-B583-41A3-8860-57BC1CDFEBD8}.Release|AnyCPU.Build.0 = Release|AnyCPU
-		{BEE0A26D-74EE-42E4-9BC6-F3F174AACA6F}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
-		{BEE0A26D-74EE-42E4-9BC6-F3F174AACA6F}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
-		{BEE0A26D-74EE-42E4-9BC6-F3F174AACA6F}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
-		{BEE0A26D-74EE-42E4-9BC6-F3F174AACA6F}.Release|AnyCPU.Build.0 = Release|AnyCPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
