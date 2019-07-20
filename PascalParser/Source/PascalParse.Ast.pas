@@ -338,7 +338,7 @@ type
     const aCompiler : DelphiCompiler = DelphiCompiler.Default): TSyntaxNode; reintroduce; virtual;
 
 
-    class method RunWithString(const context: not nullable String; InterfaceOnly: Boolean = False;
+    class method RunWithString(const Context: not nullable String; InterfaceOnly: Boolean = False;
     const aCompiler : DelphiCompiler = DelphiCompiler.Default;
     IncludeHandler: IIncludeHandler = nil;
     OnHandleString: TStringEvent = nil): TSyntaxNode; reintroduce;
@@ -3297,7 +3297,7 @@ type
         Builder.OnHandleString := OnHandleString;
 
         Builder.IncludeHandler := IncludeHandler;
-        result := Builder.RunWithString(context, aCompiler);
+        result := Builder.RunWithString(Context, aCompiler);
 
       end;
 

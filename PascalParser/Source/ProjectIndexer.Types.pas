@@ -32,7 +32,7 @@ type
   end;
 
 
-  TGetUnitSyntaxEvent = public block (Sender: Object; const fileName: String;  var syntaxTree: TSyntaxNode; var doParseUnit : Boolean; Var doAbort: Boolean);
+  TGetUnitSyntaxEvent = public block (Sender: Object; const FileName: String;  var SyntaxTree: TSyntaxNode; var DoParseUnit : Boolean; Var DoAbort: Boolean);
 
   TIncludeFileInfo = public record
   public
@@ -42,7 +42,7 @@ type
 
   TIncludeFiles = public class(List<TIncludeFileInfo>)
   protected
-    method Initialize(includeCache: TIncludeCache);
+    method Initialize(IncludeCache: TIncludeCache);
   public
     constructor(); empty;
   end;
@@ -57,24 +57,24 @@ type
   //  FUnitFile           : String;
     fUnitFileFolder     : String;
   public
-    constructor (indexer: TProjectIndexer; includeCache: TIncludeCache; problemList: TParseProblems; const currentFile: String);
-    method  GetIncludeFileContent(const fileName: not nullable String): not nullable String;
+    constructor (Indexer: TProjectIndexer; IncludeCache: TIncludeCache; ProblemList: TParseProblems; const CurrentFile: String);
+    method  GetIncludeFileContent(const FileName: not nullable String): not nullable String;
   end;
 
 
 implementation
 
 
-constructor TProjectIncludeHandler(indexer: TProjectIndexer; includeCache: TIncludeCache; problemList: TParseProblems; const currentFile: String);
+constructor TProjectIncludeHandler(Indexer: TProjectIndexer; IncludeCache: TIncludeCache; ProblemList: TParseProblems; const CurrentFile: String);
 begin
-  fIndexer := indexer;
-  fIncludeCache := includeCache;
-  fProblems := problemList;
-  fUnitFileFolder :=   Path.GetParentDirectory(currentFile);
+  fIndexer := Indexer;
+  fIncludeCache := IncludeCache;
+  fProblems := ProblemList;
+  fUnitFileFolder :=   Path.GetParentDirectory(CurrentFile);
 //  FUnitFile := Path.GetFileNameWithoutExtension(currentFile);
 end;
 
-method TProjectIncludeHandler.GetIncludeFileContent(const fileName: not nullable string): not nullable string;
+method TProjectIncludeHandler.GetIncludeFileContent(const FileName: not nullable string): not nullable string;
 var
 errorMsg   : String;
 filePath   : String;
@@ -82,7 +82,7 @@ includeInfo: TIncludeInfo;
 key        : String;
 begin
 
-  var  fName := fileName.ToLower;
+  var  fName := FileName.ToLower;
 
   key := fName + #13 + fUnitFileFolder;
   if fIncludeCache.ContainsKey(key) then
@@ -118,7 +118,7 @@ end;
 
 { TProjectIndexer.TIncludeFiles }
 
-method TIncludeFiles.Initialize(includeCache: TIncludeCache);
+method TIncludeFiles.Initialize(IncludeCache: TIncludeCache);
 begin
 
 end;

@@ -2,7 +2,7 @@
 
 interface
 type
-  TUnitParsedEvent = public block (Sender: Object; const unitName: String; const fileName: String; var syntaxTree: TSyntaxNode; syntaxTreeFromParser: Boolean; var doAbort: Boolean);
+  TUnitParsedEvent = public block (Sender: Object; const UnitName: String; const FileName: String; var SyntaxTree: TSyntaxNode; SyntaxTreeFromParser: Boolean; var doAbort: Boolean);
 
   TUnitInfo = public record
   public

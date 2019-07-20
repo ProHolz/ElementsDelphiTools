@@ -2,16 +2,16 @@
 
 type
   {$IF ECHOES}
-  TsyntaxNodeTypeSet = set of TSyntaxNodeType;
+  TSyntaxNodeTypeSet = set of TSyntaxNodeType;
  {$ELSE}
-  TsyntaxNodeTypeSet = &Set<TSyntaxNodeType>;
+  TSyntaxNodeTypeSet = &Set<TSyntaxNodeType>;
   {$ENDIF}
 
 //  TSyntaxNodeType
   const
     // Binary Operators
 
-    TSyntaxnodeTypeBinaryOperator : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeBinaryOperator : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntAdd,
     TSyntaxNodeType.ntSub,
     TSyntaxNodeType.ntMul,
@@ -34,7 +34,7 @@ type
     ];
 
   // UNary Operators
-    TSyntaxnodeTypeUnaryOperator : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeUnaryOperator : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntAddr,
     TSyntaxNodeType.ntNot,
     TSyntaxNodeType.ntUnaryMinus
@@ -42,7 +42,7 @@ type
 
 
 // Statement
-    TSyntaxnodeTypeStatement : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeStatement : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntCall,
     TSyntaxNodeType.ntAssign,
     TSyntaxNodeType.ntIf,
@@ -65,7 +65,7 @@ type
 
 
   // Expressions
-    TSyntaxnodeTypeExpression : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeExpression : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntIndexed,
     TSyntaxNodeType.ntExpression,
     TSyntaxNodeType.ntExpressions,
@@ -104,7 +104,7 @@ type
 
     // FileFlow
 
-    TSyntaxnodeTypeFileFlow : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeFileFlow : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntCompilerDirective,
     TSyntaxNodeType.ntContains,
     TSyntaxNodeType.ntDependency,
@@ -123,14 +123,14 @@ type
 
 // Anonym Methods
 
-    TSyntaxnodeTypeAnonymous : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeAnonymous : TSyntaxNodeTypeSet =[
 
     TSyntaxNodeType.ntAnonymousMethodType
     ];
 
 
 // Attributes
-    TSyntaxnodeTypeAttribs : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeAttribs : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntArguments,
     TSyntaxNodeType.ntAttribute,
     TSyntaxNodeType.ntAttributes
@@ -138,14 +138,14 @@ type
 
 
 // Asm
-    TSyntaxnodeTypeAsm : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeAsm : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntAsmFragment,
     TSyntaxNodeType.ntAsmStatement
     ];
 
 
 // Type decl
-    TSyntaxnodeTypeTypeDecl : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeTypeDecl : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntConstant,
     TSyntaxNodeType.ntConstants,
     TSyntaxNodeType.ntField,
@@ -162,21 +162,21 @@ type
     ];
 
 // Type specifier
-    TSyntaxnodeTypeTypeSpec : TsyntaxNodeTypeSet =[
+    TSyntaxnodeTypeTypeSpec : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntDefault,
     TSyntaxNodeType.ntPlatform
     ];
 
 
 // Comment
-    TSyntaxnodeTypeComments : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeComments : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntAnsiComment,
     TSyntaxNodeType.ntBorComment,
     TSyntaxNodeType.ntSlashesComment
     ];
 
 // Not Supported
-    TSyntaxnodeTypeNotSupported : TsyntaxNodeTypeSet =[
+    TSyntaxNodeTypeNotSupported : TSyntaxNodeTypeSet =[
     TSyntaxNodeType.ntLabel
 
     ];
@@ -198,28 +198,28 @@ type
 
     method IsBinaryOperator : Boolean;
     begin
-      exit self in TSyntaxnodeTypeBinaryOperator;
+      exit self in TSyntaxNodeTypeBinaryOperator;
     end;
 
     method IsUnaryOperator : Boolean;
     begin
-      exit self in TSyntaxnodeTypeUnaryOperator;
+      exit self in TSyntaxNodeTypeUnaryOperator;
     end;
 
 
     method IsStatement : Boolean;
     begin
-      exit self in TSyntaxnodeTypeStatement;
+      exit self in TSyntaxNodeTypeStatement;
     end;
 
     method IsExpression : Boolean;
     begin
-      exit self in TSyntaxnodeTypeExpression;
+      exit self in TSyntaxNodeTypeExpression;
     end;
 
     method NotSupported : Boolean;
     begin
-      exit self in TSyntaxnodeTypeNotSupported;
+      exit self in TSyntaxNodeTypeNotSupported;
     end;
 
   end;

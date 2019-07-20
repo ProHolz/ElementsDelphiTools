@@ -8,62 +8,62 @@ type
     fPaths : Dictionary<String, String>;
     fBasePath : not nullable String;
 
-    method setBasePath(const value : not nullable String);
+    method SetBasePath(const Value : not nullable String);
   public
-    class method IsRelativeWinPath(const value: not nullable String): Boolean;
-    constructor(const abasepath : not nullable String);
-    method Add(const value : not nullable String);
-    method getPaths : sequence of  String;
+    class method IsRelativeWinPath(const Value: not nullable String): Boolean;
+    constructor(const aBasePath : not nullable String);
+    method Add(const Value : not nullable String);
+    method GetPaths : sequence of  String;
     method Clear;
-    method getFullpath(const value : not nullable String): not nullable String;
-    property BasePath : not nullable String read fBasePath write setBasePath;
+    method GetFullpath(const Value : not nullable String): not nullable String;
+    property BasePath : not nullable String read fBasePath write SetBasePath;
   end;
 
 implementation
 
-constructor Searchpaths(const abasepath : not nullable String);
+constructor Searchpaths(const aBasePath : not nullable String);
 begin
-  fBasePath := abasepath;
+  fBasePath := aBasePath;
   fPaths := new Dictionary<String, String>;
 end;
 
-method Searchpaths.Add(const value: not nullable String);
+method Searchpaths.Add(const Value: not nullable String);
 begin
-  var Fullpath := getFullpath(value);
+  var Fullpath := GetFullpath(Value);
   if (Fullpath <> '')  then
   begin
-    if fPaths.ContainsKey(value.ToLower) then
-     fPaths[value.ToLower] := Fullpath
+    if fPaths.ContainsKey(Value.ToLower) then
+     fPaths[Value.ToLower] := Fullpath
    else
-    fPaths.Add(value.ToLower, Fullpath);
+    fPaths.Add(Value.ToLower, Fullpath);
   end;
 end;
 
-method Searchpaths.getFullpath(const value: not nullable String): not nullable String;
+method Searchpaths.GetFullpath(const Value: not nullable String): not nullable String;
 begin
-  if value.IsAbsolutePath then exit value;
-  if not IsRelativeWinPath(value) then exit value;
-  exit   Path.GetFullPath( Path.Combine(fBasePath, value));
+  if Value.IsAbsolutePath then exit Value;
+  if not IsRelativeWinPath(Value) then exit Value;
+  exit   Path.GetFullPath( Path.Combine(fBasePath, Value));
 end;
 
-method Searchpaths.getPaths: sequence of String;
+method Searchpaths.GetPaths: sequence of String;
 begin
  result := fPaths.Values;
 end;
 
-method Searchpaths.setBasePath(const value: not nullable String);
+method Searchpaths.SetBasePath(const Value: not nullable String);
 begin
- fBasePath := value;
+ fBasePath := Value;
  for s in fPaths.Keys do
-   fPaths[s] := getFullpath(s as not nullable);
+   fPaths[s] := GetFullpath(s as not nullable);
 
 end;
 
-class method Searchpaths.IsRelativeWinPath(const value: not nullable String): Boolean;
+class method Searchpaths.IsRelativeWinPath(const Value: not nullable String): Boolean;
 begin
-  var L := value.Length;
-  Result := ((L = 0) or ((L > 0) and (value[0] <> '\')))
-  and ( (L <= 1) or (value[ 1] <> ':') );
+  var L := Value.Length;
+  Result := ((L = 0) or ((L > 0) and (Value[0] <> '\')))
+  and ( (L <= 1) or (Value[ 1] <> ':') );
 end;
 
 method Searchpaths.Clear;

@@ -12,10 +12,10 @@ type
   protected
     method CheckSignature: Boolean;
     method CheckVersion: Boolean;
-    method CreateNode(nodeClass: TNodeClass; nodeType: TSyntaxNodeType): TSyntaxNode;
-    method ReadNode(var node: TSyntaxNode): Boolean;
-    method ReadNumber(var num: Cardinal): Boolean;
-    method ReadString(var str: not nullable String): Boolean;
+    method CreateNode(NodeClass: TNodeClass; NodeType: TSyntaxNodeType): TSyntaxNode;
+    method ReadNode(var Node: TSyntaxNode): Boolean;
+    method ReadNumber(var Num: Cardinal): Boolean;
+    method ReadString(var Str: not nullable String): Boolean;
     method WriteNode(Node: TSyntaxNode): Boolean;
     method WriteNumber(Num: Cardinal): Boolean;
     method WriteString(const S: not nullable String): Boolean;
@@ -42,18 +42,18 @@ const
     result := Version = $01000000;
   end;
 
-  method TBinarySerializer.CreateNode(nodeClass: TNodeClass; nodeType: TSyntaxNodeType): TSyntaxNode;
+  method TBinarySerializer.CreateNode(NodeClass: TNodeClass; NodeType: TSyntaxNodeType): TSyntaxNode;
   begin
-    case nodeClass of
-      TNodeClass.ntSyntax:   Result := new TSyntaxNode(nodeType);
-      TNodeClass.ntCompound: Result := new TCompoundSyntaxNode(nodeType);
-      TNodeClass.ntValued:   Result := new TValuedSyntaxNode(nodeType);
-      TNodeClass.ntComment:  Result := new TCommentNode(nodeType);
+    case NodeClass of
+      TNodeClass.ntSyntax:   Result := new TSyntaxNode(NodeType);
+      TNodeClass.ntCompound: Result := new TCompoundSyntaxNode(NodeType);
+      TNodeClass.ntValued:   Result := new TValuedSyntaxNode(NodeType);
+      TNodeClass.ntComment:  Result := new TCommentNode(NodeType);
       else raise new Exception('TBinarySerializer.CreateNode: Unexpected node class');
     end;
   end;
 
-  method TBinarySerializer.ReadNode(var node: TSyntaxNode): Boolean;
+  method TBinarySerializer.ReadNode(var Node: TSyntaxNode): Boolean;
   var
   childNode: TSyntaxNode;
   i        : Integer;
@@ -64,44 +64,44 @@ const
   begin
     Result := false;
     str := '';
-    node := nil;
+    Node := nil;
     if (not ReadNumber(var num)) or (num > Cardinal(ord(high(TNodeClass)))) then
       Exit;
     nodeClass := TNodeClass(num);
     if (not ReadNumber(var   num)) or (num > ord(high(TSyntaxNodeType))) then
       Exit;
-    node := CreateNode(nodeClass, TSyntaxNodeType(num));
+    Node := CreateNode(nodeClass, TSyntaxNodeType(num));
     try
 
       if (not ReadNumber(var   num)) or (num > Cardinal(high(Integer))) then
         Exit;
-      node.Col := num;
+      Node.Col := num;
       if (not ReadNumber(var   num)) or (num > Cardinal(high(Integer))) then
         Exit;
-      node.Line := num;
+      Node.Line := num;
 
       case nodeClass of
         TNodeClass.ntCompound:
         begin
           if (not ReadNumber(var   num)) or (num > Cardinal(high(Integer))) then
             Exit;
-          TCompoundSyntaxNode(node).EndCol := num;
+          TCompoundSyntaxNode(Node).EndCol := num;
           if (not ReadNumber(var   num)) or (num > Cardinal(high(Integer))) then
             Exit;
-          TCompoundSyntaxNode(node).EndLine := num;
+          TCompoundSyntaxNode(Node).EndLine := num;
         end;
         TNodeClass.ntValued:
         begin
 
           if not ReadString(var str) then
             Exit;
-          TValuedSyntaxNode(node).Value := str;
+          TValuedSyntaxNode(Node).Value := str;
         end;
         TNodeClass.ntComment:
         begin
           if not ReadString(var   str) then
             Exit;
-          TCommentNode(node).Text := str;
+          TCommentNode(Node).Text := str;
         end;
       end;
 
@@ -112,7 +112,7 @@ const
           Exit;
         if not ReadString(var   str) then
           Exit;
-        node.SetAttribute(TAttributeName(num), str);
+        Node.SetAttribute(TAttributeName(num), str);
       end;
 
       if not ReadNumber(var   numSub) then
@@ -120,19 +120,19 @@ const
       for i := 1 to numSub do begin
         if not ReadNode(var   childNode) then
           Exit;
-        node.AddChild(childNode);
+        Node.AddChild(childNode);
       end;
 
       Result := true;
     finally
       if not Result then begin
 
-        node := nil;
+        Node := nil;
       end;
     end;
   end;
 
-  method TBinarySerializer.ReadNumber(var num: Cardinal): Boolean;
+  method TBinarySerializer.ReadNumber(var Num: Cardinal): Boolean;
   var
   lowPart: Byte;
   shift  : Integer;
@@ -140,18 +140,18 @@ const
     Result := false;
 
     shift := 0;
-    num := 0;
+    Num := 0;
     repeat
       lowPart := fStream.ReadByte;
 
-      num := num OR ((lowPart AND $7F) SHL shift);
+      Num := Num OR ((lowPart AND $7F) SHL shift);
       inc(shift, 7);
       until (lowPart AND $80) = 0;
 
     Result := true;
   end;
 
-  method TBinarySerializer.ReadString(var str: not nullable String): Boolean;
+  method TBinarySerializer.ReadString(var Str: not nullable String): Boolean;
   var
   id: Integer;
   len: Cardinal;
@@ -165,13 +165,13 @@ const
       id := len AND $00FFFFFF;
       if id >= fStringList.Count then
         Exit;
-      str := fStringList[id];
+      Str := fStringList[id];
     end
     else begin
-      str := fStream.ReadString(len) as not nullable String;
+      Str := fStream.ReadString(len) as not nullable String;
 
-      if length(str) > 4 then
-        fStringList.Add(str);
+      if length(Str) > 4 then
+        fStringList.Add(Str);
     end;
 
     Result := true;
@@ -213,8 +213,8 @@ const
     for attr in Node.Attributes do
       begin // causes dynamic array assignment, yuck
       if not WriteNumber(ord(attr.Key)) then Exit;
-        if not WriteString(attr.Value) then Exit;
-      end;
+      if not WriteString(attr.Value) then Exit;
+    end;
 
     if not WriteNumber(length(Node.ChildNodes)) then Exit;
     for childNode in Node.ChildNodes do // causes dynamic array assignment, yuck

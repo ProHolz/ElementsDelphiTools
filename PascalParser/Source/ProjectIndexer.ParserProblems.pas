@@ -31,9 +31,9 @@ type
       inherited constructor();
     end;
 
-    method LogProblem(problemType: TParseProblemType; fileName: String; description : String);
+    method LogProblem(ProblemType: TParseProblemType; FileName: String; Description : String);
     begin
-      Add(new TParseProblemInfo(problemType, fileName, description));
+      Add(new TParseProblemInfo(ProblemType, FileName, Description));
     end;
 
   end;

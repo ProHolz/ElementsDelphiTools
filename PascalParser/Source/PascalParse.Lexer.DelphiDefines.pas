@@ -11,10 +11,10 @@ type
     'WIN32'];
 
 
-    method Prepare(const values : Array of String ): Array of String;
+    method Prepare(const Values : Array of String ): Array of String;
     begin
       var ltemp := new List<String>(base);
-      ltemp.add(values);
+      ltemp.add(Values);
       result := ltemp.ToArray;
     end;
 
@@ -54,9 +54,9 @@ type
 
   public
 
-     method GetDefinesFor(const compiler : DelphiCompiler) : sequence of String;
+     method GetDefinesFor(const Compiler : DelphiCompiler) : sequence of String;
      begin
-       case compiler of
+       case Compiler of
          DelphiCompiler.Default : result := &Default;
          DelphiCompiler.Xe7 : result := &Default;
          DelphiCompiler.Xe8 : result := DefXE8;
@@ -71,9 +71,9 @@ type
      end;
 
 
-     method GetCompilerVersion(const compiler : DelphiCompiler) : Integer;
+     method GetCompilerVersion(const Compiler : DelphiCompiler) : Integer;
      begin
-       case compiler of
+       case Compiler of
          DelphiCompiler.Default : result := 28;
          DelphiCompiler.Xe7 : result := 28;
          DelphiCompiler.Xe8 : result := 29;
@@ -86,9 +86,9 @@ type
        end;
      end;
 
-     method GetRtlVersion(const compiler : DelphiCompiler) : Integer;
+     method GetRtlVersion(const Compiler : DelphiCompiler) : Integer;
      begin
-       case compiler of
+       case Compiler of
          DelphiCompiler.Default : result := 28;
          DelphiCompiler.Xe7 : result := 28;
          DelphiCompiler.Xe8 : result := 29;

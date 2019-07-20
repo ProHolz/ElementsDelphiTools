@@ -72,6 +72,10 @@ type
   end;
 
 
+  Proc nested in TmwBasePasLex  = block();
+  Tokenfunc nested in TmwBasePasLex = block() : TptTokenKind;
+  Lee nested in TmwBasePasLex =  enum  (None, &And, &Or);
+
   TmwBasePasLex = public class(Object)
   unit or protected
     fCommentState: TCommentState;
@@ -85,14 +89,11 @@ type
     class var mHashTable: array[#0..#127] of Integer;
     class method MakeIdentTable;
   private
-type proc = block();
-type tokenfunc = block() : TptTokenKind;
-type lee =  enum  (None, &And, &Or);
 
-    fProcTable: array[#0..#127] of proc;
+    fProcTable: array[#0..#127] of Proc;
     fBuffer: TBufferRec;
     fTempRun: Integer;
-    fIdentFuncTable: array[0..191] of tokenfunc;
+    fIdentFuncTable: array[0..191] of Tokenfunc;
     fTokenPos: Integer;
     fTokenID: TptTokenKind;
     fExID: TptTokenKind;
@@ -1314,756 +1315,808 @@ if lShort < 127 then;
 
  {$ENDIF}
 
-      if ord(AChar) <= 127 then
-        fProcTable[AChar]()
-      else
+  if ord(AChar) <= 127 then
+    fProcTable[AChar]()
+  else
+  begin
+    IdentProc;
+  end;
+end;
+
+method TmwBasePasLex.SetOrigin(const NewValue: not nullable string);
+begin
+  fBuffer.Buf := NewValue+#0;
+  InitLexer;
+  Next;
+end;
+
+method TmwBasePasLex.SetRunPos(const Value: Integer);
+begin
+  fBuffer.Run := Value;
+  Next;
+end;
+
+method TmwBasePasLex.SetSharedBuffer(SharedBuffer: TBufferRec);
+begin
+  while assigned(fBuffer.Next) do
+    fBuffer := fBuffer.Next;
+
+  if not fBuffer.SharedBuffer and assigned(fBuffer.Buf) then
+    fBuffer.Buf := '';
+
+  fBuffer.Buf := SharedBuffer.Buf;
+  fBuffer.Run := SharedBuffer.Run;
+  fBuffer.LineNumber := SharedBuffer.LineNumber;
+  fBuffer.LinePos := SharedBuffer.LinePos;
+  fBuffer.SharedBuffer := True;
+
+  Next;
+end;
+
+method TmwBasePasLex.AddDefine(const ADefine: not nullable string);
+
+begin
+  fDefines.Add(ADefine);
+end;
+
+method TmwBasePasLex.AddressOpProc;
+begin
+  case fBuffer.Buf[fBuffer.Run + 1] of
+    '@':
+    begin
+      fTokenID := TptTokenKind.ptDoubleAddressOp;
+      inc(fBuffer.Run, 2);
+    end;
+    else
       begin
-        IdentProc;
-      end;
-    end;
-
-    method TmwBasePasLex.SetOrigin(const NewValue: not nullable string);
-    begin
-      fBuffer.Buf := NewValue+#0;
-      InitLexer;
-      Next;
-    end;
-
-    method TmwBasePasLex.SetRunPos(const Value: Integer);
-    begin
-      fBuffer.Run := Value;
-      Next;
-    end;
-
-    method TmwBasePasLex.SetSharedBuffer(SharedBuffer: TBufferRec);
-    begin
-      while assigned(fBuffer.Next) do
-        fBuffer := fBuffer.Next;
-
-      if not fBuffer.SharedBuffer and assigned(fBuffer.Buf) then
-        fBuffer.Buf := '';
-
-      fBuffer.Buf := SharedBuffer.Buf;
-      fBuffer.Run := SharedBuffer.Run;
-      fBuffer.LineNumber := SharedBuffer.LineNumber;
-      fBuffer.LinePos := SharedBuffer.LinePos;
-      fBuffer.SharedBuffer := True;
-
-      Next;
-    end;
-
-    method TmwBasePasLex.AddDefine(const ADefine: not nullable string);
-
-    begin
-      fDefines.Add(ADefine);
-    end;
-
-    method TmwBasePasLex.AddressOpProc;
-    begin
-      case fBuffer.Buf[fBuffer.Run + 1] of
-        '@':
-        begin
-          fTokenID := TptTokenKind.ptDoubleAddressOp;
-          inc(fBuffer.Run, 2);
-        end;
-        else
-          begin
-            fTokenID := TptTokenKind.ptAddressOp;
-            inc(fBuffer.Run);
-          end;
-      end;
-    end;
-
-    method TmwBasePasLex.AsciiCharProc;
-    begin
-      fTokenID := TptTokenKind.ptAsciiChar;
-      inc(fBuffer.Run);
-      if fBuffer.Buf[fBuffer.Run] = '$' then
-      begin
+        fTokenID := TptTokenKind.ptAddressOp;
         inc(fBuffer.Run);
-      // ['0'..'9', 'A'..'F', 'a'..'f']
-        while (fBuffer.Buf[fBuffer.Run] in ['0'..'9', 'A'..'F', 'a'..'f']) do inc(fBuffer.Run);
-      end else
-      begin
+      end;
+  end;
+end;
 
-    {$IF TOFFEE}
-    while String.CharacterisNumber(FBuffer.Buf[FBuffer.Run]) do
-      inc(FBuffer.Run);
-  {$ELSE}
-  while Char.IsNumber(fBuffer.Buf[fBuffer.Run]) do
+method TmwBasePasLex.AsciiCharProc;
+begin
+  fTokenID := TptTokenKind.ptAsciiChar;
+  inc(fBuffer.Run);
+  if fBuffer.Buf[fBuffer.Run] = '$' then
+  begin
     inc(fBuffer.Run);
+  // ['0'..'9', 'A'..'F', 'a'..'f']
+    while (fBuffer.Buf[fBuffer.Run] in ['0'..'9', 'A'..'F', 'a'..'f']) do inc(fBuffer.Run);
+  end else
+  begin
+
+{$IF TOFFEE}
+while String.CharacterisNumber(FBuffer.Buf[FBuffer.Run]) do
+  inc(FBuffer.Run);
+{$ELSE}
+while Char.IsNumber(fBuffer.Buf[fBuffer.Run]) do
+  inc(fBuffer.Run);
 {$ENDIF}
 
-      end;
-    end;
+  end;
+end;
 
-    method TmwBasePasLex.BraceCloseProc;
+method TmwBasePasLex.BraceCloseProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptError;
+  if assigned(OnMessage) then
+    OnMessage(Self, TMessageEventType.meError, 'Illegal character', PosXY.X, PosXY.Y);
+end;
+
+method TmwBasePasLex.BorProc;
+var
+BeginRun: Integer;
+CommentText: String;
+begin
+  fTokenID := TptTokenKind.ptBorComment;
+  case fBuffer.Buf[fBuffer.Run] of
+    #0:
     begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptError;
+      NullProc;
       if assigned(OnMessage) then
-        OnMessage(Self, TMessageEventType.meError, 'Illegal character', PosXY.X, PosXY.Y);
+        OnMessage(Self, TMessageEventType.meError, 'Unexpected file end', PosXY.X, PosXY.Y);
+      Exit;
+    end;
+  end;
+
+  BeginRun := fBuffer.Run;
+
+  while fBuffer.Buf[fBuffer.Run] <> #0 do
+    case fBuffer.Buf[fBuffer.Run] of
+      '}':
+      begin
+        fCommentState := TCommentState.csNo;
+        inc(fBuffer.Run);
+        Break;
+      end;
+      #10:
+      begin
+        inc(fBuffer.Run);
+        inc(fBuffer.LineNumber);
+        fBuffer.LinePos := fBuffer.Run;
+      end;
+      #13:
+      begin
+        inc(fBuffer.Run);
+        if fBuffer.Buf[fBuffer.Run] = #10 then inc(fBuffer.Run);
+        inc(fBuffer.LineNumber);
+        fBuffer.LinePos := fBuffer.Run;
+      end;
+      else
+        inc(fBuffer.Run);
     end;
 
-    method TmwBasePasLex.BorProc;
-    var
-    BeginRun: Integer;
-    CommentText: String;
-    begin
-      fTokenID := TptTokenKind.ptBorComment;
-      case fBuffer.Buf[fBuffer.Run] of
-        #0:
-        begin
-          NullProc;
-          if assigned(OnMessage) then
-            OnMessage(Self, TMessageEventType.meError, 'Unexpected file end', PosXY.X, PosXY.Y);
-          Exit;
-        end;
+  if assigned(OnComment) then
+  begin
+    CommentText := fBuffer.Buf.Substring( BeginRun, fBuffer.Run - BeginRun - 1);
+    DoOnComment(CommentText);
+  end;
+end;
+
+method TmwBasePasLex.BraceOpenProc;
+var
+BeginRun: Integer;
+CommentText: String;
+begin
+  case fBuffer.Buf[fBuffer.Run + 1] of
+    '$': fTokenID := GetDirectiveKind;
+    else
+      begin
+        fTokenID := TptTokenKind.ptBorComment;
+        fCommentState := TCommentState.csBor;
       end;
+  end;
 
-      BeginRun := fBuffer.Run;
-
-      while fBuffer.Buf[fBuffer.Run] <> #0 do
-        case fBuffer.Buf[fBuffer.Run] of
-          '}':
-          begin
-            fCommentState := TCommentState.csNo;
-            inc(fBuffer.Run);
-            Break;
-          end;
-          #10:
-          begin
-            inc(fBuffer.Run);
-            inc(fBuffer.LineNumber);
-            fBuffer.LinePos := fBuffer.Run;
-          end;
-          #13:
-          begin
-            inc(fBuffer.Run);
-            if fBuffer.Buf[fBuffer.Run] = #10 then inc(fBuffer.Run);
-            inc(fBuffer.LineNumber);
-            fBuffer.LinePos := fBuffer.Run;
-          end;
-          else
-            inc(fBuffer.Run);
-        end;
-
+  inc(fBuffer.Run);
+  BeginRun := fBuffer.Run;
+  while fBuffer.Buf[fBuffer.Run] <> #0 do
+    case fBuffer.Buf[fBuffer.Run] of
+      '}':
+      begin
+        fCommentState := TCommentState.csNo;
+       // Position of Comment is on the end before {
+        if fTokenID = TptTokenKind.ptBorComment then
+          fTokenPos := fBuffer.Run-1;
+        inc(fBuffer.Run);
+        Break;
+      end;
+      #10:
+      begin
+        inc(fBuffer.Run);
+        inc(fBuffer.LineNumber);
+        fBuffer.LinePos := fBuffer.Run;
+      end;
+      #13:
+      begin
+        inc(fBuffer.Run);
+        if fBuffer.Buf[fBuffer.Run] = #10 then inc(fBuffer.Run);
+        inc(fBuffer.LineNumber);
+        fBuffer.LinePos := fBuffer.Run;
+      end;
+      else
+        inc(fBuffer.Run);
+    end;
+  case fTokenID of
+    TptTokenKind.ptBorComment:
+    begin
       if assigned(OnComment) then
       begin
         CommentText := fBuffer.Buf.Substring( BeginRun, fBuffer.Run - BeginRun - 1);
         DoOnComment(CommentText);
       end;
     end;
-
-    method TmwBasePasLex.BraceOpenProc;
-    var
-    BeginRun: Integer;
-    CommentText: String;
+    TptTokenKind.ptCompDirect:
     begin
-      case fBuffer.Buf[fBuffer.Run + 1] of
-        '$': fTokenID := GetDirectiveKind;
-        else
-          begin
-            fTokenID := TptTokenKind.ptBorComment;
-            fCommentState := TCommentState.csBor;
-          end;
-      end;
-
-      inc(fBuffer.Run);
-      BeginRun := fBuffer.Run;
-      while fBuffer.Buf[fBuffer.Run] <> #0 do
-        case fBuffer.Buf[fBuffer.Run] of
-          '}':
-          begin
-            fCommentState := TCommentState.csNo;
-           // Position of Comment is on the end before {
-            if fTokenID = TptTokenKind.ptBorComment then
-              fTokenPos := fBuffer.Run-1;
-            inc(fBuffer.Run);
-            Break;
-          end;
-          #10:
-          begin
-            inc(fBuffer.Run);
-            inc(fBuffer.LineNumber);
-            fBuffer.LinePos := fBuffer.Run;
-          end;
-          #13:
-          begin
-            inc(fBuffer.Run);
-            if fBuffer.Buf[fBuffer.Run] = #10 then inc(fBuffer.Run);
-            inc(fBuffer.LineNumber);
-            fBuffer.LinePos := fBuffer.Run;
-          end;
+      if assigned(OnCompDirect) then
+        OnCompDirect(Self);
+    end;
+    TptTokenKind.ptDefineDirect:
+    begin
+      if fUseDefines and (fDefineStack = 0) then
+        AddDefine(DirectiveParam);
+      if assigned(OnDefineDirect) then
+        OnDefineDirect(Self);
+    end;
+    TptTokenKind.ptElseDirect:
+    begin
+      if fUseDefines then
+      begin
+        if fTopDefineRec.Count > 0 then
+        begin
+          if fTopDefineRec.Peek.Defined then
+            inc(fDefineStack)
           else
-            inc(fBuffer.Run);
+            if fDefineStack > 0 then
+              dec(fDefineStack);
         end;
-      case fTokenID of
-        TptTokenKind.ptBorComment:
+      end;
+      if assigned(OnElseDirect) then
+        OnElseDirect(Self);
+    end;
+    TptTokenKind.ptEndIfDirect:
+    begin
+      if fUseDefines then
+        ExitDefineBlock;
+      if assigned(OnEndIfDirect) then
+        OnEndIfDirect(Self);
+    end;
+    TptTokenKind.ptIfDefDirect:
+    begin
+      if fUseDefines then
+        EnterDefineBlock(IsDefined(DirectiveParam));
+      if assigned(OnIfDefDirect) then
+        OnIfDefDirect(Self);
+    end;
+    TptTokenKind.ptIfNDefDirect:
+    begin
+      if fUseDefines then
+        EnterDefineBlock(not IsDefined(DirectiveParam));
+      if assigned(OnIfNDefDirect) then
+        OnIfNDefDirect(Self);
+    end;
+    TptTokenKind.ptIfOptDirect:
+    begin
+      if fUseDefines then
+        EnterDefineBlock(False);
+      if assigned(OnIfOptDirect) then
+        OnIfOptDirect(Self);
+    end;
+    TptTokenKind.ptIfDirect:
+    begin
+      if fUseDefines then
+        EnterDefineBlock(EvaluateConditionalExpression(DirectiveParam));
+      if assigned(OnIfDirect) then
+        OnIfDirect(Self);
+    end;
+    TptTokenKind.ptIfEndDirect:
+    begin
+      if fUseDefines then
+        ExitDefineBlock;
+      if assigned(OnIfEndDirect) then
+        OnIfEndDirect(Self);
+    end;
+    TptTokenKind.ptElseIfDirect:
+    begin
+      if fUseDefines then
+      begin
+        if fTopDefineRec.Count > 0 then
         begin
-          if assigned(OnComment) then
-          begin
-            CommentText := fBuffer.Buf.Substring( BeginRun, fBuffer.Run - BeginRun - 1);
-            DoOnComment(CommentText);
-          end;
-        end;
-        TptTokenKind.ptCompDirect:
-        begin
-          if assigned(OnCompDirect) then
-            OnCompDirect(Self);
-        end;
-        TptTokenKind.ptDefineDirect:
-        begin
-          if fUseDefines and (fDefineStack = 0) then
-            AddDefine(DirectiveParam);
-          if assigned(OnDefineDirect) then
-            OnDefineDirect(Self);
-        end;
-        TptTokenKind.ptElseDirect:
-        begin
-          if fUseDefines then
-          begin
-            if fTopDefineRec.Count > 0 then
-            begin
-              if fTopDefineRec.Peek.Defined then
-                inc(fDefineStack)
-              else
-                if fDefineStack > 0 then
-                  dec(fDefineStack);
-            end;
-          end;
-          if assigned(OnElseDirect) then
-            OnElseDirect(Self);
-        end;
-        TptTokenKind.ptEndIfDirect:
-        begin
-          if fUseDefines then
-            ExitDefineBlock;
-          if assigned(OnEndIfDirect) then
-            OnEndIfDirect(Self);
-        end;
-        TptTokenKind.ptIfDefDirect:
-        begin
-          if fUseDefines then
-            EnterDefineBlock(IsDefined(DirectiveParam));
-          if assigned(OnIfDefDirect) then
-            OnIfDefDirect(Self);
-        end;
-        TptTokenKind.ptIfNDefDirect:
-        begin
-          if fUseDefines then
-            EnterDefineBlock(not IsDefined(DirectiveParam));
-          if assigned(OnIfNDefDirect) then
-            OnIfNDefDirect(Self);
-        end;
-        TptTokenKind.ptIfOptDirect:
-        begin
-          if fUseDefines then
-            EnterDefineBlock(False);
-          if assigned(OnIfOptDirect) then
-            OnIfOptDirect(Self);
-        end;
-        TptTokenKind.ptIfDirect:
-        begin
-          if fUseDefines then
-            EnterDefineBlock(EvaluateConditionalExpression(DirectiveParam));
-          if assigned(OnIfDirect) then
-            OnIfDirect(Self);
-        end;
-        TptTokenKind.ptIfEndDirect:
-        begin
-          if fUseDefines then
-            ExitDefineBlock;
-          if assigned(OnIfEndDirect) then
-            OnIfEndDirect(Self);
-        end;
-        TptTokenKind.ptElseIfDirect:
-        begin
-          if fUseDefines then
-          begin
-            if fTopDefineRec.Count > 0 then
-            begin
-              if fTopDefineRec.Peek.Defined then
-                fDefineStack := fTopDefineRec.Peek.StartCount + 1
-              else
-              begin
-                fDefineStack := fTopDefineRec.Peek.StartCount;
-                if EvaluateConditionalExpression(DirectiveParam) then
-                  fTopDefineRec.Peek.Defined := True
-                else
-                  fDefineStack := fTopDefineRec.Peek.StartCount + 1
-              end;
-            end;
-          end;
-          if assigned(OnElseIfDirect) then
-            OnElseIfDirect(Self);
-        end;
-        TptTokenKind.ptIncludeDirect:
-        begin
-
-          if assigned(fIncludeHandler) and (fDefineStack = 0) then
-            IncludeFile
+          if fTopDefineRec.Peek.Defined then
+            fDefineStack := fTopDefineRec.Peek.StartCount + 1
           else
-            Next;
-        end;
-        TptTokenKind.ptResourceDirect:
-        begin
-          if assigned(OnResourceDirect) then
-            OnResourceDirect(Self);
-        end;
-        TptTokenKind.ptScopedEnumsDirect:
-        begin
-          UpdateScopedEnums;
-        end;
-        TptTokenKind.ptUndefDirect:
-        begin
-          if fUseDefines and (fDefineStack = 0) then
-            RemoveDefine(DirectiveParam);
-          if assigned(OnUnDefDirect) then
-            OnUnDefDirect(Self);
+          begin
+            fDefineStack := fTopDefineRec.Peek.StartCount;
+            if EvaluateConditionalExpression(DirectiveParam) then
+              fTopDefineRec.Peek.Defined := True
+            else
+              fDefineStack := fTopDefineRec.Peek.StartCount + 1
+          end;
         end;
       end;
+      if assigned(OnElseIfDirect) then
+        OnElseIfDirect(Self);
     end;
-
-    method TmwBasePasLex.EvaluateComparison(AValue1: Double; const AOper: not nullable String; AValue2: Double): Boolean;
+    TptTokenKind.ptIncludeDirect:
     begin
-      if AOper = '=' then
-        Result := AValue1 = AValue2
-      else if AOper = '<>' then
-        Result := AValue1 <> AValue2
-      else if AOper = '<' then
-        Result := AValue1 < AValue2
-      else if AOper = '<=' then
-        Result := AValue1 <= AValue2
-      else if AOper = '>' then
-        Result := AValue1 > AValue2
-      else if AOper = '>=' then
-        Result := AValue1 >= AValue2
+
+      if assigned(fIncludeHandler) and (fDefineStack = 0) then
+        IncludeFile
       else
-        Result := False;
-    end;
-
-    method TmwBasePasLex.EvaluateSpeciaConditionalExpression(const AParams: not nullable String): Boolean;
-    begin
-      result := false;
-      if assigned(OnParseCompilerDirectiveEvent) then
-      begin
-        var res : Boolean := false;
-        if OnParseCompilerDirectiveEvent(self, AParams, out res) then
-          exit res;
-      end;
-
-     // We should raise a Exception...........
-      if not result then
-        raise new EParserException(PosXY.Y, PosXY.X,'',$"can not solve Compiler directive [{AParams}]");
-
-    end;
-
-    method TmwBasePasLex.EvaluateConditionalExpression(const AParams: not nullable String): Boolean;
-    var
-    LParams: not nullable String;
-    LDefine: not nullable String;
-    LEvaluation: lee;
-    LIsComVer: Boolean;
-    LIsRtlVer: Boolean;
-    LOper: not nullable String;
-    LValue: Integer;
-    p: Integer;
-
-      method DeleteOneBased(Var value : not nullable String; start : Integer; len : Integer); inline;
-      begin
-        value := value.Remove(start-1, len);
-      end;
-
-      method PosIndexOneBassed(const check : not nullable String; const Value : not nullable String) : Integer; inline;
-      begin
-        result := Value.IndexOf(check)+1;
-      end;
-
-      method CopyOneBased(const Value : not nullable String; start : Integer; len : Integer) : not nullable String;
-      begin
-        result := Value.Substring(start-1, len);
-      end;
-
-      method TrimLeft(const Value : not nullable String) : not nullable String; inline;
-      begin
-        result := Value.TrimStart;
-      end;
-
-    begin
-      //{$HINT check against original Sources the consts}
-      { TODO : Expand support for <=> evaluations (complicated to do). Expand support for NESTED expressions }
-      LEvaluation := lee.None;
-      LParams := AParams.TrimStart;
-      LIsComVer := PosIndexOneBassed('COMPILERVERSION', LParams) = 1;
-      LIsRtlVer := PosIndexOneBassed('RTLVERSION', LParams) = 1;
-      if LIsComVer or LIsRtlVer then //simple parser which covers most frequent use cases
-      begin
-        Result := False;
-        if LIsComVer then
-          DeleteOneBased(var LParams, 1, length('COMPILERVERSION'));
-        if LIsRtlVer then
-          DeleteOneBased(var LParams, 1, length('RTLVERSION'));
-        while (LParams <> '') and (LParams[0] = ' ') do
-          DeleteOneBased(var LParams, 1, 1);
-        p := PosIndexOneBassed(' ', LParams);
-        if p > 0 then
-        begin
-          LOper := CopyOneBased(LParams, 1, p-1);
-          DeleteOneBased(var LParams, 1, p);
-          while (LParams <> '') and (LParams[0] = ' ') do
-            DeleteOneBased(var LParams, 1, 1);
-          p := PosIndexOneBassed(' ', LParams);
-          if p = 0 then
-            p := length(LParams);
-          if p=4 then
-            LParams := CopyOneBased(LParams,1,2);
-
-          if Integer.TryParse(LParams, out  LValue) then
-          begin
-            if LIsComVer then
-              Result := EvaluateComparison(DelphiDefines.getCompilerversion(fCompiler), LOper, LValue)
-            else if LIsRtlVer then
-              Result := EvaluateComparison(DelphiDefines.getRTLVersion(fCompiler), LOper, LValue);
-          end;
-        end;
-      end else
-        if (PosIndexOneBassed('DEFINED(', LParams) = 1) or (PosIndexOneBassed('NOT DEFINED(', LParams) = 1) then
-        begin
-          Result := True; // Optimistic
-          while (PosIndexOneBassed('DEFINED(', LParams) = 1) or (PosIndexOneBassed('NOT DEFINED(', LParams) = 1) do
-          begin
-            if PosIndexOneBassed('DEFINED(', LParams) = 1 then
-            begin
-              LDefine := CopyOneBased(LParams, 9, PosIndexOneBassed(')', LParams) - 9);
-              LParams := TrimLeft(CopyOneBased(LParams, 10 + length(LDefine), length(LParams) - (9 + length(LDefine))));
-              case LEvaluation of
-                lee.None: Result := IsDefined(LDefine);
-                lee.And: Result := Result and IsDefined(LDefine);
-                lee.Or: Result := Result or IsDefined(LDefine);
-              end;
-            end
-            else if PosIndexOneBassed('NOT DEFINED(', LParams) = 1 then
-            begin
-              LDefine := CopyOneBased(LParams, 13, PosIndexOneBassed(')', LParams) - 13);
-              LParams := TrimLeft(CopyOneBased(LParams, 14 + length(LDefine), length(LParams) - (13 + length(LDefine))));
-              case LEvaluation of
-                lee.None: Result := (not IsDefined(LDefine));
-                lee.And: Result := Result and (not IsDefined(LDefine));
-                lee.Or: Result := Result or (not IsDefined(LDefine));
-              end;
-            end;
-          // Determine next Evaluation
-            if PosIndexOneBassed('AND ', LParams) = 1 then
-            begin
-              LEvaluation := lee.And;
-              LParams := TrimLeft(CopyOneBased(LParams, 4, length(LParams) - 3));
-            end
-            else if PosIndexOneBassed('OR ', LParams) = 1 then
-            begin
-              LEvaluation := lee.Or;
-              LParams := TrimLeft(CopyOneBased(LParams, 3, length(LParams) - 2));
-            end;
-          end;
-        end
-        else
-          result := EvaluateSpeciaConditionalExpression(LParams);
-    end;
-
-    method TmwBasePasLex.ColonProc;
-    begin
-      case fBuffer.Buf[fBuffer.Run + 1] of
-        '=':
-        begin
-          inc(fBuffer.Run, 2);
-          fTokenID := TptTokenKind.ptAssign;
-        end;
-        else
-          begin
-            inc(fBuffer.Run);
-            fTokenID := TptTokenKind.ptColon;
-          end;
-      end;
-    end;
-
-    method TmwBasePasLex.CommaProc;
-    begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptComma;
-    end;
-
-    method TmwBasePasLex.CRProc;
-    begin
-      case fCommentState of
-        TCommentState.csBor: fTokenID := TptTokenKind.ptCRLFCo;
-        TCommentState.csAnsi: fTokenID := TptTokenKind.ptCRLFCo;
-        else
-          fTokenID := TptTokenKind.ptCRLF;
-      end;
-
-      case fBuffer.Buf[fBuffer.Run + 1] of
-        #10: inc(fBuffer.Run, 2);
-        else
-          inc(fBuffer.Run);
-      end;
-      inc(fBuffer.LineNumber);
-      fBuffer.LinePos := fBuffer.Run;
-    end;
-
-    method TmwBasePasLex.EnterDefineBlock(ADefined: Boolean);
-    var
-    StackFrame: TDefineRec;
-    begin
-      StackFrame := New TDefineRec();
-      StackFrame.Defined := ADefined;
-      StackFrame.StartCount := fDefineStack;
-      fTopDefineRec.Push(StackFrame);// := StackFrame;
-      if not ADefined then
-        inc(fDefineStack);
-    end;
-
-    method TmwBasePasLex.EqualProc;
-    begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptEqual;
-    end;
-
-    method TmwBasePasLex.ExitDefineBlock;
-
-    begin
-      if fTopDefineRec.Count > 0 then
-      begin
-        var StackFrame := fTopDefineRec.Pop;
-        fDefineStack := StackFrame.StartCount;
-      end;
-
-    end;
-
-    method TmwBasePasLex.GreaterProc;
-    begin
-      case fBuffer.Buf[fBuffer.Run + 1] of
-        '=':
-        begin
-          inc(fBuffer.Run, 2);
-          fTokenID := TptTokenKind.ptGreaterEqual;
-        end;
-        else
-          begin
-            inc(fBuffer.Run);
-            fTokenID := TptTokenKind.ptGreater;
-          end;
-      end;
-    end;
-
-    method TmwBasePasLex.HashValue(AChar: Char): Integer;
-    begin
-      if AChar <= #127 then
-        Result := mHashTable[fBuffer.Buf[fBuffer.Run]]
-      else
-        Result := ord(AChar);
-    end;
-
-    method TmwBasePasLex.IdentProc;
-    begin
-      fTokenID := IdentKind;
-    end;
-
-    method TmwBasePasLex.IntegerProc;
-    begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptIntegerConst;
-    //  ['0'..'9', 'A'..'F', 'a'..'f']
-      while (fBuffer.Buf[fBuffer.Run] in ['0'..'9', 'A'..'F', 'a'..'f']  ) do
-        inc(fBuffer.Run);
-    end;
-
-    method TmwBasePasLex.IsDefined(const ADefine: not nullable string): Boolean;
-    begin
-      for Define in  fDefines do
-        if Define:EqualsIgnoringCase(ADefine) then
-          Exit(True);
-      Result := False;
-    end;
-
-    method TmwBasePasLex.IsIdentifiers(AChar: Char): Boolean;
-    begin
-   {$IF ECHOES}
-
-   exit Char.IsLetterOrDigit(AChar) or (AChar = '_');
-   {$ELSEIF TOFFEE}
-   exit  String.CharacterIsLetterOrNumber(AChar) or (AChar = '_');
-  {$ELSE}
-   {$HINT 'Needs Checks'}
-
-   if AChar = '_' then exit true;
-   if Char.IsNumber(AChar) then exit(true);
-   if Char.IsWhiteSpace(AChar) then exit false;
-   if AChar in [#0,'.',';',',','!','<','>','(',')'] then exit false;
-   exit true;
- {$ENDIF}
-    end;
-
-    method TmwBasePasLex.LFProc;
-    begin
-      case fCommentState of
-        TCommentState.csBor: fTokenID := TptTokenKind.ptCRLFCo;
-        TCommentState.csAnsi: fTokenID := TptTokenKind.ptCRLFCo;
-        else
-          fTokenID := TptTokenKind.ptCRLF;
-      end;
-      inc(fBuffer.Run);
-      inc(fBuffer.LineNumber);
-      fBuffer.LinePos := fBuffer.Run;
-    end;
-
-    method TmwBasePasLex.LowerProc;
-    begin
-      case fBuffer.Buf[fBuffer.Run + 1] of
-        '=':
-        begin
-          inc(fBuffer.Run, 2);
-          fTokenID := TptTokenKind.ptLowerEqual;
-        end;
-        '>':
-        begin
-          inc(fBuffer.Run, 2);
-          fTokenID := TptTokenKind.ptNotEqual;
-        end
-        else
-          begin
-            inc(fBuffer.Run);
-            fTokenID := TptTokenKind.ptLower;
-          end;
-      end;
-    end;
-
-    method TmwBasePasLex.MinusProc;
-    begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptMinus;
-    end;
-
-    method TmwBasePasLex.NullProc;
-    begin
-      if assigned(fBuffer.Next) then
-      begin
-        fBuffer := fBuffer.Next;
         Next;
-      end else
-        fTokenID := TptTokenKind.ptNull;
     end;
-
-    method TmwBasePasLex.NumberProc;
+    TptTokenKind.ptResourceDirect:
     begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptIntegerConst;
-    //  ['0'..'9', '.', 'e', 'E']
-      while (fBuffer.Buf[fBuffer.Run] in ['0'..'9', '.', 'e', 'E']) do
+      if assigned(OnResourceDirect) then
+        OnResourceDirect(Self);
+    end;
+    TptTokenKind.ptScopedEnumsDirect:
+    begin
+      UpdateScopedEnums;
+    end;
+    TptTokenKind.ptUndefDirect:
+    begin
+      if fUseDefines and (fDefineStack = 0) then
+        RemoveDefine(DirectiveParam);
+      if assigned(OnUnDefDirect) then
+        OnUnDefDirect(Self);
+    end;
+  end;
+end;
+
+method TmwBasePasLex.EvaluateComparison(AValue1: Double; const AOper: not nullable String; AValue2: Double): Boolean;
+begin
+  if AOper = '=' then
+    Result := AValue1 = AValue2
+  else if AOper = '<>' then
+    Result := AValue1 <> AValue2
+  else if AOper = '<' then
+    Result := AValue1 < AValue2
+  else if AOper = '<=' then
+    Result := AValue1 <= AValue2
+  else if AOper = '>' then
+    Result := AValue1 > AValue2
+  else if AOper = '>=' then
+    Result := AValue1 >= AValue2
+  else
+    Result := False;
+end;
+
+method TmwBasePasLex.EvaluateSpeciaConditionalExpression(const AParams: not nullable String): Boolean;
+begin
+  result := false;
+  if assigned(OnParseCompilerDirectiveEvent) then
+  begin
+    var res : Boolean := false;
+    if OnParseCompilerDirectiveEvent(self, AParams, out res) then
+      exit res;
+  end;
+
+ // We should raise a Exception...........
+  if not result then
+    raise new EParserException(PosXY.Y, PosXY.X,'',$"can not solve Compiler directive [{AParams}]");
+
+end;
+
+method TmwBasePasLex.EvaluateConditionalExpression(const AParams: not nullable String): Boolean;
+var
+LParams: not nullable String;
+LDefine: not nullable String;
+LEvaluation: Lee;
+LIsComVer: Boolean;
+LIsRtlVer: Boolean;
+LOper: not nullable String;
+LValue: Integer;
+p: Integer;
+
+  method DeleteOneBased(Var value : not nullable String; start : Integer; len : Integer); inline;
+  begin
+    value := value.Remove(start-1, len);
+  end;
+
+  method PosIndexOneBassed(const check : not nullable String; const Value : not nullable String) : Integer; inline;
+  begin
+    result := Value.IndexOf(check)+1;
+  end;
+
+  method CopyOneBased(const Value : not nullable String; start : Integer; len : Integer) : not nullable String;
+  begin
+    result := Value.Substring(start-1, len);
+  end;
+
+  method TrimLeft(const Value : not nullable String) : not nullable String; inline;
+  begin
+    result := Value.TrimStart;
+  end;
+
+begin
+  //{$HINT check against original Sources the consts}
+  { TODO : Expand support for <=> evaluations (complicated to do). Expand support for NESTED expressions }
+  LEvaluation := Lee.None;
+  LParams := AParams.TrimStart;
+  LIsComVer := PosIndexOneBassed('COMPILERVERSION', LParams) = 1;
+  LIsRtlVer := PosIndexOneBassed('RTLVERSION', LParams) = 1;
+  if LIsComVer or LIsRtlVer then //simple parser which covers most frequent use cases
+  begin
+    Result := False;
+    if LIsComVer then
+      DeleteOneBased(var LParams, 1, length('COMPILERVERSION'));
+    if LIsRtlVer then
+      DeleteOneBased(var LParams, 1, length('RTLVERSION'));
+    while (LParams <> '') and (LParams[0] = ' ') do
+      DeleteOneBased(var LParams, 1, 1);
+    p := PosIndexOneBassed(' ', LParams);
+    if p > 0 then
+    begin
+      LOper := CopyOneBased(LParams, 1, p-1);
+      DeleteOneBased(var LParams, 1, p);
+      while (LParams <> '') and (LParams[0] = ' ') do
+        DeleteOneBased(var LParams, 1, 1);
+      p := PosIndexOneBassed(' ', LParams);
+      if p = 0 then
+        p := length(LParams);
+      if p=4 then
+        LParams := CopyOneBased(LParams,1,2);
+
+      if Integer.TryParse(LParams, out  LValue) then
       begin
-        case fBuffer.Buf[fBuffer.Run] of
-          '.':
-          if fBuffer.Buf[fBuffer.Run + 1] = '.' then
-            Break
-          else
-            fTokenID := TptTokenKind.ptFloat
-          end;
-        inc(fBuffer.Run);
+        if LIsComVer then
+          Result := EvaluateComparison(DelphiDefines.getCompilerversion(fCompiler), LOper, LValue)
+        else if LIsRtlVer then
+          Result := EvaluateComparison(DelphiDefines.getRTLVersion(fCompiler), LOper, LValue);
       end;
     end;
-
-    method TmwBasePasLex.PlusProc;
+  end else
+    if (PosIndexOneBassed('DEFINED(', LParams) = 1) or (PosIndexOneBassed('NOT DEFINED(', LParams) = 1) then
     begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptPlus;
+      Result := True; // Optimistic
+      while (PosIndexOneBassed('DEFINED(', LParams) = 1) or (PosIndexOneBassed('NOT DEFINED(', LParams) = 1) do
+      begin
+        if PosIndexOneBassed('DEFINED(', LParams) = 1 then
+        begin
+          LDefine := CopyOneBased(LParams, 9, PosIndexOneBassed(')', LParams) - 9);
+          LParams := TrimLeft(CopyOneBased(LParams, 10 + length(LDefine), length(LParams) - (9 + length(LDefine))));
+          case LEvaluation of
+            Lee.None: Result := IsDefined(LDefine);
+            Lee.And: Result := Result and IsDefined(LDefine);
+            Lee.Or: Result := Result or IsDefined(LDefine);
+          end;
+        end
+        else if PosIndexOneBassed('NOT DEFINED(', LParams) = 1 then
+        begin
+          LDefine := CopyOneBased(LParams, 13, PosIndexOneBassed(')', LParams) - 13);
+          LParams := TrimLeft(CopyOneBased(LParams, 14 + length(LDefine), length(LParams) - (13 + length(LDefine))));
+          case LEvaluation of
+            Lee.None: Result := (not IsDefined(LDefine));
+            Lee.And: Result := Result and (not IsDefined(LDefine));
+            Lee.Or: Result := Result or (not IsDefined(LDefine));
+          end;
+        end;
+      // Determine next Evaluation
+        if PosIndexOneBassed('AND ', LParams) = 1 then
+        begin
+          LEvaluation := Lee.And;
+          LParams := TrimLeft(CopyOneBased(LParams, 4, length(LParams) - 3));
+        end
+        else if PosIndexOneBassed('OR ', LParams) = 1 then
+        begin
+          LEvaluation := Lee.Or;
+          LParams := TrimLeft(CopyOneBased(LParams, 3, length(LParams) - 2));
+        end;
+      end;
+    end
+    else
+      result := EvaluateSpeciaConditionalExpression(LParams);
+end;
+
+method TmwBasePasLex.ColonProc;
+begin
+  case fBuffer.Buf[fBuffer.Run + 1] of
+    '=':
+    begin
+      inc(fBuffer.Run, 2);
+      fTokenID := TptTokenKind.ptAssign;
     end;
-
-    method TmwBasePasLex.PointerSymbolProc;
-  //const
-  //  PointerChars = ['a'..'z', 'A'..'Z', '\', '!', '"', '#', '$', '%', '&', '''',
-    //                '?', '@', '_', '`', '|', '}', '~'];
-                    // TODO: support ']', '), ''*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '{', '^', '(', '['
-    begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptPointerSymbol;
-
-      //This is a wierd Pascal construct that rarely appears, but needs to be
-      //supported. ^M is a valid char reference (#13, in this case)
-      if (fBuffer.Buf[fBuffer.Run] in ['a'..'z', 'A'..'Z', '\', '!', '"', '#', '$', '%', '&', '''','?', '@', '_', '`', '|', '}', '~'])
-      and not IsIdentifiers(fBuffer.Buf[fBuffer.Run+1]) then
+    else
       begin
         inc(fBuffer.Run);
-        fTokenID := TptTokenKind.ptAsciiChar;
+        fTokenID := TptTokenKind.ptColon;
       end;
-    end;
+  end;
+end;
 
-    method TmwBasePasLex.PointProc;
-    begin
-      case fBuffer.Buf[fBuffer.Run + 1] of
-        '.':
-        begin
-          inc(fBuffer.Run, 2);
-          fTokenID := TptTokenKind.ptDotDot;
-        end;
-        ')':
-        begin
-          inc(fBuffer.Run, 2);
-          fTokenID := TptTokenKind.ptSquareClose;
-        end;
-        else
-          begin
-            inc(fBuffer.Run);
-            fTokenID := TptTokenKind.ptPoint;
-          end;
-      end;
-    end;
+method TmwBasePasLex.CommaProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptComma;
+end;
 
+method TmwBasePasLex.CRProc;
+begin
+  case fCommentState of
+    TCommentState.csBor: fTokenID := TptTokenKind.ptCRLFCo;
+    TCommentState.csAnsi: fTokenID := TptTokenKind.ptCRLFCo;
+    else
+      fTokenID := TptTokenKind.ptCRLF;
+  end;
 
-
-    method TmwBasePasLex.RemoveDefine(const ADefine: not nullable string);
-    begin
-      for i : Integer := fDefines.Count-1 downto 0 do
-        begin
-
-        if (fDefines[i] = nil)  or
-         fDefines[i].EqualsIgnoringCase(ADefine) then
-          fDefines.RemoveAt(i);
-      end;
-    end;
-
-    method TmwBasePasLex.RoundCloseProc;
-    begin
+  case fBuffer.Buf[fBuffer.Run + 1] of
+    #10: inc(fBuffer.Run, 2);
+    else
       inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptRoundClose;
+  end;
+  inc(fBuffer.LineNumber);
+  fBuffer.LinePos := fBuffer.Run;
+end;
+
+method TmwBasePasLex.EnterDefineBlock(ADefined: Boolean);
+var
+StackFrame: TDefineRec;
+begin
+  StackFrame := New TDefineRec();
+  StackFrame.Defined := ADefined;
+  StackFrame.StartCount := fDefineStack;
+  fTopDefineRec.Push(StackFrame);// := StackFrame;
+  if not ADefined then
+    inc(fDefineStack);
+end;
+
+method TmwBasePasLex.EqualProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptEqual;
+end;
+
+method TmwBasePasLex.ExitDefineBlock;
+
+begin
+  if fTopDefineRec.Count > 0 then
+  begin
+    var StackFrame := fTopDefineRec.Pop;
+    fDefineStack := StackFrame.StartCount;
+  end;
+
+end;
+
+method TmwBasePasLex.GreaterProc;
+begin
+  case fBuffer.Buf[fBuffer.Run + 1] of
+    '=':
+    begin
+      inc(fBuffer.Run, 2);
+      fTokenID := TptTokenKind.ptGreaterEqual;
+    end;
+    else
+      begin
+        inc(fBuffer.Run);
+        fTokenID := TptTokenKind.ptGreater;
+      end;
+  end;
+end;
+
+method TmwBasePasLex.HashValue(AChar: Char): Integer;
+begin
+  if AChar <= #127 then
+    Result := mHashTable[fBuffer.Buf[fBuffer.Run]]
+  else
+    Result := ord(AChar);
+end;
+
+method TmwBasePasLex.IdentProc;
+begin
+  fTokenID := IdentKind;
+end;
+
+method TmwBasePasLex.IntegerProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptIntegerConst;
+//  ['0'..'9', 'A'..'F', 'a'..'f']
+  while (fBuffer.Buf[fBuffer.Run] in ['0'..'9', 'A'..'F', 'a'..'f']  ) do
+    inc(fBuffer.Run);
+end;
+
+method TmwBasePasLex.IsDefined(const ADefine: not nullable string): Boolean;
+begin
+  for Define in  fDefines do
+    if Define:EqualsIgnoringCase(ADefine) then
+      Exit(True);
+  Result := False;
+end;
+
+method TmwBasePasLex.IsIdentifiers(AChar: Char): Boolean;
+begin
+{$IF ECHOES}
+
+exit Char.IsLetterOrDigit(AChar) or (AChar = '_');
+{$ELSEIF TOFFEE}
+exit  String.CharacterIsLetterOrNumber(AChar) or (AChar = '_');
+{$ELSE}
+ {$HINT 'Needs Checks'}
+
+ if AChar = '_' then exit true;
+ if Char.IsNumber(AChar) then exit(true);
+ if Char.IsWhiteSpace(AChar) then exit false;
+ if AChar in [#0,'.',';',',','!','<','>','(',')'] then exit false;
+ exit true;
+{$ENDIF}
+end;
+
+method TmwBasePasLex.LFProc;
+begin
+  case fCommentState of
+    TCommentState.csBor: fTokenID := TptTokenKind.ptCRLFCo;
+    TCommentState.csAnsi: fTokenID := TptTokenKind.ptCRLFCo;
+    else
+      fTokenID := TptTokenKind.ptCRLF;
+  end;
+  inc(fBuffer.Run);
+  inc(fBuffer.LineNumber);
+  fBuffer.LinePos := fBuffer.Run;
+end;
+
+method TmwBasePasLex.LowerProc;
+begin
+  case fBuffer.Buf[fBuffer.Run + 1] of
+    '=':
+    begin
+      inc(fBuffer.Run, 2);
+      fTokenID := TptTokenKind.ptLowerEqual;
+    end;
+    '>':
+    begin
+      inc(fBuffer.Run, 2);
+      fTokenID := TptTokenKind.ptNotEqual;
+    end
+    else
+      begin
+        inc(fBuffer.Run);
+        fTokenID := TptTokenKind.ptLower;
+      end;
+  end;
+end;
+
+method TmwBasePasLex.MinusProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptMinus;
+end;
+
+method TmwBasePasLex.NullProc;
+begin
+  if assigned(fBuffer.Next) then
+  begin
+    fBuffer := fBuffer.Next;
+    Next;
+  end else
+    fTokenID := TptTokenKind.ptNull;
+end;
+
+method TmwBasePasLex.NumberProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptIntegerConst;
+//  ['0'..'9', '.', 'e', 'E']
+  while (fBuffer.Buf[fBuffer.Run] in ['0'..'9', '.', 'e', 'E']) do
+  begin
+    case fBuffer.Buf[fBuffer.Run] of
+      '.':
+      if fBuffer.Buf[fBuffer.Run + 1] = '.' then
+        Break
+      else
+        fTokenID := TptTokenKind.ptFloat
+      end;
+    inc(fBuffer.Run);
+  end;
+end;
+
+method TmwBasePasLex.PlusProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptPlus;
+end;
+
+method TmwBasePasLex.PointerSymbolProc;
+//const
+//  PointerChars = ['a'..'z', 'A'..'Z', '\', '!', '"', '#', '$', '%', '&', '''',
+  //                '?', '@', '_', '`', '|', '}', '~'];
+                  // TODO: support ']', '), ''*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '{', '^', '(', '['
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptPointerSymbol;
+
+  //This is a wierd Pascal construct that rarely appears, but needs to be
+  //supported. ^M is a valid char reference (#13, in this case)
+  if (fBuffer.Buf[fBuffer.Run] in ['a'..'z', 'A'..'Z', '\', '!', '"', '#', '$', '%', '&', '''','?', '@', '_', '`', '|', '}', '~'])
+  and not IsIdentifiers(fBuffer.Buf[fBuffer.Run+1]) then
+  begin
+    inc(fBuffer.Run);
+    fTokenID := TptTokenKind.ptAsciiChar;
+  end;
+end;
+
+method TmwBasePasLex.PointProc;
+begin
+  case fBuffer.Buf[fBuffer.Run + 1] of
+    '.':
+    begin
+      inc(fBuffer.Run, 2);
+      fTokenID := TptTokenKind.ptDotDot;
+    end;
+    ')':
+    begin
+      inc(fBuffer.Run, 2);
+      fTokenID := TptTokenKind.ptSquareClose;
+    end;
+    else
+      begin
+        inc(fBuffer.Run);
+        fTokenID := TptTokenKind.ptPoint;
+      end;
+  end;
+end;
+
+
+
+method TmwBasePasLex.RemoveDefine(const ADefine: not nullable string);
+begin
+  for i : Integer := fDefines.Count-1 downto 0 do
+    begin
+
+    if (fDefines[i] = nil)  or
+     fDefines[i].EqualsIgnoringCase(ADefine) then
+      fDefines.RemoveAt(i);
+  end;
+end;
+
+method TmwBasePasLex.RoundCloseProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptRoundClose;
+end;
+
+method TmwBasePasLex.AnsiProc;
+var
+BeginRun: Integer;
+CommentText: String;
+begin
+  fTokenID := TptTokenKind.ptAnsiComment;
+  case fBuffer.Buf[fBuffer.Run] of
+    #0:
+    begin
+      NullProc;
+      if assigned(OnMessage) then
+        OnMessage(Self, TMessageEventType.meError, 'Unexpected file end', PosXY.X, PosXY.Y);
+      Exit;
+    end;
+  end;
+
+  BeginRun := fBuffer.Run + 1;
+
+  while fBuffer.Run < fBuffer.Buf.Length  do
+    case fBuffer.Buf[fBuffer.Run] of
+      '*':
+      if fBuffer.Buf[fBuffer.Run + 1] = ')' then
+      begin
+        fCommentState := TCommentState.csNo;
+        inc(fBuffer.Run, 2);
+        Break;
+      end
+      else inc(fBuffer.Run);
+      #10:
+      begin
+        inc(fBuffer.Run);
+        inc(fBuffer.LineNumber);
+        fBuffer.LinePos := fBuffer.Run;
+      end;
+      #13:
+      begin
+        inc(fBuffer.Run);
+        if fBuffer.Buf[fBuffer.Run] = #10 then inc(fBuffer.Run);
+        inc(fBuffer.LineNumber);
+        fBuffer.LinePos := fBuffer.Run;
+      end;
+      else
+        inc(fBuffer.Run);
     end;
 
-    method TmwBasePasLex.AnsiProc;
-    var
-    BeginRun: Integer;
-    CommentText: String;
+  if assigned(OnComment) then
+  begin
+    CommentText := fBuffer.Buf.Substring( BeginRun, fBuffer.Run - BeginRun - 2);
+    DoOnComment(CommentText);
+  end;
+end;
+
+method TmwBasePasLex.RoundOpenProc;
+begin
+  var BeginRun := fBuffer.Run + 2; // The Comment or Directive start here
+  inc(fBuffer.Run);
+  case fBuffer.Buf[fBuffer.Run] of
+    '*':
     begin
       fTokenID := TptTokenKind.ptAnsiComment;
-      case fBuffer.Buf[fBuffer.Run] of
-        #0:
-        begin
-          NullProc;
-          if assigned(OnMessage) then
-            OnMessage(Self, TMessageEventType.meError, 'Unexpected file end', PosXY.X, PosXY.Y);
-          Exit;
-        end;
-      end;
-
-      BeginRun := fBuffer.Run + 1;
-
-      while fBuffer.Run < fBuffer.Buf.Length  do
+      if fBuffer.Buf[fBuffer.Run + 1] = '$' then
+        fTokenID := GetDirectiveKind
+      else
+        fCommentState := TCommentState.csAnsi;
+      inc(fBuffer.Run);
+      while fBuffer.Buf[fBuffer.Run] <> #0 do
         case fBuffer.Buf[fBuffer.Run] of
           '*':
           if fBuffer.Buf[fBuffer.Run + 1] = ')' then
           begin
             fCommentState := TCommentState.csNo;
+            // The Position in the CommentNode is at the end before "*)"
+            // Only for Comments
+            if fTokenID = TptTokenKind.ptAnsiComment then
+              fTokenPos := fBuffer.Run-1;
             inc(fBuffer.Run, 2);
             Break;
           end
-          else inc(fBuffer.Run);
+          else
+            inc(fBuffer.Run);
           #10:
           begin
             inc(fBuffer.Run);
@@ -2080,726 +2133,674 @@ if lShort < 127 then;
           else
             inc(fBuffer.Run);
         end;
-
-      if assigned(OnComment) then
-      begin
-        CommentText := fBuffer.Buf.Substring( BeginRun, fBuffer.Run - BeginRun - 2);
-        DoOnComment(CommentText);
-      end;
     end;
-
-    method TmwBasePasLex.RoundOpenProc;
-    begin
-      var BeginRun := fBuffer.Run + 2; // The Comment or Directive start here
-      inc(fBuffer.Run);
-      case fBuffer.Buf[fBuffer.Run] of
-        '*':
-        begin
-          fTokenID := TptTokenKind.ptAnsiComment;
-          if fBuffer.Buf[fBuffer.Run + 1] = '$' then
-            fTokenID := GetDirectiveKind
-          else
-            fCommentState := TCommentState.csAnsi;
-          inc(fBuffer.Run);
-          while fBuffer.Buf[fBuffer.Run] <> #0 do
-            case fBuffer.Buf[fBuffer.Run] of
-              '*':
-              if fBuffer.Buf[fBuffer.Run + 1] = ')' then
-              begin
-                fCommentState := TCommentState.csNo;
-                // The Position in the CommentNode is at the end before "*)"
-                // Only for Comments
-                if fTokenID = TptTokenKind.ptAnsiComment then
-                fTokenPos := fBuffer.Run-1;
-                inc(fBuffer.Run, 2);
-                Break;
-              end
-              else
-                inc(fBuffer.Run);
-              #10:
-              begin
-                inc(fBuffer.Run);
-                inc(fBuffer.LineNumber);
-                fBuffer.LinePos := fBuffer.Run;
-              end;
-              #13:
-              begin
-                inc(fBuffer.Run);
-                if fBuffer.Buf[fBuffer.Run] = #10 then inc(fBuffer.Run);
-                inc(fBuffer.LineNumber);
-                fBuffer.LinePos := fBuffer.Run;
-              end;
-              else
-                inc(fBuffer.Run);
-             end;
-        end;
-        '.':
-        begin
-          inc(fBuffer.Run);
-          fTokenID := TptTokenKind.ptSquareOpen;
-        end;
-        else
-          fTokenID := TptTokenKind.ptRoundOpen;
-      end;
-      case fTokenID of
-        TptTokenKind.ptAnsiComment:
-        begin
-          if assigned(OnComment) then
-          begin
-            var CommentText := fBuffer.Buf.Substring(BeginRun,  fBuffer.Run - BeginRun - 2);
-            DoOnComment(CommentText);
-          end;
-        end;
-        TptTokenKind.ptCompDirect:
-        begin
-          if assigned(OnCompDirect) then
-            OnCompDirect(Self);
-        end;
-        TptTokenKind.ptDefineDirect:
-        begin
-          if assigned(OnDefineDirect) then
-            OnDefineDirect(Self);
-        end;
-        TptTokenKind.ptElseDirect:
-        begin
-          if assigned(OnElseDirect) then
-            OnElseDirect(Self);
-        end;
-        TptTokenKind.ptEndIfDirect:
-        begin
-          if assigned(OnEndIfDirect) then
-            OnEndIfDirect(Self);
-        end;
-        TptTokenKind.ptIfDefDirect:
-        begin
-          if assigned(OnIfDefDirect) then
-            OnIfDefDirect(Self);
-        end;
-        TptTokenKind.ptIfNDefDirect:
-        begin
-          if assigned(OnIfNDefDirect) then
-            OnIfNDefDirect(Self);
-        end;
-        TptTokenKind.ptIfOptDirect:
-        begin
-          if assigned(OnIfOptDirect) then
-            OnIfOptDirect(Self);
-        end;
-        TptTokenKind.ptIncludeDirect:
-        begin
-          if assigned(fIncludeHandler) then
-            IncludeFile;
-        end;
-        TptTokenKind.ptResourceDirect:
-        begin
-          if assigned(OnResourceDirect) then
-            OnResourceDirect(Self);
-        end;
-        TptTokenKind.ptScopedEnumsDirect:
-        begin
-          UpdateScopedEnums;
-        end;
-        TptTokenKind.ptUndefDirect:
-        begin
-          if assigned(OnUnDefDirect) then
-            OnUnDefDirect(Self);
-        end;
-      end;
-    end;
-
-    method TmwBasePasLex.SemiColonProc;
-    begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptSemiColon;
-    end;
-
-    method TmwBasePasLex.SlashProc;
-    var
-    BeginRun: Integer;
-    CommentText: String;
-    begin
-      case fBuffer.Buf[fBuffer.Run + 1] of
-        '/':
-        begin
-          inc(fBuffer.Run, 2);
-
-          BeginRun := fBuffer.Run;
-
-          fTokenID := TptTokenKind.ptSlashesComment;
-          while fBuffer.Buf[fBuffer.Run] <> #0 do
-          begin
-            case fBuffer.Buf[fBuffer.Run] of
-              #10, #13: Break;
-            end;
-            inc(fBuffer.Run);
-          end;
-
-          if assigned(OnComment) then
-          begin
-            CommentText := fBuffer.Buf.Substring(BeginRun,  fBuffer.Run - BeginRun);
-            DoOnComment(CommentText);
-          end;
-        end;
-        else
-          begin
-            inc(fBuffer.Run);
-            fTokenID := TptTokenKind.ptSlash;
-          end;
-      end;
-    end;
-
-    method TmwBasePasLex.SpaceProc;
-    begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptSpace;
-  // [#1..#9, #11, #12, #14..#32]
-
-      while fBuffer.Buf[fBuffer.Run] in [#1..#9, #11, #12, #14..#32] do
-        inc(fBuffer.Run);
-    end;
-
-    method TmwBasePasLex.SquareCloseProc;
-    begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptSquareClose;
-    end;
-
-    method TmwBasePasLex.SquareOpenProc;
+    '.':
     begin
       inc(fBuffer.Run);
       fTokenID := TptTokenKind.ptSquareOpen;
     end;
-
-    method TmwBasePasLex.StarProc;
+    else
+      fTokenID := TptTokenKind.ptRoundOpen;
+  end;
+  case fTokenID of
+    TptTokenKind.ptAnsiComment:
     begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptStar;
+      if assigned(OnComment) then
+      begin
+        var CommentText := fBuffer.Buf.Substring(BeginRun,  fBuffer.Run - BeginRun - 2);
+        DoOnComment(CommentText);
+      end;
     end;
-
-    method TmwBasePasLex.StringProc;
+    TptTokenKind.ptCompDirect:
     begin
-      fTokenID := TptTokenKind.ptStringConst;
-      repeat
-        inc(fBuffer.Run);
+      if assigned(OnCompDirect) then
+        OnCompDirect(Self);
+    end;
+    TptTokenKind.ptDefineDirect:
+    begin
+      if assigned(OnDefineDirect) then
+        OnDefineDirect(Self);
+    end;
+    TptTokenKind.ptElseDirect:
+    begin
+      if assigned(OnElseDirect) then
+        OnElseDirect(Self);
+    end;
+    TptTokenKind.ptEndIfDirect:
+    begin
+      if assigned(OnEndIfDirect) then
+        OnEndIfDirect(Self);
+    end;
+    TptTokenKind.ptIfDefDirect:
+    begin
+      if assigned(OnIfDefDirect) then
+        OnIfDefDirect(Self);
+    end;
+    TptTokenKind.ptIfNDefDirect:
+    begin
+      if assigned(OnIfNDefDirect) then
+        OnIfNDefDirect(Self);
+    end;
+    TptTokenKind.ptIfOptDirect:
+    begin
+      if assigned(OnIfOptDirect) then
+        OnIfOptDirect(Self);
+    end;
+    TptTokenKind.ptIncludeDirect:
+    begin
+      if assigned(fIncludeHandler) then
+        IncludeFile;
+    end;
+    TptTokenKind.ptResourceDirect:
+    begin
+      if assigned(OnResourceDirect) then
+        OnResourceDirect(Self);
+    end;
+    TptTokenKind.ptScopedEnumsDirect:
+    begin
+      UpdateScopedEnums;
+    end;
+    TptTokenKind.ptUndefDirect:
+    begin
+      if assigned(OnUnDefDirect) then
+        OnUnDefDirect(Self);
+    end;
+  end;
+end;
+
+method TmwBasePasLex.SemiColonProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptSemiColon;
+end;
+
+method TmwBasePasLex.SlashProc;
+var
+BeginRun: Integer;
+CommentText: String;
+begin
+  case fBuffer.Buf[fBuffer.Run + 1] of
+    '/':
+    begin
+      inc(fBuffer.Run, 2);
+
+      BeginRun := fBuffer.Run;
+
+      fTokenID := TptTokenKind.ptSlashesComment;
+      while fBuffer.Buf[fBuffer.Run] <> #0 do
+      begin
         case fBuffer.Buf[fBuffer.Run] of
-          #0, #10, #13:
-          begin
-            if assigned(OnMessage) then
-              OnMessage(Self, TMessageEventType.meError, 'Unterminated string', PosXY.X, PosXY.Y);
-            Break;
-          end;
-          #39:
-          begin
-            while (fBuffer.Buf[fBuffer.Run] = #39) and (fBuffer.Buf[fBuffer.Run + 1] = #39) do
-            begin
-              inc(fBuffer.Run, 2);
-            end;
-          end;
+          #10, #13: Break;
         end;
-        until fBuffer.Buf[fBuffer.Run] = #39;
-      if fBuffer.Buf[fBuffer.Run] = #39 then
+        inc(fBuffer.Run);
+      end;
+
+      if assigned(OnComment) then
+      begin
+        CommentText := fBuffer.Buf.Substring(BeginRun,  fBuffer.Run - BeginRun);
+        DoOnComment(CommentText);
+      end;
+    end;
+    else
       begin
         inc(fBuffer.Run);
-        if TokenLen = 3 then
-        begin
-          fTokenID := TptTokenKind.ptAsciiChar;
-        end;
+        fTokenID := TptTokenKind.ptSlash;
       end;
-    end;
+  end;
+end;
 
-    method TmwBasePasLex.SymbolProc;
-    begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptSymbol;
-    end;
+method TmwBasePasLex.SpaceProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptSpace;
+// [#1..#9, #11, #12, #14..#32]
 
-    method TmwBasePasLex.UnknownProc;
-    begin
-      inc(fBuffer.Run);
-      fTokenID := TptTokenKind.ptUnknown;
-      if assigned(OnMessage) then
-        OnMessage(Self, TMessageEventType.meError, 'Unknown Character', PosXY.X, PosXY.Y);
-    end;
+  while fBuffer.Buf[fBuffer.Run] in [#1..#9, #11, #12, #14..#32] do
+    inc(fBuffer.Run);
+end;
 
-    method TmwBasePasLex.Next;
-    begin
-      fExID := TptTokenKind.ptUnknown;
-      fTokenPos := fBuffer.Run;
-      case fCommentState of
-        TCommentState.csNo: DoProcTable(fBuffer.Buf[fBuffer.Run]);
-        TCommentState.csBor: BorProc;
-        TCommentState.csAnsi: AnsiProc;
-      end;
-    end;
+method TmwBasePasLex.SquareCloseProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptSquareClose;
+end;
 
-    method TmwBasePasLex.GetIsJunk: Boolean;
-    begin
-      Result := fTokenID.IsJunk or (fUseDefines and (fDefineStack > 0) and (TokenID <> TptTokenKind.ptNull));
-    end;
+method TmwBasePasLex.SquareOpenProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptSquareOpen;
+end;
 
-    method TmwBasePasLex.GetIsJunkAssembly: Boolean;
-    begin
-      Result := not(fTokenID in [ TptTokenKind.ptCRLF]) and (
-        fTokenID.IsJunk or (fUseDefines and (fDefineStack > 0) and (TokenID <> TptTokenKind.ptNull))
-        );
-    end;
+method TmwBasePasLex.StarProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptStar;
+end;
 
-    method TmwBasePasLex.GetIsSpace: Boolean;
-    begin
-      Result := fTokenID in [TptTokenKind.ptCRLF, TptTokenKind.ptSpace];
-    end;
-
-    method TmwBasePasLex.GetToken: not nullable string;
-    begin
-      Result := fBuffer.Buf.Substring(fTokenPos, TokenLen);
-    end;
-
-    method TmwBasePasLex.GetTokenLen: Integer;
-    begin
-      Result := fBuffer.Run - fTokenPos;
-    end;
-
-    method TmwBasePasLex.NextNoJunk;
-    begin
-      repeat
-        Next;
-        until not IsJunk;
-    end;
-
-    method TmwBasePasLex.NextNoJunkAssembly;
-    begin
-      repeat
-        Next
-        until not IsJunkAssembly;
-    end;
-    method TmwBasePasLex.NextNoSpace;
-    begin
-      repeat
-        Next;
-        until not IsSpace;
-    end;
-
-    method TmwBasePasLex.FirstInLine: Boolean;
-    var
-    RunBack: Integer;
-    begin
-      Result := True;
-      if fTokenPos = 0 then Exit;
-      RunBack := fTokenPos;
-      dec(RunBack);
-  //  [#1..#9, #11, #12, #14..#32]
-
-      while fBuffer.Buf[RunBack] in [#1..#9, #11, #12, #14..#32] do
-        dec(RunBack);
-      if RunBack = 0 then Exit;
-      case fBuffer.Buf[RunBack] of
-        #10, #13: Exit;
-        else
-          begin
-            Result := False;
-            Exit;
-          end;
-      end;
-    end;
-
-    method TmwBasePasLex.GetCompilerDirective: not nullable string;
-    var
-    DirectLen: Integer;
-    begin
-      result := '';
-      if TokenID <> TptTokenKind.ptCompDirect then
-        Result := ''
-      else
-        case fBuffer.Buf[fTokenPos] of
-          '(':
-          begin
-            DirectLen := fBuffer.Run - fTokenPos - 4;
-            Result := fBuffer.Buf.Substring(fTokenPos + 2, DirectLen).ToUpper;
-          end;
-          '{':
-          begin
-            DirectLen := fBuffer.Run - fTokenPos - 2;
-            Result := fBuffer.Buf.Substring(fTokenPos + 1, DirectLen).ToUpper;
-          end;
-        end;
-    end;
-
-    method TmwBasePasLex.GetDirectiveKind: TptTokenKind;
-    var
-    TempPos: Integer;
-    begin
-      case fBuffer.Buf[fTokenPos] of
-        '(': fBuffer.Run := fTokenPos + 3;
-        '{': fBuffer.Run := fTokenPos + 2;
-      end;
-      fDirectiveParamOrigin := fTokenPos;
-      TempPos := fTokenPos;
-      fTokenPos := fBuffer.Run;
-      fExID:= TptTokenKind.ptCompDirect; //Always register the fact that we are in a directive.
-      case KeyHash of
-        9:
-        if KeyComp('I') and (not (fBuffer.Buf[fBuffer.Run] in ['+', '-'])) then
-          Result := TptTokenKind.ptIncludeDirect else
-          Result := TptTokenKind.ptCompDirect;
-        15:
-        if KeyComp('IF') then
-          Result := TptTokenKind.ptIfDirect else
-          Result := TptTokenKind.ptCompDirect;
-        18:
-        if KeyComp('R') then
-        begin
-          if not (fBuffer.Buf[fBuffer.Run] in ['+', '-']) then
-            Result := TptTokenKind.ptResourceDirect else Result := TptTokenKind.ptCompDirect;
-        end else Result := TptTokenKind.ptCompDirect;
-        30:
-        if KeyComp('IFDEF') then
-          Result := TptTokenKind.ptIfDefDirect else
-          Result := TptTokenKind.ptCompDirect;
-        38:
-        if KeyComp('ENDIF') then
-          Result := TptTokenKind.ptEndIfDirect else
-          if KeyComp('IFEND') then
-            Result := TptTokenKind.ptIfEndDirect else
-            Result := TptTokenKind.ptCompDirect;
-        41:
-        if KeyComp('ELSE') then
-          Result := TptTokenKind.ptElseDirect else
-          Result := TptTokenKind.ptCompDirect;
-        43:
-        if KeyComp('DEFINE') then
-          Result := TptTokenKind.ptDefineDirect else
-          Result := TptTokenKind.ptCompDirect;
-        44:
-        if KeyComp('IFNDEF') then
-          Result := TptTokenKind.ptIfNDefDirect else
-          Result := TptTokenKind.ptCompDirect;
-        50:
-        if KeyComp('UNDEF') then
-          Result := TptTokenKind.ptUndefDirect else
-          Result := TptTokenKind.ptCompDirect;
-        56:
-        if KeyComp('ELSEIF') then
-          Result := TptTokenKind.ptElseIfDirect else
-          Result := TptTokenKind.ptCompDirect;
-        66:
-        if KeyComp('IFOPT') then
-          Result := TptTokenKind.ptIfOptDirect else
-          Result := TptTokenKind.ptCompDirect;
-        68:
-        if KeyComp('INCLUDE') then
-          Result := TptTokenKind.ptIncludeDirect else
-          Result := TptTokenKind.ptCompDirect;
-        104:
-        if KeyComp('Resource') then
-          Result := TptTokenKind.ptResourceDirect else
-          Result := TptTokenKind.ptCompDirect;
-        134:
-        if KeyComp('SCOPEDENUMS') then
-          Result := TptTokenKind.ptScopedEnumsDirect else
-          Result := TptTokenKind.ptCompDirect;
-        else Result := TptTokenKind.ptCompDirect;
-      end;
-      fTokenPos := TempPos;
-      dec(fBuffer.Run);
-    end;
-
-    method TmwBasePasLex.GetDirectiveParam: not nullable string;
-    var
-    EndPos: Integer;
-    ParamLen: Integer;
-    begin
-      case fBuffer.Buf[fTokenPos] of
-        '(':
-        begin
-          fTempRun := fTokenPos + 3;
-          EndPos := fBuffer.Run - 2;
-        end;
-        '{':
-        begin
-          fTempRun := fTokenPos + 2;
-          EndPos := fBuffer.Run - 1;
-        end;
-        else
-          EndPos := 0;
-      end;
-      while IsIdentifiers(fBuffer.Buf[fTempRun]) do
-        inc(fTempRun);
-      while (fBuffer.Buf[fTempRun] in ['+', ',', '-']) do
+method TmwBasePasLex.StringProc;
+begin
+  fTokenID := TptTokenKind.ptStringConst;
+  repeat
+    inc(fBuffer.Run);
+    case fBuffer.Buf[fBuffer.Run] of
+      #0, #10, #13:
       begin
-        inc(fTempRun);
-        while IsIdentifiers(fBuffer.Buf[fTempRun]) do
-          inc(fTempRun);
-        if (fBuffer.Buf[fTempRun - 1] in ['+', ',', '-']) and (fBuffer.Buf[fTempRun] = ' ')
-          then inc(fTempRun);
+        if assigned(OnMessage) then
+          OnMessage(Self, TMessageEventType.meError, 'Unterminated string', PosXY.X, PosXY.Y);
+        Break;
       end;
-      if fBuffer.Buf[fTempRun] = ' ' then inc(fTempRun);
-      ParamLen := EndPos - fTempRun;
-      Result:= fBuffer.Buf.Substring(fTempRun, ParamLen).ToUpper;
-    end;
-
-    method TmwBasePasLex.GetFileName: not nullable string;
-    begin
-      Result := fBuffer.FileName;
-    end;
-
-    method TmwBasePasLex.GetIncludeFileNameFromToken(const IncludeToken: not nullable string): not nullable string;
-    var
-    FileNameStartPos, CurrentPos: Integer;
-    TrimmedToken: String;
-    begin
-      TrimmedToken := IncludeToken.Trim;
-      CurrentPos := 1;
-      while TrimmedToken[CurrentPos] > #32 do
-        inc(CurrentPos);
-      while TrimmedToken[CurrentPos] <= #32 do
-        inc(CurrentPos);
-      FileNameStartPos := CurrentPos;
-      while (TrimmedToken[CurrentPos] > #32) and (TrimmedToken[CurrentPos] <> '}')  do
-        inc(CurrentPos);
-
-      Result := TrimmedToken.Substring( FileNameStartPos, CurrentPos - FileNameStartPos);
-    end;
-
-    method TmwBasePasLex.IncludeFile;
-    var
-    IncludeFileName, IncludeDirective, Content: not nullable String;
-    NewBuffer: TBufferRec;
-    begin
-      IncludeDirective := Token;
-      IncludeFileName := GetIncludeFileNameFromToken(IncludeDirective);
-      Content := fIncludeHandler.GetIncludeFileContent(IncludeFileName) + #13#10#0;
-
-      NewBuffer := New TBufferRec();
-      NewBuffer.SharedBuffer := False;
-      NewBuffer.Next := fBuffer;
-      NewBuffer.LineNumber := 0;
-      NewBuffer.LinePos := 0;
-      NewBuffer.Run := 0;
-      NewBuffer.FileName := IncludeFileName;
-
-      NewBuffer.Buf := Content;
-
-
-      fBuffer := NewBuffer;
-
-      Next;
-    end;
-
-    method TmwBasePasLex.InitLexer;
-    begin
-      fCommentState :=  TCommentState.csNo;
-      fBuffer.LineNumber := 0;
-      fBuffer.LinePos := 0;
-    end;
-
-    method TmwBasePasLex.InitFrom(ALexer: TmwBasePasLex);
-    begin
-      SetSharedBuffer(ALexer.fBuffer);
-      fCommentState := ALexer.fCommentState;
-      fScopedEnums := ALexer.ScopedEnums;
-      fBuffer.Run := ALexer.RunPos;
-      fTokenID := ALexer.TokenID;
-      fExID := ALexer.ExID;
-      CloneDefinesFrom(ALexer);
-      OnParseCompilerDirectiveEvent := ALexer.OnParseCompilerDirectiveEvent;
-    end;
-
-    method TmwBasePasLex.InitDefinesDefinedByCompiler;
-    begin
-      for each s in DelphiDefines.getDefinesFor(fCompiler) do
-        AddDefine(s)
-    end;
-
-    method TmwBasePasLex.GetStringContent: not nullable string;
-    begin
-      if TokenID <> TptTokenKind.ptStringConst then
-        Result := ''
-      else
+      #39:
       begin
-        var TempString := Token;
-        var sEnd := length(TempString);
-        if TempString[sEnd] <> #39 then inc(sEnd);
-        Result :=  TempString.Substring( 2, sEnd - 2);
-
+        while (fBuffer.Buf[fBuffer.Run] = #39) and (fBuffer.Buf[fBuffer.Run + 1] = #39) do
+        begin
+          inc(fBuffer.Run, 2);
+        end;
       end;
     end;
-
-    method TmwBasePasLex.GetIsOrdIdent: Boolean;
+    until fBuffer.Buf[fBuffer.Run] = #39;
+  if fBuffer.Buf[fBuffer.Run] = #39 then
+  begin
+    inc(fBuffer.Run);
+    if TokenLen = 3 then
     begin
-      if fTokenID =TptTokenKind.ptIdentifier then
-        Result := fExID in [TptTokenKind.ptBoolean, TptTokenKind.ptByte, TptTokenKind.ptChar, TptTokenKind.ptDWORD, TptTokenKind.ptInt64, TptTokenKind.ptInteger,
-          TptTokenKind.ptLongint, TptTokenKind.ptLongword, TptTokenKind.ptPChar, TptTokenKind.ptShortint, TptTokenKind.ptSmallint, TptTokenKind.ptWideChar, TptTokenKind.ptWord]
-      else
-        Result := False;
+      fTokenID := TptTokenKind.ptAsciiChar;
     end;
+  end;
+end;
 
-    method TmwBasePasLex.GetIsOrdinalType: Boolean;
-    begin
-      Result := GetIsOrdIdent or (fTokenID in [TptTokenKind.ptAsciiChar, TptTokenKind.ptIntegerConst]);
-    end;
+method TmwBasePasLex.SymbolProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptSymbol;
+end;
 
-    method TmwBasePasLex.GetIsRealType: Boolean;
-    begin
-      if fTokenID =TptTokenKind.ptIdentifier then
-        Result := fExID in [TptTokenKind.ptComp, TptTokenKind.ptCurrency, TptTokenKind.ptDouble, TptTokenKind.ptExtended, TptTokenKind.ptReal, TptTokenKind.ptReal48, TptTokenKind.ptSingle]
-      else
-        Result := False;
-    end;
+method TmwBasePasLex.UnknownProc;
+begin
+  inc(fBuffer.Run);
+  fTokenID := TptTokenKind.ptUnknown;
+  if assigned(OnMessage) then
+    OnMessage(Self, TMessageEventType.meError, 'Unknown Character', PosXY.X, PosXY.Y);
+end;
 
-    method TmwBasePasLex.GetIsStringType: Boolean;
-    begin
-      if fTokenID =TptTokenKind.ptIdentifier then
-        Result := fExID in [TptTokenKind.ptAnsiString, TptTokenKind.ptWideString]
-      else
-        Result := fTokenID in [TptTokenKind.ptString, TptTokenKind.ptStringConst];
-    end;
+method TmwBasePasLex.Next;
+begin
+  fExID := TptTokenKind.ptUnknown;
+  fTokenPos := fBuffer.Run;
+  case fCommentState of
+    TCommentState.csNo: DoProcTable(fBuffer.Buf[fBuffer.Run]);
+    TCommentState.csBor: BorProc;
+    TCommentState.csAnsi: AnsiProc;
+  end;
+end;
 
-    method TmwBasePasLex.GetIsVariantType: Boolean;
-    begin
-      if fTokenID =TptTokenKind.ptIdentifier then
-        Result := fExID in [TptTokenKind.ptOleVariant, TptTokenKind.ptVariant]
-      else
-        Result := False;
-    end;
+method TmwBasePasLex.GetIsJunk: Boolean;
+begin
+  Result := fTokenID.IsJunk or (fUseDefines and (fDefineStack > 0) and (TokenID <> TptTokenKind.ptNull));
+end;
 
-    method TmwBasePasLex.GetOrigin: not nullable string;
-    begin
-      Result := fBuffer.Buf;
-    end;
+method TmwBasePasLex.GetIsJunkAssembly: Boolean;
+begin
+  Result := not(fTokenID in [ TptTokenKind.ptCRLF]) and (
+    fTokenID.IsJunk or (fUseDefines and (fDefineStack > 0) and (TokenID <> TptTokenKind.ptNull))
+    );
+end;
 
-    method TmwBasePasLex.GetIsAddOperator: Boolean;
-    begin
-      Result := fTokenID in [TptTokenKind.ptMinus, TptTokenKind.ptOr, TptTokenKind.ptPlus, TptTokenKind.ptXor];
-    end;
+method TmwBasePasLex.GetIsSpace: Boolean;
+begin
+  Result := fTokenID in [TptTokenKind.ptCRLF, TptTokenKind.ptSpace];
+end;
 
-    method TmwBasePasLex.GetIsMulOperator: Boolean;
-    begin
-      Result := fTokenID in [TptTokenKind.ptAnd, TptTokenKind.ptAs, TptTokenKind.ptDiv, TptTokenKind.ptMod, TptTokenKind.ptShl, TptTokenKind.ptShr, TptTokenKind.ptSlash, TptTokenKind.ptStar];
-    end;
+method TmwBasePasLex.GetToken: not nullable string;
+begin
+  Result := fBuffer.Buf.Substring(fTokenPos, TokenLen);
+end;
 
-    method TmwBasePasLex.GetIsRelativeOperator: Boolean;
-    begin
-      Result := fTokenID in [TptTokenKind.ptAs, TptTokenKind.ptEqual, TptTokenKind.ptGreater, TptTokenKind.ptGreaterEqual, TptTokenKind.ptLower, TptTokenKind.ptLowerEqual,
-        TptTokenKind.ptIn, TptTokenKind.ptIs, TptTokenKind.ptNotEqual];
-    end;
+method TmwBasePasLex.GetTokenLen: Integer;
+begin
+  Result := fBuffer.Run - fTokenPos;
+end;
 
-    method TmwBasePasLex.GetIsCompilerDirective: Boolean;
-    begin
-      Result := fTokenID in [TptTokenKind.ptCompDirect, TptTokenKind.ptDefineDirect, TptTokenKind.ptElseDirect,
-        TptTokenKind.ptEndIfDirect, TptTokenKind.ptIfDefDirect, TptTokenKind.ptIfNDefDirect, TptTokenKind.ptIfOptDirect,
-        TptTokenKind.ptIncludeDirect, TptTokenKind.ptResourceDirect, TptTokenKind.ptScopedEnumsDirect, TptTokenKind.ptUndefDirect];
-    end;
+method TmwBasePasLex.NextNoJunk;
+begin
+  repeat
+    Next;
+    until not IsJunk;
+end;
 
-    method TmwBasePasLex.GetGenID: TptTokenKind;
-    begin
-      Result := fTokenID;
-      if fTokenID =TptTokenKind.ptIdentifier then
-        if fExID <> TptTokenKind.ptUnknown then Result := fExID;
-    end;
+method TmwBasePasLex.NextNoJunkAssembly;
+begin
+  repeat
+    Next
+    until not IsJunkAssembly;
+end;
+method TmwBasePasLex.NextNoSpace;
+begin
+  repeat
+    Next;
+    until not IsSpace;
+end;
 
-    { TmwPasLex }
+method TmwBasePasLex.FirstInLine: Boolean;
+var
+RunBack: Integer;
+begin
+  Result := True;
+  if fTokenPos = 0 then Exit;
+  RunBack := fTokenPos;
+  dec(RunBack);
+//  [#1..#9, #11, #12, #14..#32]
 
-    constructor TmwPasLex(const aCompiler : DelphiCompiler);
-    begin
-      inherited constructor(aCompiler);
-      fAheadLex := new TmwBasePasLex(aCompiler);
-    end;
-
-    method TmwPasLex.AheadNext;
-    begin
-      fAheadLex.NextNoJunk;
-    end;
-
-    method TmwPasLex.GetAheadExID: TptTokenKind;
-    begin
-      Result := fAheadLex.ExID;
-    end;
-
-    method TmwPasLex.GetAheadGenID: TptTokenKind;
-    begin
-      Result := fAheadLex.GenID;
-    end;
-
-    method TmwPasLex.GetAheadToken: not nullable string;
-    begin
-      Result := fAheadLex.Token;
-    end;
-
-    method TmwPasLex.GetAheadTokenID: TptTokenKind;
-    begin
-      Result := fAheadLex.TokenID;
-    end;
-
-    method TmwPasLex.InitAhead;
-    begin
-      fAheadLex.fCommentState := fCommentState;
-      fAheadLex.CloneDefinesFrom(Self);
-      fAheadLex.SetSharedBuffer(Buffer);
-      fAheadLex.OnParseCompilerDirectiveEvent := OnParseCompilerDirectiveEvent;
-      while fAheadLex.IsJunk do
-        fAheadLex.Next;
-    end;
-
-    method TmwPasLex.SetOrigin(const NewValue: not nullable string);
-    begin
-      inherited SetOrigin(NewValue);
-      fAheadLex.SetSharedBuffer(Buffer);
-    end;
-
-    method TmwBasePasLex.Func86: TptTokenKind;
-    begin
-      Result :=TptTokenKind.ptIdentifier;
-      if KeyComp('Varargs') then fExID := TptTokenKind.ptVarargs;
-    end;
-
-    method TmwBasePasLex.StringDQProc;
-    begin
-      if not fAsmCode then
+  while fBuffer.Buf[RunBack] in [#1..#9, #11, #12, #14..#32] do
+    dec(RunBack);
+  if RunBack = 0 then Exit;
+  case fBuffer.Buf[RunBack] of
+    #10, #13: Exit;
+    else
       begin
-        SymbolProc;
+        Result := False;
         Exit;
       end;
-      fTokenID := TptTokenKind.ptStringDQConst;
-      repeat
-        inc(fBuffer.Run);
-        case fBuffer.Buf[fBuffer.Run] of
-          #0, #10, #13:
-          begin
-            if assigned(OnMessage) then
-              OnMessage(Self, TMessageEventType.meError, 'Unterminated string', PosXY.X, PosXY.Y);
-            Break;
-          end;
-          '\':
-          begin
-            inc(fBuffer.Run);
-            //[#32..#127]
-            if (fBuffer.Buf[fBuffer.Run] in [#32..#127]) then inc(fBuffer.Run);
-          end;
-        end;
-        until fBuffer.Buf[fBuffer.Run] = '"';
-      if fBuffer.Buf[fBuffer.Run] = '"' then
-        inc(fBuffer.Run);
-    end;
+  end;
+end;
 
-    method TmwBasePasLex.AmpersandOpProc;
+method TmwBasePasLex.GetCompilerDirective: not nullable string;
+var
+DirectLen: Integer;
+begin
+  result := '';
+  if TokenID <> TptTokenKind.ptCompDirect then
+    Result := ''
+  else
+    case fBuffer.Buf[fTokenPos] of
+      '(':
+      begin
+        DirectLen := fBuffer.Run - fTokenPos - 4;
+        Result := fBuffer.Buf.Substring(fTokenPos + 2, DirectLen).ToUpper;
+      end;
+      '{':
+      begin
+        DirectLen := fBuffer.Run - fTokenPos - 2;
+        Result := fBuffer.Buf.Substring(fTokenPos + 1, DirectLen).ToUpper;
+      end;
+    end;
+end;
+
+method TmwBasePasLex.GetDirectiveKind: TptTokenKind;
+var
+TempPos: Integer;
+begin
+  case fBuffer.Buf[fTokenPos] of
+    '(': fBuffer.Run := fTokenPos + 3;
+    '{': fBuffer.Run := fTokenPos + 2;
+  end;
+  fDirectiveParamOrigin := fTokenPos;
+  TempPos := fTokenPos;
+  fTokenPos := fBuffer.Run;
+  fExID:= TptTokenKind.ptCompDirect; //Always register the fact that we are in a directive.
+  case KeyHash of
+    9:
+    if KeyComp('I') and (not (fBuffer.Buf[fBuffer.Run] in ['+', '-'])) then
+      Result := TptTokenKind.ptIncludeDirect else
+      Result := TptTokenKind.ptCompDirect;
+    15:
+    if KeyComp('IF') then
+      Result := TptTokenKind.ptIfDirect else
+      Result := TptTokenKind.ptCompDirect;
+    18:
+    if KeyComp('R') then
     begin
-      fTokenID := TptTokenKind.ptAmpersand;
-      inc(fBuffer.Run);
-      //   ['a'..'z', 'A'..'Z','0'..'9', '_', '&']
-      while (fBuffer.Buf[fBuffer.Run] in ['a'..'z', 'A'..'Z','0'..'9', '_', '&']) do
+      if not (fBuffer.Buf[fBuffer.Run] in ['+', '-']) then
+        Result := TptTokenKind.ptResourceDirect else Result := TptTokenKind.ptCompDirect;
+    end else Result := TptTokenKind.ptCompDirect;
+    30:
+    if KeyComp('IFDEF') then
+      Result := TptTokenKind.ptIfDefDirect else
+      Result := TptTokenKind.ptCompDirect;
+    38:
+    if KeyComp('ENDIF') then
+      Result := TptTokenKind.ptEndIfDirect else
+      if KeyComp('IFEND') then
+        Result := TptTokenKind.ptIfEndDirect else
+        Result := TptTokenKind.ptCompDirect;
+    41:
+    if KeyComp('ELSE') then
+      Result := TptTokenKind.ptElseDirect else
+      Result := TptTokenKind.ptCompDirect;
+    43:
+    if KeyComp('DEFINE') then
+      Result := TptTokenKind.ptDefineDirect else
+      Result := TptTokenKind.ptCompDirect;
+    44:
+    if KeyComp('IFNDEF') then
+      Result := TptTokenKind.ptIfNDefDirect else
+      Result := TptTokenKind.ptCompDirect;
+    50:
+    if KeyComp('UNDEF') then
+      Result := TptTokenKind.ptUndefDirect else
+      Result := TptTokenKind.ptCompDirect;
+    56:
+    if KeyComp('ELSEIF') then
+      Result := TptTokenKind.ptElseIfDirect else
+      Result := TptTokenKind.ptCompDirect;
+    66:
+    if KeyComp('IFOPT') then
+      Result := TptTokenKind.ptIfOptDirect else
+      Result := TptTokenKind.ptCompDirect;
+    68:
+    if KeyComp('INCLUDE') then
+      Result := TptTokenKind.ptIncludeDirect else
+      Result := TptTokenKind.ptCompDirect;
+    104:
+    if KeyComp('Resource') then
+      Result := TptTokenKind.ptResourceDirect else
+      Result := TptTokenKind.ptCompDirect;
+    134:
+    if KeyComp('SCOPEDENUMS') then
+      Result := TptTokenKind.ptScopedEnumsDirect else
+      Result := TptTokenKind.ptCompDirect;
+    else Result := TptTokenKind.ptCompDirect;
+  end;
+  fTokenPos := TempPos;
+  dec(fBuffer.Run);
+end;
+
+method TmwBasePasLex.GetDirectiveParam: not nullable string;
+var
+EndPos: Integer;
+ParamLen: Integer;
+begin
+  case fBuffer.Buf[fTokenPos] of
+    '(':
+    begin
+      fTempRun := fTokenPos + 3;
+      EndPos := fBuffer.Run - 2;
+    end;
+    '{':
+    begin
+      fTempRun := fTokenPos + 2;
+      EndPos := fBuffer.Run - 1;
+    end;
+    else
+      EndPos := 0;
+  end;
+  while IsIdentifiers(fBuffer.Buf[fTempRun]) do
+    inc(fTempRun);
+  while (fBuffer.Buf[fTempRun] in ['+', ',', '-']) do
+  begin
+    inc(fTempRun);
+    while IsIdentifiers(fBuffer.Buf[fTempRun]) do
+      inc(fTempRun);
+    if (fBuffer.Buf[fTempRun - 1] in ['+', ',', '-']) and (fBuffer.Buf[fTempRun] = ' ')
+      then inc(fTempRun);
+  end;
+  if fBuffer.Buf[fTempRun] = ' ' then inc(fTempRun);
+  ParamLen := EndPos - fTempRun;
+  Result:= fBuffer.Buf.Substring(fTempRun, ParamLen).ToUpper;
+end;
+
+method TmwBasePasLex.GetFileName: not nullable string;
+begin
+  Result := fBuffer.FileName;
+end;
+
+method TmwBasePasLex.GetIncludeFileNameFromToken(const IncludeToken: not nullable string): not nullable string;
+var
+FileNameStartPos, CurrentPos: Integer;
+TrimmedToken: String;
+begin
+  TrimmedToken := IncludeToken.Trim;
+  CurrentPos := 1;
+  while TrimmedToken[CurrentPos] > #32 do
+    inc(CurrentPos);
+  while TrimmedToken[CurrentPos] <= #32 do
+    inc(CurrentPos);
+  FileNameStartPos := CurrentPos;
+  while (TrimmedToken[CurrentPos] > #32) and (TrimmedToken[CurrentPos] <> '}')  do
+    inc(CurrentPos);
+
+  Result := TrimmedToken.Substring( FileNameStartPos, CurrentPos - FileNameStartPos);
+end;
+
+method TmwBasePasLex.IncludeFile;
+var
+IncludeFileName, IncludeDirective, Content: not nullable String;
+NewBuffer: TBufferRec;
+begin
+  IncludeDirective := Token;
+  IncludeFileName := GetIncludeFileNameFromToken(IncludeDirective);
+  Content := fIncludeHandler.GetIncludeFileContent(IncludeFileName) + #13#10#0;
+
+  NewBuffer := New TBufferRec();
+  NewBuffer.SharedBuffer := False;
+  NewBuffer.Next := fBuffer;
+  NewBuffer.LineNumber := 0;
+  NewBuffer.LinePos := 0;
+  NewBuffer.Run := 0;
+  NewBuffer.FileName := IncludeFileName;
+
+  NewBuffer.Buf := Content;
+
+
+  fBuffer := NewBuffer;
+
+  Next;
+end;
+
+method TmwBasePasLex.InitLexer;
+begin
+  fCommentState :=  TCommentState.csNo;
+  fBuffer.LineNumber := 0;
+  fBuffer.LinePos := 0;
+end;
+
+method TmwBasePasLex.InitFrom(ALexer: TmwBasePasLex);
+begin
+  SetSharedBuffer(ALexer.fBuffer);
+  fCommentState := ALexer.fCommentState;
+  fScopedEnums := ALexer.ScopedEnums;
+  fBuffer.Run := ALexer.RunPos;
+  fTokenID := ALexer.TokenID;
+  fExID := ALexer.ExID;
+  CloneDefinesFrom(ALexer);
+  OnParseCompilerDirectiveEvent := ALexer.OnParseCompilerDirectiveEvent;
+end;
+
+method TmwBasePasLex.InitDefinesDefinedByCompiler;
+begin
+  for each s in DelphiDefines.getDefinesFor(fCompiler) do
+    AddDefine(s)
+end;
+
+method TmwBasePasLex.GetStringContent: not nullable string;
+begin
+  if TokenID <> TptTokenKind.ptStringConst then
+    Result := ''
+  else
+  begin
+    var TempString := Token;
+    var sEnd := length(TempString);
+    if TempString[sEnd] <> #39 then inc(sEnd);
+    Result :=  TempString.Substring( 2, sEnd - 2);
+
+  end;
+end;
+
+method TmwBasePasLex.GetIsOrdIdent: Boolean;
+begin
+  if fTokenID =TptTokenKind.ptIdentifier then
+    Result := fExID in [TptTokenKind.ptBoolean, TptTokenKind.ptByte, TptTokenKind.ptChar, TptTokenKind.ptDWORD, TptTokenKind.ptInt64, TptTokenKind.ptInteger,
+      TptTokenKind.ptLongint, TptTokenKind.ptLongword, TptTokenKind.ptPChar, TptTokenKind.ptShortint, TptTokenKind.ptSmallint, TptTokenKind.ptWideChar, TptTokenKind.ptWord]
+  else
+    Result := False;
+end;
+
+method TmwBasePasLex.GetIsOrdinalType: Boolean;
+begin
+  Result := GetIsOrdIdent or (fTokenID in [TptTokenKind.ptAsciiChar, TptTokenKind.ptIntegerConst]);
+end;
+
+method TmwBasePasLex.GetIsRealType: Boolean;
+begin
+  if fTokenID =TptTokenKind.ptIdentifier then
+    Result := fExID in [TptTokenKind.ptComp, TptTokenKind.ptCurrency, TptTokenKind.ptDouble, TptTokenKind.ptExtended, TptTokenKind.ptReal, TptTokenKind.ptReal48, TptTokenKind.ptSingle]
+  else
+    Result := False;
+end;
+
+method TmwBasePasLex.GetIsStringType: Boolean;
+begin
+  if fTokenID =TptTokenKind.ptIdentifier then
+    Result := fExID in [TptTokenKind.ptAnsiString, TptTokenKind.ptWideString]
+  else
+    Result := fTokenID in [TptTokenKind.ptString, TptTokenKind.ptStringConst];
+end;
+
+method TmwBasePasLex.GetIsVariantType: Boolean;
+begin
+  if fTokenID =TptTokenKind.ptIdentifier then
+    Result := fExID in [TptTokenKind.ptOleVariant, TptTokenKind.ptVariant]
+  else
+    Result := False;
+end;
+
+method TmwBasePasLex.GetOrigin: not nullable string;
+begin
+  Result := fBuffer.Buf;
+end;
+
+method TmwBasePasLex.GetIsAddOperator: Boolean;
+begin
+  Result := fTokenID in [TptTokenKind.ptMinus, TptTokenKind.ptOr, TptTokenKind.ptPlus, TptTokenKind.ptXor];
+end;
+
+method TmwBasePasLex.GetIsMulOperator: Boolean;
+begin
+  Result := fTokenID in [TptTokenKind.ptAnd, TptTokenKind.ptAs, TptTokenKind.ptDiv, TptTokenKind.ptMod, TptTokenKind.ptShl, TptTokenKind.ptShr, TptTokenKind.ptSlash, TptTokenKind.ptStar];
+end;
+
+method TmwBasePasLex.GetIsRelativeOperator: Boolean;
+begin
+  Result := fTokenID in [TptTokenKind.ptAs, TptTokenKind.ptEqual, TptTokenKind.ptGreater, TptTokenKind.ptGreaterEqual, TptTokenKind.ptLower, TptTokenKind.ptLowerEqual,
+    TptTokenKind.ptIn, TptTokenKind.ptIs, TptTokenKind.ptNotEqual];
+end;
+
+method TmwBasePasLex.GetIsCompilerDirective: Boolean;
+begin
+  Result := fTokenID in [TptTokenKind.ptCompDirect, TptTokenKind.ptDefineDirect, TptTokenKind.ptElseDirect,
+    TptTokenKind.ptEndIfDirect, TptTokenKind.ptIfDefDirect, TptTokenKind.ptIfNDefDirect, TptTokenKind.ptIfOptDirect,
+    TptTokenKind.ptIncludeDirect, TptTokenKind.ptResourceDirect, TptTokenKind.ptScopedEnumsDirect, TptTokenKind.ptUndefDirect];
+end;
+
+method TmwBasePasLex.GetGenID: TptTokenKind;
+begin
+  Result := fTokenID;
+  if fTokenID =TptTokenKind.ptIdentifier then
+    if fExID <> TptTokenKind.ptUnknown then Result := fExID;
+end;
+
+{ TmwPasLex }
+
+constructor TmwPasLex(const aCompiler : DelphiCompiler);
+begin
+  inherited constructor(aCompiler);
+  fAheadLex := new TmwBasePasLex(aCompiler);
+end;
+
+method TmwPasLex.AheadNext;
+begin
+  fAheadLex.NextNoJunk;
+end;
+
+method TmwPasLex.GetAheadExID: TptTokenKind;
+begin
+  Result := fAheadLex.ExID;
+end;
+
+method TmwPasLex.GetAheadGenID: TptTokenKind;
+begin
+  Result := fAheadLex.GenID;
+end;
+
+method TmwPasLex.GetAheadToken: not nullable string;
+begin
+  Result := fAheadLex.Token;
+end;
+
+method TmwPasLex.GetAheadTokenID: TptTokenKind;
+begin
+  Result := fAheadLex.TokenID;
+end;
+
+method TmwPasLex.InitAhead;
+begin
+  fAheadLex.fCommentState := fCommentState;
+  fAheadLex.CloneDefinesFrom(Self);
+  fAheadLex.SetSharedBuffer(Buffer);
+  fAheadLex.OnParseCompilerDirectiveEvent := OnParseCompilerDirectiveEvent;
+  while fAheadLex.IsJunk do
+    fAheadLex.Next;
+end;
+
+method TmwPasLex.SetOrigin(const NewValue: not nullable string);
+begin
+  inherited SetOrigin(NewValue);
+  fAheadLex.SetSharedBuffer(Buffer);
+end;
+
+method TmwBasePasLex.Func86: TptTokenKind;
+begin
+  Result :=TptTokenKind.ptIdentifier;
+  if KeyComp('Varargs') then fExID := TptTokenKind.ptVarargs;
+end;
+
+method TmwBasePasLex.StringDQProc;
+begin
+  if not fAsmCode then
+  begin
+    SymbolProc;
+    Exit;
+  end;
+  fTokenID := TptTokenKind.ptStringDQConst;
+  repeat
+    inc(fBuffer.Run);
+    case fBuffer.Buf[fBuffer.Run] of
+      #0, #10, #13:
+      begin
+        if assigned(OnMessage) then
+          OnMessage(Self, TMessageEventType.meError, 'Unterminated string', PosXY.X, PosXY.Y);
+        Break;
+      end;
+      '\':
+      begin
         inc(fBuffer.Run);
-      fTokenID :=TptTokenKind.ptIdentifier;
+        //[#32..#127]
+        if (fBuffer.Buf[fBuffer.Run] in [#32..#127]) then inc(fBuffer.Run);
+      end;
     end;
+    until fBuffer.Buf[fBuffer.Run] = '"';
+  if fBuffer.Buf[fBuffer.Run] = '"' then
+    inc(fBuffer.Run);
+end;
 
-    method TmwBasePasLex.UpdateScopedEnums;
-    begin
-      fScopedEnums := DirectiveParam.EqualsIgnoringCase('ON');
-    end;
+method TmwBasePasLex.AmpersandOpProc;
+begin
+  fTokenID := TptTokenKind.ptAmpersand;
+  inc(fBuffer.Run);
+  //   ['a'..'z', 'A'..'Z','0'..'9', '_', '&']
+  while (fBuffer.Buf[fBuffer.Run] in ['a'..'z', 'A'..'Z','0'..'9', '_', '&']) do
+    inc(fBuffer.Run);
+  fTokenID :=TptTokenKind.ptIdentifier;
+end;
 
-    class constructor TmwBasePasLex();
-    begin
-      MakeIdentTable;
-    end;
+method TmwBasePasLex.UpdateScopedEnums;
+begin
+  fScopedEnums := DirectiveParam.EqualsIgnoringCase('ON');
+end;
+
+class constructor TmwBasePasLex();
+begin
+  MakeIdentTable;
+end;
 
 
 end.
