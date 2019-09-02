@@ -189,6 +189,7 @@ public class CGIfThenElseExpression: CGExpression { // aka Ternary operator
 	public var Condition: CGExpression
 	public var IfExpression: CGExpression
 	public var ElseExpression: CGExpression?
+	public var Define:  CGConditionalDefine?
 
 	public init(_ condition: CGExpression, _ ifExpression: CGExpression, _ elseExpression: CGExpression?) {
 		Condition = condition
@@ -454,7 +455,7 @@ public class CGIntegerLiteralExpression: CGLanguageAgnosticLiteralExpression {
 
 			return Convert.ToString(UnsignedValue, base)
 		} else {
-			return "0"
+			return Convert.ToString(0, base)
 		}
 
 

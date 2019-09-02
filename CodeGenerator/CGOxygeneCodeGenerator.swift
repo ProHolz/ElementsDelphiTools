@@ -30,7 +30,7 @@ public class CGOxygeneCodeGenerator : CGPascalCodeGenerator {
 					"mapped", "matching", "method", "mod", "module", "namespace",
 					"nested", "new", "nil", "not", "notify", "nullable",
 					"of", "old", "on", "operator", "optional", "or", "order", "out", "override",
-					"parallel", "param", "params", "partial", "pinned", "private", "procedure", "property", "protected", "public",
+					"parallel", "param", "params", "partial", "pinned", "private", "procedure", "property", "protected", "public", "published",
 					"queryable", "raise", "raises", "read", "readonly", "record", "reintroduce", "remove", "repeat", "require", "result", "reverse", "sealed",
 					"select", "selector -", "self", "sequence", "set", "shl", "shr", "skip", "soft", "static", "step", "strong",
 					"take", "then", "to", "true", "try", "type",
@@ -186,6 +186,28 @@ public class CGOxygeneCodeGenerator : CGPascalCodeGenerator {
 		Append("(")
 		pascalGenerateCallParameters(statement.Parameters)
 		AppendLine(");")
+	}
+	override func generateLocalMethodStatement(_ method: CGLocalMethodStatement) {
+		Append("method ")
+		generateIdentifier(method.Name)
+		if method.Parameters.Count > 0 {
+			Append("(")
+			pascalGenerateDefinitionParameters(method.Parameters, implementation: false)
+			Append(")")
+		}
+		if let returnType = method.ReturnType, !returnType.IsVoid {
+			Append(": ")
+			returnType.startLocation = currentLocation
+			generateTypeReference(returnType)
+			returnType.endLocation = currentLocation
+		}
+		AppendLine(";")
+		AppendLine("begin")
+		incIndent()
+		generateStatements(variables: method.LocalVariables)
+		generateStatements(method.Statements)
+		decIndent()
+		AppendLine("end;")
 	}
 
 	//

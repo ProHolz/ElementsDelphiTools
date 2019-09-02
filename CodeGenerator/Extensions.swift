@@ -24,6 +24,10 @@
 		return CGNamedIdentifierExpression(self)
 	}
 
+	public func AsCallParameter() -> CGCallParameter {
+		return CGNamedIdentifierExpression(self).AsCallParameter()
+	}
+
 	public func AsLiteralExpression() -> CGStringLiteralExpression {
 		return CGStringLiteralExpression(self)
 	}
@@ -68,6 +72,10 @@ public extension RemObjects.Elements.System.String {
 
 	public func AsNamedIdentifierExpression() -> CGNamedIdentifierExpression {
 		return CGNamedIdentifierExpression(self)
+	}
+
+	public func AsCallParameter() -> CGCallParameter {
+		return CGNamedIdentifierExpression(self).AsCallParameter()
 	}
 
 	public func AsLiteralExpression() -> CGStringLiteralExpression {

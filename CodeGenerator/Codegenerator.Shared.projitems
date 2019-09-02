@@ -47,6 +47,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)CGCStyleCodeGenerator.swift">
       <VirtualFolder>Code Generation</VirtualFolder>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)CGDelphiCodeGenerator.swift">
+      <VirtualFolder>Code Generation — Pascal</VirtualFolder>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)CGCSharpCodeGenerator.swift">
+      <VirtualFolder>Code Generation</VirtualFolder>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Code Generation — Pascal">

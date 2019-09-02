@@ -419,11 +419,14 @@ public __abstract class CGPascalCodeGenerator : CGCodeGenerator {
 
 	override func generateReturnStatement(_ statement: CGReturnStatement) {
 		if let value = statement.Value {
-			Append("result := ")
+			Append("exit(")
 			generateExpression(value)
-			generateStatementTerminator()
+			Append(")")
+
 		}
-		Append("exit")
+		else {
+		  Append("exit")
+		}
 		generateStatementTerminator()
 	}
 
@@ -897,6 +900,7 @@ public __abstract class CGPascalCodeGenerator : CGCodeGenerator {
 		Append("(")
 		pascalGenerateCallParameters(method.Parameters)
 		Append(")")
+
 	}
 
 	override func generateNewInstanceExpression(_ expression: CGNewInstanceExpression) {
