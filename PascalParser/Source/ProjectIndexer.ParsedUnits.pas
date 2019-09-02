@@ -34,7 +34,8 @@ begin
     if UnitPaths.ContainsKey(kv+'.pas')
     then   UnitPaths[kv+'.pas']
     else   '';
-    info.Path := unitpath as not nullable;
+
+    info.Path := String(unitpath);
     Add(info);
   end;
 
