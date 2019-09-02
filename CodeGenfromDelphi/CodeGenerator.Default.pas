@@ -32,6 +32,7 @@ begin
     'integer' : result:= CGPredefinedTypeReference.Int32;
     'fixeduint',
     'uint32',
+    'longword',
     'cardinal' : result:= CGPredefinedTypeReference.UInt32;
 
 

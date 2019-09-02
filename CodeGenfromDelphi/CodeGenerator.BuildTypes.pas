@@ -122,7 +122,8 @@ begin
           result.Attributes.Add(new CGAttribute('COM'.AsTypeReference));
 
         result.Attributes.Add(new CGAttribute('Guid'.AsTypeReference, new CGCallParameter(StringGuid.AsLiteralExpression)));
-      end;
+       //  result.InterfaceGuid := InterfaceGuid
+        end;
     end;
   end;
 
@@ -235,7 +236,7 @@ begin
               res.Members.Add(lClassMethod);
             end;
           end
-          // If we receaive nil it could be a
+          // If we receive nil it could be a
           // Implements Method so we check it
           else
           begin
@@ -303,12 +304,12 @@ begin
   if assigned(Helper) then
   begin
     result :=  new CGExtensionTypeDefinition(name);
-   AddAncestors( result, Helper);
+    AddAncestors( result, Helper);
 
- end
- else
+  end
+  else
 
-  result := new CGClassTypeDefinition(name);
+    result := new CGClassTypeDefinition(name);
   var lGenerics := PrepareGenericParameterDefinition(node.ParentNode).ToArray;
   result.GenericParameters.Add(lGenerics);
 
@@ -321,118 +322,118 @@ begin
   AddAncestors(result, node);
   AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name+lname, methodBodys);
 
-  if settings.PublicClasses then
-    result.Visibility := CGTypeVisibilityKind.Public;
+   if settings.PublicClasses then
+     result.Visibility := CGTypeVisibilityKind.Public;
 
-end;
+ end;
 
-method CodeBuilder.BuildSet(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
-begin
-  var typenode := node.Findnode(TSyntaxNodeType.ntType);
-  var typename := typenode:AttribName;
-  if not String.IsNullOrEmpty(typename) then
-    exit new CGTypeAliasDefinition(className,  new CGSetTypeReference( typename.AsTypeReference));
+ method CodeBuilder.BuildSet(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
+ begin
+   var typenode := node.Findnode(TSyntaxNodeType.ntType);
+   var typename := typenode:AttribName;
+   if not String.IsNullOrEmpty(typename) then
+     exit new CGTypeAliasDefinition(className,  new CGSetTypeReference( typename.AsTypeReference));
 
-  typename := typenode:AttribType;
+   typename := typenode:AttribType;
 
-  case typename:ToLower of
-    'enum' : exit BuildSet2(node,className);
+   case typename:ToLower of
+     'enum' : exit BuildSet2(node,className);
 
-  end; // Case
+   end; // Case
 
-  {..$HINT "ADD SUPPORT FOR OTHER SET TYPES"}
+   {..$HINT "ADD SUPPORT FOR OTHER SET TYPES"}
 
-  if node.ChildNodes.Count = 2 then
-  begin
-    var lstart := PrepareSingleExpressionValue(node.ChildNodes[0]);
-   var lEnd := PrepareSingleExpressionValue(node.ChildNodes[1]);
+   if node.ChildNodes.Count = 2 then
+   begin
+     var lstart := PrepareSingleExpressionValue(node.ChildNodes[0]);
+     var lEnd := PrepareSingleExpressionValue(node.ChildNodes[1]);
 
-    exit new CGTypeAliasDefinition(className, new CGRangeTypeReference(lstart, lEnd));
-  end;
-
-
-  var lres := new CGTypeAliasDefinition(className, ('****UnknownSET').AsTypeReference);
-  lres.Comment :=  $" UnknownSet on Line {node.ParentNode.Line}".AsComment;
-
-  if settings.PublicEnums then
-    lres.Visibility := CGTypeVisibilityKind.Public;
+     exit new CGTypeAliasDefinition(className, new CGRangeTypeReference(lstart, lEnd));
+   end;
 
 
-  exit lres;
+   var lres := new CGTypeAliasDefinition(className, ('****UnknownSET').AsTypeReference);
+   lres.Comment :=  $" UnknownSet on Line {node.ParentNode.Line}".AsComment;
 
-  //raise new Exception("Could not create set or enum");
-end;
+   if settings.PublicEnums then
+     lres.Visibility := CGTypeVisibilityKind.Public;
 
-method CodeBuilder.BuildGlobMethod(const node: TSyntaxNode; const ispublic : Boolean): CGGlobalFunctionDefinition;
-begin
-  Var res := PrepareMethod(node, nil);
-  if res is CGMethodDefinition then
-  begin
-    result := (res as CGMethodDefinition).AsGlobal;
-    result.Function.Visibility := if ispublic then CGMemberVisibilityKind.Public else CGMemberVisibilityKind.Private;
-  end
-  else exit nil;
-end;
 
-method CodeBuilder.BuildRecord(const node: TSyntaxNode; const name: not nullable String;const methodBodys : Dictionary<String,TSyntaxNode>) : CGClassOrStructTypeDefinition;
-begin
-{$IF LOG}
-  writeLn(TSyntaxTreeWriter.ToXML(node, true ) );
+   exit lres;
+
+   //raise new Exception("Could not create set or enum");
+ end;
+
+ method CodeBuilder.BuildGlobMethod(const node: TSyntaxNode; const ispublic : Boolean): CGGlobalFunctionDefinition;
+ begin
+   Var res := PrepareMethod(node, nil);
+   if res is CGMethodDefinition then
+   begin
+     result := (res as CGMethodDefinition).AsGlobal;
+     result.Function.Visibility := if ispublic then CGMemberVisibilityKind.Public else CGMemberVisibilityKind.Private;
+   end
+   else exit nil;
+ end;
+
+ method CodeBuilder.BuildRecord(const node: TSyntaxNode; const name: not nullable String;const methodBodys : Dictionary<String,TSyntaxNode>) : CGClassOrStructTypeDefinition;
+ begin
+ {$IF LOG}
+ writeLn(TSyntaxTreeWriter.ToXML(node, true ) );
 {$ENDIF}
-  var Helper := node.FindNode(TSyntaxNodeType.ntHelper);
+   var Helper := node.FindNode(TSyntaxNodeType.ntHelper);
 
-  if assigned(Helper) then
+   if assigned(Helper) then
    begin
     result :=  new CGExtensionTypeDefinition(name);
-     AddAncestors( result, Helper);
+    AddAncestors( result, Helper);
 
-   end
-   else
-  result :=  new CGStructTypeDefinition(name);
+  end
+  else
+    result :=  new CGStructTypeDefinition(name);
   var lGenerics := PrepareGenericParameterDefinition(node.ParentNode).ToArray;
   result.GenericParameters.Add(lGenerics);
 
-  var lTypeParams := node.ParentNode.FindNode(TSyntaxNodeType.ntTypeParams);
-  var lname : String := '';
-  if assigned(lTypeParams) then
-    lname := PrepareGenericParameterName(lTypeParams);
+   var lTypeParams := node.ParentNode.FindNode(TSyntaxNodeType.ntTypeParams);
+   var lname : String := '';
+   if assigned(lTypeParams) then
+     lname := PrepareGenericParameterName(lTypeParams);
 
-  AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name+lname, methodBodys);
+   AddMembers(result, node, CGMemberVisibilityKind.Unspecified,   name+lname, methodBodys);
 
-  if settings.PublicRecords then
-    result.Visibility := CGTypeVisibilityKind.Public;
-end;
+   if settings.PublicRecords then
+     result.Visibility := CGTypeVisibilityKind.Public;
+ end;
 
 
 
-method CodeBuilder.BuildArray(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
-begin
-  var lArray := PrepareArrayType(node);
-  if assigned(lArray) then
-    exit new CGTypeAliasDefinition(className, lArray)
-  else raise new Exception("Array Type Alias not solved");
-end;
+ method CodeBuilder.BuildArray(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
+ begin
+   var lArray := PrepareArrayType(node);
+   if assigned(lArray) then
+     exit new CGTypeAliasDefinition(className, lArray)
+   else raise new Exception("Array Type Alias not solved");
+ end;
 
-method CodeBuilder.BuildAlias(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
-require
-  (node <> nil) implies (node.Typ = TSyntaxNodeType.ntType);
-begin
-  Var typeName := node.AttribName;
-  if not String.IsNullOrEmpty(typeName)  then
-  begin
-    var lref := PrepareTypeRef(node);
-    exit new CGTypeAliasDefinition(name, lref);
-  end
-  else raise new Exception("BuildAlias not solved");
-end;
+ method CodeBuilder.BuildAlias(const node: TSyntaxNode; const name: not nullable String): CGTypeDefinition;
+ require
+   (node <> nil) implies (node.Typ = TSyntaxNodeType.ntType);
+ begin
+   Var typeName := node.AttribName;
+   if not String.IsNullOrEmpty(typeName)  then
+   begin
+     var lref := PrepareTypeRef(node);
+     exit new CGTypeAliasDefinition(name, lref);
+   end
+   else raise new Exception("BuildAlias not solved");
+ end;
 
-method CodeBuilder.BuildClassOf(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
-begin
-  Var typeName := node.AttribName;
-  if not String.IsNullOrEmpty(typeName)  then
-    exit new CGTypeAliasDefinition(className, ('Class of '+typeName).AsTypeReference)
-  else raise new Exception("Type ClassOf not solved");
-end;
+ method CodeBuilder.BuildClassOf(const node: TSyntaxNode; const className: not nullable String): CGTypeDefinition;
+ begin
+   Var typeName := node.AttribName;
+   if not String.IsNullOrEmpty(typeName)  then
+     exit new CGTypeAliasDefinition(className, ('Class of '+typeName).AsTypeReference)
+   else raise new Exception("Type ClassOf not solved");
+ end;
 
 
 

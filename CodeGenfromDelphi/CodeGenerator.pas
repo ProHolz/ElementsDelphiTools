@@ -14,7 +14,7 @@ type
     property PublicInterfaces : Boolean := true;
     property PublicRecords : Boolean := true;
     property PublicBlocks : Boolean := true;
-
+    property DelphiComInterfaces : Boolean := false;
   end;
 
   CodeBuilder =  partial class

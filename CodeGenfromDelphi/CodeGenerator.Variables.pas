@@ -196,7 +196,7 @@ begin
         else
           if length(resDimensions) = 1 then
           begin
-            var temp := new CGArrayBounds(resDimensions[0]);
+            var temp := new CGArrayBounds(resDimensions[0]) &end(nil);
             result.Add(temp);
           end;
     end;
