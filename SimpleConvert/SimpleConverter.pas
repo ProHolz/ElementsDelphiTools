@@ -10,6 +10,8 @@ type
 
   public
     method BuildSameName(const Source : String) : Boolean;
+    method BuildNewName(const Source : String) : Boolean;
+
   end;
 
 implementation
@@ -31,6 +33,8 @@ uses
       result := false;
       var lUnit := new CodeBuilder().BuildCGCodeUnitFomSyntaxNode(Root);
       var cg := new CGOxygeneCodeGenerator();
+      //var cg := new CGSwiftCodeGenerator();
+
       var ElementsData := cg.GenerateUnit(lUnit);
       if Environment.OS = OperatingSystem.Windows then
       begin
@@ -49,6 +53,14 @@ uses
     if File.Exists(Source) then
     result := BuildElementsFile(Source, Source);
   end;
+
+method ElementsConverter.BuildNewName(const Source: String): Boolean;
+begin
+ var lFile := Path.GetFileName(Source);
+ lFile := Path.Combine('D:\Test', lFile);
+// lFile := Path.ChangeExtension(lFile, '.swift');
+  result := BuildElementsFile(Source, lFile);
+end;
 
 
 end.

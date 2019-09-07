@@ -83,6 +83,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <ItemGroup>
+    <Folder Include="Properties\" />
     <Folder Include="TestUnits" />
   </ItemGroup>
   <Import Project="..\PascalParser\Source\PascalParse.Shared.projitems" Label="Shared" />

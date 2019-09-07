@@ -60,6 +60,9 @@
     <Compile Include="DelphiProject.pas" />
     <Compile Include="ProjetcBuilderClass.pas" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets" />
   <Import Project="..\PascalParser\Source\PascalParse.Shared.projitems" Label="Shared" />
 </Project>

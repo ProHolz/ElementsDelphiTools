@@ -123,7 +123,7 @@ begin
 
 
   var projectProblems :=  Path.ChangeExtension(projectname, '.Problems.txt');
-  var projectPath := Path.GetWindowsParentDirectory(projectname);
+  var projectPath := Path.GetParentDirectory(projectname);
   var projectShortName := Path.GetFileNameWithoutExtension(projectname);
   var project := new ProjectRunner(actualCompiler, projectname);
 

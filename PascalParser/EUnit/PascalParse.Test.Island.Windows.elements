@@ -38,15 +38,11 @@
     <Reference Include="Elements" />
     <Reference Include="EUnit" />
     <Reference Include="Elements" />
-    <ProjectReference Include="PascalParse.Island.Windows">
-      <HintPath />
-      <Project>{CEB60BEA-46F8-411E-96E8-758636139A45}</Project>
-      <ProjectFile>..\PascalParse.Island.Windows.elements</ProjectFile>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.pas" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Island.Windows.targets" />
   <Import Project="PascalParse.Test.Shared.projitems" Label="Shared" />
+  <Import Project="..\Source\PascalParse.Shared.projitems" Label="Shared" />
 </Project>

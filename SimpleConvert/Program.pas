@@ -11,7 +11,7 @@ type
       if args.Count > 0 then
       begin
      //   var lConvert := new DelphiProject(args[0]);
-        if ElementsConverter.BuildSameName(args[0]) then
+        if ElementsConverter.BuildNewName(args[0]) then
           writeLn($"File {args[0]} converted") else
           writeLn($"Project {args[0]} not converted");
 

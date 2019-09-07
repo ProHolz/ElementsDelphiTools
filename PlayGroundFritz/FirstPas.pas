@@ -41,9 +41,10 @@ uses
     //  Var s := "D:\sourceProHolz\Abbund170\Synopse\SynLz.pas";
     // "D:\sourceProHolz\Abbund170\Cairo\Cairo.Dll.pas";
     //  "D:\sourceProHolz\Abbund170\Cairo\Cairo.Types.pas";
-   "X:\Projekte\Neslib\Neslib.Clang\Neslib.Clang.pas";
+   //"X:\Projekte\Neslib\Neslib.Clang\Neslib.Clang.pas";
    //   "D:\sourceProHolz\Abbund170\Cairo\Cairo.Freetype.pas";
-
+    "D:\Projekte\SpringEle\Base\Collections\Spring.Collections.Base.pas";
+ //    "X:\Projekte\Neslib\Neslib.Clang\Neslib.Clang.pas";
 
    //   "X:\Elements\ElementsDelphiTools\CtoElements\Chet\Classes\Chet.SourceWriter.pas";
    //   "X:\Elements\ElementsDelphiTools\CtoElements\Chet\Classes\Chet.Project.pas";
@@ -78,7 +79,7 @@ uses
 *)
 
 
-    sb.Append(BuildInterfaceTest(TestMethodimplementation, 'TestMethodimplementation'));
+  //  sb.Append(BuildInterfaceTest(TestMethodimplementation, 'TestMethodimplementation'));
   (*
     sb.AppendLine.Append('{Next File}').AppendLine;
     sb.Append(BuildInterfaceTest(TestDll, 'TestDll'));

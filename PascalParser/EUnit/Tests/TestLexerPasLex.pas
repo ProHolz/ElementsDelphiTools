@@ -20,6 +20,8 @@ type
 
     Procedure Test2;
 
+    Procedure TestNumbers;
+
   end;
 
 implementation
@@ -101,6 +103,57 @@ begin
    Assert.AreEqual('END', fLexer.Token.ToUpper);
    fLexer.NextNoSpace;
    Assert.AreEqual('.', fLexer.Token);
+   fLexer.NextNoSpace;
+   Assert.AreEqual(TptTokenKind.ptNull ,  fLexer.TokenID);
+
+end;
+
+
+Procedure LexerPasTest.TestNumbers;
+begin
+   fLexer.Origin :=
+    "  100
+      -100
+      10.00
+      -10.00
+      1.123E4
+      END
+     ";
+
+
+  fLexer.NextNoSpace;
+  Assert.AreEqual(fLexer.Token.ToUpper, '100');
+  Assert.AreEqual(TptTokenKind.ptIntegerConst ,  fLexer.TokenID);
+
+  fLexer.NextNoSpace;
+  Assert.AreEqual(fLexer.Token.ToUpper, '-');
+  Assert.AreEqual(TptTokenKind.ptMinus ,  fLexer.TokenID);
+
+
+  fLexer.NextNoSpace;
+  Assert.AreEqual(fLexer.Token.ToUpper, '100');
+  Assert.AreEqual(TptTokenKind.ptIntegerConst ,  fLexer.TokenID);
+
+  fLexer.NextNoSpace;
+  Assert.AreEqual(fLexer.Token.ToUpper, '10.00');
+  Assert.AreEqual(TptTokenKind.ptFloat ,  fLexer.TokenID);
+
+  fLexer.NextNoSpace;
+  Assert.AreEqual(fLexer.Token.ToUpper, '-');
+  Assert.AreEqual(TptTokenKind.ptMinus ,  fLexer.TokenID);
+
+  fLexer.NextNoSpace;
+  Assert.AreEqual(fLexer.Token.ToUpper, '10.00');
+  Assert.AreEqual(TptTokenKind.ptFloat ,  fLexer.TokenID);
+
+  fLexer.NextNoSpace;
+  Assert.AreEqual(fLexer.Token.ToUpper, '1.123E4');
+  Assert.AreEqual(TptTokenKind.ptFloat ,  fLexer.TokenID);
+
+  fLexer.NextNoSpace;
+  Assert.AreEqual(fLexer.Token.ToUpper, 'END');
+
+
    fLexer.NextNoSpace;
    Assert.AreEqual(TptTokenKind.ptNull ,  fLexer.TokenID);
 

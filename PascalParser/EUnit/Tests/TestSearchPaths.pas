@@ -21,7 +21,7 @@ begin
   lPath.Add('\cairo'); //1
   lPath.Add('..\cairo'); //2
   lPath.Add('.\cairo'); //3
-  for each ls in lPath.getPaths index i do
+  for each ls in lPath.GetPaths index i do
     begin
       case i of
         0 : Check.AreEqual(ls, 'X:\Source_fritz\RoofCad\cad');
@@ -32,7 +32,7 @@ begin
     end;
 
   lPath.BasePath := 'D:\Source_fritz\';
-  for each ls in lPath.getPaths index i do
+  for each ls in lPath.GetPaths index i do
     begin
         case i of
           0 : Check.AreEqual(ls, 'D:\Source_fritz\cad');
