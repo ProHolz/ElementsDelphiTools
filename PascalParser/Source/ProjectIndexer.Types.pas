@@ -89,7 +89,7 @@ begin
     exit fIncludeCache[key].Content as not nullable;
     //Exit(includeInfo.Content);
 
-  if not fIndexer.FindFile(fName, fUnitFileFolder, var  filePath) then
+  if not fIndexer.FindFile(fName, fUnitFileFolder, out   filePath) then
   begin
     fProblems.LogProblem(TParseProblemType.ptCantFindFile, fName, 'Source folder: ' + fUnitFileFolder);
     includeInfo.FileName := '';

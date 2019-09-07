@@ -41,7 +41,7 @@ type
 
  public
    constructor (const aCompiler : DelphiCompiler);
-   method  FindFile(const FileName: String; RelativeToFolder: String; var FilePath: String): Boolean;
+   method  FindFile(const FileName: String; RelativeToFolder: String; out FilePath: String): Boolean;
 
    method Parse(const FileName: String);
 
@@ -85,12 +85,15 @@ begin
         else
         begin
 
-          FindFile(unitName+ '.pas', '', var unitPath);
+          FindFile(unitName+ '.pas', '', out  unitPath);
 
           if unitPath <> '' then begin
             fProjectPaths.Add(unitPath);
+            // How to Handle on MAC?
+            if Environment.OS =   OperatingSystem.Windows then begin
             if SearchPaths.IsRelativeWinPath(unitPath) then
               unitPath :=  Path.GetFullPath(Path.Combine( FilePath , unitPath));
+            end;
             fUnitPaths.Add(unitName + '.pas', unitPath.ToLower);
           end
       end;
@@ -106,7 +109,7 @@ begin
 var fileFolder := Path.GetParentDirectory(FileName);
 if IsProject then
 begin
-  fProjectPaths.Add(Path.GetWindowsFileName(FileName));
+  fProjectPaths.Add(Path.GetFileName(FileName));
   usesNode := FindType(UnitNode, TSyntaxNodeType.ntUses);
   if assigned(usesNode) then
     AppendUnits(usesNode, fileFolder, UnitList);
@@ -234,15 +237,15 @@ begin
 
 
 
- method TProjectIndexer.FindFile(const FileName: string; RelativeToFolder: string; var FilePath: string): boolean;
+ method TProjectIndexer.FindFile(const FileName: string; RelativeToFolder: string; out FilePath: string): boolean;
 
- method FilePresent(const testFile: String; const name : String): Boolean;
+ method FilePresent(const testFile: String; const name : String; out newFolder : String): Boolean;
  begin
    Result := File.Exists(testFile);
    if Result then
    begin
-     FilePath := Path.GetFullPath(testFile);
-     fUnitPaths.Add(name, FilePath);
+      newFolder := Path.GetFullPath(testFile);
+     fUnitPaths.Add(name, newFolder);
    end;
  end;
 
@@ -260,14 +263,14 @@ begin
      exit false;
 
    if RelativeToFolder <> '' then
-     if FilePresent(Path.Combine(RelativeToFolder , fName), fName) then
+     if FilePresent(Path.Combine(RelativeToFolder , fName), fName, out  FilePath) then
        Exit true;
 
-   if FilePresent(Path.Combine(fProjectFolder ,fName), fName) then
+   if FilePresent(Path.Combine(fProjectFolder ,fName), fName, out  FilePath) then
      Exit true;
 
    for lsearch in fSearchPaths.GetPaths do
-     if FilePresent(Path.Combine( lsearch , fName), fName) then
+     if FilePresent(Path.Combine( lsearch , fName), fName, out FilePath) then
        Exit true;
 
  //if SameText(ExtractFileExt(fileName), '.pas') then
@@ -348,7 +351,7 @@ begin
      if not fParsedUnits.ContainsKey(usesName) then
      begin
        var  usesPath: String;
-       if FindFile(usesName + '.pas', '', var usesPath) then
+       if FindFile(usesName + '.pas', '', out  usesPath) then
          ParseUnit(usesName, usesPath, false)
        else
          fParsedUnits.Add(usesName, nil);
